@@ -1,0 +1,28 @@
+image: ubuntu:latest
+
+build-armhf:
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - apt-get update
+    - apt-get install -y crossbuild-essential-armhf
+  script:
+    - make CROSS_PREFIX=arm-linux-gnueabihf-
+
+build-aarch64:
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - apt-get update
+    - apt-get install -y crossbuild-essential-arm64
+  script:
+    - make CROSS_PREFIX=aarch64-linux-gnu-
+
+build-x86_64:
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - apt-get update
+    - apt-get install -y build-essential
+  script:
+    - make
