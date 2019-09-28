@@ -646,21 +646,21 @@ socks5_close_session (HevSocks5Session *self)
         close (self->remote_fd);
 
     hev_task_mutex_lock (self->mutex);
-    if (self->tcp) {
-        tcp_recv (self->tcp, NULL);
-        tcp_sent (self->tcp, NULL);
-        tcp_err (self->tcp, NULL);
-        if (tcp_close (self->tcp) != ERR_OK)
-            tcp_abort (self->tcp);
-    }
-    if (self->is_dns)
+    if (self->is_dns) {
         pbuf_free (self->query);
-    while ((buf = hev_circular_queue_pop (self->queue)))
-        pbuf_free (buf);
-    hev_task_mutex_unlock (self->mutex);
-
-    if (self->queue)
+    } else {
+        if (self->tcp) {
+            tcp_recv (self->tcp, NULL);
+            tcp_sent (self->tcp, NULL);
+            tcp_err (self->tcp, NULL);
+            if (tcp_close (self->tcp) != ERR_OK)
+                tcp_abort (self->tcp);
+        }
+        while ((buf = hev_circular_queue_pop (self->queue)))
+            pbuf_free (buf);
         hev_circular_queue_unref (self->queue);
+    }
+    hev_task_mutex_unlock (self->mutex);
 
     LOG_I ("Session %s: closed", self->saddr);
 
