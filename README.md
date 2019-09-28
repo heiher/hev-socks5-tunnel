@@ -13,11 +13,17 @@ A tunnel over Socks5 proxy.
 
 **Linux**:
 ```bash
-git clone git://github.com/heiher/hev-socks5-tunnel
+git clone --recursive git://github.com/heiher/hev-socks5-tunnel
 cd hev-socks5-tunnel
-git submodule init
-git submodule update
 make
+```
+
+**Android**:
+```bash
+mkdir hev-socks5-tunnel
+cd hev-socks5-tunnel
+git clone --recursive git://github.com/heiher/hev-socks5-tunnel jni
+ndk-build
 ```
 
 ## How to Use
