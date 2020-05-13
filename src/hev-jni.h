@@ -2,8 +2,8 @@
  ============================================================================
  Name        : hev-jni.h
  Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 everyone.
- Description : Java native interface
+ Copyright   : Copyright (c) 2019 - 2020 Everyone.
+ Description : Java Native Interface
  ============================================================================
  */
 
