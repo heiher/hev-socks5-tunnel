@@ -7,13 +7,13 @@
  ============================================================================
  */
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/uio.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <unistd.h>
 #include <time.h>
 
 #include "hev-config.h"
