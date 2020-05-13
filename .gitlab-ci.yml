@@ -2,6 +2,7 @@ image: ubuntu:latest
 
 build-armhf:
   variables:
+    DEBIAN_FRONTEND: noninteractive
     GIT_SUBMODULE_STRATEGY: recursive
   before_script:
     - apt-get update
@@ -11,6 +12,7 @@ build-armhf:
 
 build-aarch64:
   variables:
+    DEBIAN_FRONTEND: noninteractive
     GIT_SUBMODULE_STRATEGY: recursive
   before_script:
     - apt-get update
@@ -20,6 +22,7 @@ build-aarch64:
 
 build-x86_64:
   variables:
+    DEBIAN_FRONTEND: noninteractive
     GIT_SUBMODULE_STRATEGY: recursive
   before_script:
     - apt-get update
