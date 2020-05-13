@@ -2,7 +2,7 @@
  ============================================================================
  Name        : hev-tunnel-linux.c
  Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 everyone.
+ Copyright   : Copyright (c) 2019 - 2020 Everyone.
  Description : Tunnel on Linux
  ============================================================================
  */
