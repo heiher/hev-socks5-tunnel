@@ -10,8 +10,6 @@
 #ifndef __HEV_CONFIG_H__
 #define __HEV_CONFIG_H__
 
-#include <netinet/in.h>
-
 int hev_config_init (const char *config_path);
 void hev_config_fini (void);
 
