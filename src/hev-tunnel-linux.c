@@ -20,9 +20,9 @@
 #include <linux/if.h>
 #include <linux/if_tun.h>
 
-#include "hev-task.h"
-#include "hev-task-io.h"
-#include "hev-memory-allocator.h"
+#include <hev-task.h>
+#include <hev-task-io.h>
+#include <hev-memory-allocator.h>
 
 #include "hev-tunnel-linux.h"
 
