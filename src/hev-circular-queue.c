@@ -2,8 +2,8 @@
  ============================================================================
  Name        : hev-circular-queue.c
  Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 everyone.
- Description : Circular queue
+ Copyright   : Copyright (c) 2019 - 2020 Everyone.
+ Description : Circular Queue
  ============================================================================
  */
 
