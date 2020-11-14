@@ -24,9 +24,10 @@
 #include "hev-socks5-session.h"
 
 #define SESSION_HP (10)
-#define TASK_STACK_SIZE (8192)
+#define SADDR_SIZE (64)
 #define QUEUE_SIZE (128)
 #define BUFFER_SIZE (8192)
+#define TASK_STACK_SIZE (8192)
 
 typedef struct _Socks5AuthHeader Socks5AuthHeader;
 typedef struct _Socks5ReqResHeader Socks5ReqResHeader;
@@ -61,13 +62,10 @@ struct _HevSocks5Session
         u16_t port;
     };
 
-    uint8_t is_dns;
-    char saddr[64];
-
+    char *saddr;
     struct pbuf *query;
     HevTaskMutex *mutex;
     HevCircularQueue *queue;
-
     HevSocks5SessionCloseNotify notify;
 };
 
@@ -136,6 +134,9 @@ hev_socks5_session_new (HevTaskMutex *mutex, HevSocks5SessionCloseNotify notify)
     self->notify = notify;
     self->mutex = mutex;
 
+    if (LOG_ON ())
+        self->saddr = hev_malloc (SADDR_SIZE);
+
     task = hev_task_new (TASK_STACK_SIZE);
     if (!task) {
         hev_free (self);
@@ -179,7 +180,8 @@ hev_socks5_session_new_tcp (struct tcp_pcb *pcb, HevTaskMutex *mutex,
         int port = pcb->remote_port;
 
         sa = ipaddr_ntoa_r (&pcb->remote_ip, buf, sizeof (buf));
-        snprintf (self->saddr, sizeof (self->saddr), "[%s]:%u", sa, port);
+        if (self->saddr)
+            snprintf (self->saddr, SADDR_SIZE, "[%s]:%u", sa, port);
 
         port = pcb->local_port;
         sa = ipaddr_ntoa_r (&pcb->local_ip, buf, sizeof (buf));
@@ -202,7 +204,6 @@ hev_socks5_session_new_dns (struct udp_pcb *pcb, struct pbuf *p,
         return NULL;
 
     self->udp = pcb;
-    self->is_dns = 1;
     self->query = p;
     self->port = port;
     __builtin_memcpy (&self->addr, addr, sizeof (ip_addr_t));
@@ -212,7 +213,8 @@ hev_socks5_session_new_dns (struct udp_pcb *pcb, struct pbuf *p,
         const char *sa;
 
         sa = ipaddr_ntoa_r (addr, buf, sizeof (buf));
-        snprintf (self->saddr, sizeof (self->saddr), "[%s]:%u", sa, port);
+        if (self->saddr)
+            snprintf (self->saddr, SADDR_SIZE, "[%s]:%u", sa, port);
         LOG_I ("Session %s: created DNS", self->saddr);
     }
 
@@ -300,7 +302,7 @@ socks5_write_request (HevSocks5Session *self)
 
     /* write socks5 request */
     socks5_r.ver = 0x05;
-    if (self->is_dns)
+    if (self->query)
         socks5_r.cmd = 0x04;
     else
         socks5_r.cmd = 0x01;
@@ -389,7 +391,7 @@ socks5_read_response (HevSocks5Session *self)
         return STEP_CLOSE_SESSION;
     }
 
-    return self->is_dns ? STEP_DO_FWD_DNS : STEP_DO_SPLICE;
+    return self->query ? STEP_DO_FWD_DNS : STEP_DO_SPLICE;
 }
 
 static err_t
@@ -646,7 +648,7 @@ socks5_close_session (HevSocks5Session *self)
         close (self->remote_fd);
 
     hev_task_mutex_lock (self->mutex);
-    if (self->is_dns) {
+    if (self->query) {
         pbuf_free (self->query);
     } else {
         if (self->tcp) {
