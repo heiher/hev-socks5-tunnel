@@ -19,13 +19,11 @@
 
 #include "hev-config.h"
 #include "hev-logger.h"
-#include "hev-circular-queue.h"
 
 #include "hev-socks5-session.h"
 
 #define SESSION_HP (10)
 #define SADDR_SIZE (64)
-#define QUEUE_SIZE (128)
 #define BUFFER_SIZE (8192)
 #define TASK_STACK_SIZE (8192)
 
@@ -64,8 +62,8 @@ struct _HevSocks5Session
 
     char *saddr;
     struct pbuf *query;
+    struct pbuf *queue;
     HevTaskMutex *mutex;
-    HevCircularQueue *queue;
     HevSocks5SessionCloseNotify notify;
 };
 
@@ -162,12 +160,6 @@ hev_socks5_session_new_tcp (struct tcp_pcb *pcb, HevTaskMutex *mutex,
     self->tcp = pcb;
     self->port = pcb->local_port;
     __builtin_memcpy (&self->addr, &pcb->local_ip, sizeof (ip_addr_t));
-
-    self->queue = hev_circular_queue_new (QUEUE_SIZE);
-    if (!self->queue) {
-        hev_free (self);
-        return NULL;
-    }
 
     tcp_arg (pcb, self);
     tcp_recv (pcb, tcp_recv_handler);
@@ -404,8 +396,10 @@ tcp_recv_handler (void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
         goto exit;
     }
 
-    if (hev_circular_queue_push (self->queue, p) < 0)
-        return ERR_MEM;
+    if (!self->queue)
+        self->queue = p;
+    else
+        pbuf_cat (self->queue, p);
 
     tcp_recved (pcb, p->tot_len);
 
@@ -434,26 +428,19 @@ tcp_err_handler (void *arg, err_t err)
 }
 
 static int
-tcp_splice_f (HevSocks5Session *self, u16_t *offset)
+tcp_splice_f (HevSocks5Session *self)
 {
-    struct pbuf *buf, *p;
     ssize_t s;
-    u16_t off;
 
-    if (!(buf = hev_circular_queue_peek (self->queue)))
+    if (!self->queue)
         return 0;
 
-    if (!(p = pbuf_skip (buf, *offset, &off)))
-        return -1;
-
-    if (p->next) {
+    if (self->queue->next) {
+        struct pbuf *p = self->queue;
         struct iovec iov[64];
         int i;
 
-        iov[0].iov_base = p->payload + off;
-        iov[0].iov_len = p->len - off;
-
-        for (i = 1, p = p->next; (i < 64) && p; p = p->next) {
+        for (i = 0; (i < 64) && p; p = p->next) {
             iov[i].iov_base = p->payload;
             iov[i].iov_len = p->len;
             i++;
@@ -461,7 +448,7 @@ tcp_splice_f (HevSocks5Session *self, u16_t *offset)
 
         s = writev (self->remote_fd, iov, i);
     } else {
-        s = write (self->remote_fd, p->payload + off, p->len - off);
+        s = write (self->remote_fd, self->queue->payload, self->queue->len);
     }
 
     if (0 >= s) {
@@ -470,14 +457,9 @@ tcp_splice_f (HevSocks5Session *self, u16_t *offset)
         else
             return -1;
     } else {
-        *offset += s;
-        if (*offset == buf->tot_len) {
-            *offset = 0;
-            hev_circular_queue_pop (self->queue);
-            hev_task_mutex_lock (self->mutex);
-            pbuf_free (buf);
-            hev_task_mutex_unlock (self->mutex);
-        }
+        hev_task_mutex_lock (self->mutex);
+        self->queue = pbuf_free_header (self->queue, s);
+        hev_task_mutex_unlock (self->mutex);
     }
 
     return 1;
@@ -520,7 +502,6 @@ socks5_do_splice (HevSocks5Session *self)
     int err_f = 0;
     int err_b = 0;
     uint8_t *buffer;
-    u16_t offset = 0;
 
     buffer = hev_malloc (BUFFER_SIZE);
     if (!buffer)
@@ -530,7 +511,7 @@ socks5_do_splice (HevSocks5Session *self)
         HevTaskYieldType type = 0;
 
         if (!err_f) {
-            int ret = tcp_splice_f (self, &offset);
+            int ret = tcp_splice_f (self);
             if (0 >= ret) {
                 /* backward closed, quit */
                 if (err_b)
@@ -642,8 +623,6 @@ socks5_do_fwd_dns (HevSocks5Session *self)
 static int
 socks5_close_session (HevSocks5Session *self)
 {
-    struct pbuf *buf;
-
     if (self->remote_fd >= 0)
         close (self->remote_fd);
 
@@ -658,9 +637,8 @@ socks5_close_session (HevSocks5Session *self)
             if (tcp_close (self->tcp) != ERR_OK)
                 tcp_abort (self->tcp);
         }
-        while ((buf = hev_circular_queue_pop (self->queue)))
-            pbuf_free (buf);
-        hev_circular_queue_unref (self->queue);
+        if (self->queue)
+            pbuf_free (self->queue);
     }
     hev_task_mutex_unlock (self->mutex);
 
