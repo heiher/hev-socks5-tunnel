@@ -644,6 +644,9 @@ socks5_close_session (HevSocks5Session *self)
 
     LOG_I ("Session %s: closed", self->saddr);
 
+    if (self->saddr)
+        hev_free (self->saddr);
+
     self->notify (self);
     hev_socks5_session_unref (self);
 
