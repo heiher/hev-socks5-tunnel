@@ -468,9 +468,12 @@ tcp_splice_f (HevSocks5Session *self)
 static int
 tcp_splice_b (HevSocks5Session *self, uint8_t *buffer)
 {
+    err_t err = ERR_OK;
     size_t size;
     ssize_t s;
-    err_t err;
+
+    if (!self->tcp)
+        return -1;
 
     if (!(size = tcp_sndbuf (self->tcp)))
         return 0;
@@ -486,11 +489,13 @@ tcp_splice_b (HevSocks5Session *self, uint8_t *buffer)
     }
 
     hev_task_mutex_lock (self->mutex);
-    err = tcp_write (self->tcp, buffer, s, TCP_WRITE_FLAG_COPY);
-    if (err == ERR_OK)
-        err = tcp_output (self->tcp);
+    if (self->tcp) {
+        err = tcp_write (self->tcp, buffer, s, TCP_WRITE_FLAG_COPY);
+        if (err == ERR_OK)
+            err = tcp_output (self->tcp);
+    }
     hev_task_mutex_unlock (self->mutex);
-    if (err != ERR_OK)
+    if (!self->tcp || (err != ERR_OK))
         return -1;
 
     return 1;
