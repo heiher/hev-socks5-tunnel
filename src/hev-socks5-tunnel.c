@@ -566,6 +566,9 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
 {
     HevSocks5Session *session;
 
+    if (err != ERR_OK)
+        return err;
+
     session = hev_socks5_session_new_tcp (pcb, &mutex, session_close_handler);
     if (!session)
         return ERR_MEM;
