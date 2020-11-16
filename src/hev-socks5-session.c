@@ -25,7 +25,7 @@
 #define SESSION_HP (10)
 #define SADDR_SIZE (64)
 #define BUFFER_SIZE (8192)
-#define TASK_STACK_SIZE (8192)
+#define TASK_STACK_SIZE (20480)
 
 typedef struct _Socks5AuthHeader Socks5AuthHeader;
 typedef struct _Socks5ReqResHeader Socks5ReqResHeader;
