@@ -86,7 +86,7 @@ hev_socks5_tunnel_init (int tunfd)
 
     hev_task_mutex_init (&mutex);
 
-    task_event = hev_task_new (8192);
+    task_event = hev_task_new (-1);
     if (!task_event) {
         LOG_E ("Create task event failed!");
         goto exit_free_gateway;
@@ -116,7 +116,7 @@ hev_socks5_tunnel_init (int tunfd)
     }
     hev_task_set_priority (task_lwip_timer, HEV_TASK_PRIORITY_REALTIME);
 
-    task_session_manager = hev_task_new (8192);
+    task_session_manager = hev_task_new (-1);
     if (!task_session_manager) {
         LOG_E ("Create task session manager failed!");
         goto exit_free_task_lwip_timer;
