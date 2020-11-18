@@ -605,7 +605,7 @@ socks5_do_fwd_dns (HevSocks5Session *self)
     }
 
     hev_task_mutex_lock (self->mutex);
-    buf = pbuf_alloc (PBUF_RAW, dns_len, PBUF_RAM);
+    buf = pbuf_alloc (PBUF_TRANSPORT, dns_len, PBUF_RAM);
     hev_task_mutex_unlock (self->mutex);
     if (!buf) {
         LOG_W ("Session %s: alloc dns buffer failed!", self->saddr);
