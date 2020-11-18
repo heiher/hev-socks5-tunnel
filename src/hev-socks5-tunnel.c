@@ -445,7 +445,9 @@ lwip_io_task_entry (void *data)
         struct pbuf *buf;
         ssize_t s;
 
+        hev_task_mutex_lock (&mutex);
         buf = pbuf_alloc (PBUF_RAW, mtu, PBUF_RAM);
+        hev_task_mutex_unlock (&mutex);
         if (!buf) {
             LOG_W ("Alloc packet buffer failed!");
             hev_task_sleep (100);
