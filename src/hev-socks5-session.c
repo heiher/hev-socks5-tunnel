@@ -397,12 +397,10 @@ tcp_recv_handler (void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
     if (!self->queue) {
         self->queue = p;
     } else {
-        if ((UINT16_MAX - self->queue->tot_len) < p->tot_len)
+        if (self->queue->tot_len > TCP_WND)
             return ERR_WOULDBLOCK;
         pbuf_cat (self->queue, p);
     }
-
-    tcp_recved (pcb, p->tot_len);
 
 exit:
     hev_task_wakeup (self->base.task);
@@ -459,6 +457,7 @@ tcp_splice_f (HevSocks5Session *self)
     } else {
         hev_task_mutex_lock (self->mutex);
         self->queue = pbuf_free_header (self->queue, s);
+        tcp_recved (self->tcp, s);
         hev_task_mutex_unlock (self->mutex);
     }
 
