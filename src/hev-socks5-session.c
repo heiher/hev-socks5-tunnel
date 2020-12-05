@@ -510,46 +510,28 @@ tcp_splice_b (HevSocks5Session *self, uint8_t *buffer)
 static int
 socks5_do_splice (HevSocks5Session *self)
 {
-    int err_f = 0;
-    int err_b = 0;
     uint8_t *buffer;
+    int res_f = 1;
+    int res_b = 1;
 
     buffer = hev_malloc (BUFFER_SIZE);
     if (!buffer)
         return STEP_CLOSE_SESSION;
 
     for (;;) {
-        HevTaskYieldType type = 0;
+        HevTaskYieldType type;
 
-        if (!err_f) {
-            int ret = tcp_splice_f (self);
-            if (0 >= ret) {
-                /* backward closed, quit */
-                if (err_b)
-                    break;
-                if (0 > ret) { /* error */
-                    /* forward error or closed, mark to skip */
-                    err_f = 1;
-                } else { /* no data */
-                    type++;
-                }
-            }
-        }
+        if (res_f >= 0)
+            res_f = tcp_splice_f (self);
+        if (res_b >= 0)
+            res_b = tcp_splice_b (self, buffer);
 
-        if (!err_b) {
-            int ret = tcp_splice_b (self, buffer);
-            if (0 >= ret) {
-                /* forward closed, quit */
-                if (err_f)
-                    break;
-                if (0 > ret) { /* error */
-                    /* backward error or closed, mark to skip */
-                    err_b = 1;
-                } else { /* no data */
-                    type++;
-                }
-            }
-        }
+        if (res_f < 0 && res_b < 0)
+            break;
+        else if (res_f > 0 || res_b > 0)
+            type = HEV_TASK_YIELD;
+        else
+            type = HEV_TASK_WAITIO;
 
         if (socks5_session_task_io_yielder (type, self) < 0)
             break;
