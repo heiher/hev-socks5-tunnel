@@ -236,7 +236,7 @@ hev_socks5_session_run (HevSocks5Session *self)
 }
 
 static int
-socks5_session_task_io_yielder (HevTaskYieldType type, void *data)
+task_io_yielder (HevTaskYieldType type, void *data)
 {
     HevSocks5Session *self = data;
 
@@ -263,7 +263,7 @@ socks5_do_connect (HevSocks5Session *self)
     addr = hev_config_get_socks5_address (&addr_len);
 
     if (hev_task_io_socket_connect (self->remote_fd, addr, addr_len,
-                                    socks5_session_task_io_yielder, self) < 0) {
+                                    task_io_yielder, self) < 0) {
         LOG_W ("Session %s: connect remote server failed!", self->saddr);
         return STEP_CLOSE_SESSION;
     }
@@ -317,7 +317,7 @@ socks5_write_request (HevSocks5Session *self)
     iov[1].iov_len = len;
 
     len = hev_task_io_socket_sendmsg (self->remote_fd, &mh, MSG_WAITALL,
-                                      socks5_session_task_io_yielder, self);
+                                      task_io_yielder, self);
     if (len <= 0) {
         LOG_W ("Session %s: send socks5 request failed!", self->saddr);
         return STEP_CLOSE_SESSION;
@@ -335,8 +335,7 @@ socks5_read_response (HevSocks5Session *self)
 
     /* read socks5 auth method */
     len = hev_task_io_socket_recv (self->remote_fd, &socks5_auth, 2,
-                                   MSG_WAITALL, socks5_session_task_io_yielder,
-                                   self);
+                                   MSG_WAITALL, task_io_yielder, self);
     if (len <= 0) {
         LOG_W ("Session %s: receive socks5 response failed!", self->saddr);
         return STEP_CLOSE_SESSION;
@@ -349,7 +348,7 @@ socks5_read_response (HevSocks5Session *self)
 
     /* read socks5 response header */
     len = hev_task_io_socket_recv (self->remote_fd, &socks5_r, 4, MSG_WAITALL,
-                                   socks5_session_task_io_yielder, self);
+                                   task_io_yielder, self);
     if (len <= 0) {
         LOG_W ("Session %s: receive socks5 response failed!", self->saddr);
         return STEP_CLOSE_SESSION;
@@ -375,7 +374,7 @@ socks5_read_response (HevSocks5Session *self)
 
     /* read socks5 response body */
     len = hev_task_io_socket_recv (self->remote_fd, &socks5_r, len, MSG_WAITALL,
-                                   socks5_session_task_io_yielder, self);
+                                   task_io_yielder, self);
     if (len <= 0) {
         LOG_W ("Session %s: receive socks5 response failed!", self->saddr);
         return STEP_CLOSE_SESSION;
@@ -533,7 +532,7 @@ socks5_do_splice (HevSocks5Session *self)
         else
             type = HEV_TASK_WAITIO;
 
-        if (socks5_session_task_io_yielder (type, self) < 0)
+        if (task_io_yielder (type, self) < 0)
             break;
     }
 
@@ -564,7 +563,7 @@ socks5_do_fwd_dns (HevSocks5Session *self)
 
     /* send dns request */
     len = hev_task_io_socket_sendmsg (self->remote_fd, &mh, MSG_WAITALL,
-                                      socks5_session_task_io_yielder, self);
+                                      task_io_yielder, self);
     if (len <= 0) {
         LOG_W ("Session %s: send DNS request failed!", self->saddr);
         return STEP_CLOSE_SESSION;
@@ -572,7 +571,7 @@ socks5_do_fwd_dns (HevSocks5Session *self)
 
     /* read dns response length */
     len = hev_task_io_socket_recv (self->remote_fd, &dns_len, 2, MSG_WAITALL,
-                                   socks5_session_task_io_yielder, self);
+                                   task_io_yielder, self);
     if (len <= 0) {
         LOG_W ("Session %s: receive DNS response failed!", self->saddr);
         return STEP_CLOSE_SESSION;
@@ -595,8 +594,7 @@ socks5_do_fwd_dns (HevSocks5Session *self)
 
     /* read dns response */
     len = hev_task_io_socket_recv (self->remote_fd, buf->payload, dns_len,
-                                   MSG_WAITALL, socks5_session_task_io_yielder,
-                                   self);
+                                   MSG_WAITALL, task_io_yielder, self);
     if (len <= 0) {
         LOG_W ("Session %s: receive DNS response failed!", self->saddr);
         hev_task_mutex_lock (self->mutex);
