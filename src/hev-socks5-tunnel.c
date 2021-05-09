@@ -2,7 +2,7 @@
  ============================================================================
  Name        : hev-socks5-tunnel.c
  Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 - 2020 Everyone.
+ Copyright   : Copyright (c) 2019 - 2021 Everyone.
  Description : Socks5 Tunnel
  ============================================================================
  */
@@ -40,6 +40,7 @@ static int event_fds[2];
 
 static struct netif netif;
 static struct tcp_pcb *tcp;
+static struct udp_pcb *udp;
 static struct udp_pcb *dns;
 
 static HevTaskMutex mutex;
@@ -58,6 +59,8 @@ static void lwip_io_task_entry (void *data);
 static void lwip_timer_task_entry (void *data);
 static void session_manager_task_entry (void *data);
 static err_t tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err);
+static void udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
+                              const ip_addr_t *addr, u16_t port);
 static void dns_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
                               const ip_addr_t *addr, u16_t port);
 
@@ -144,6 +147,7 @@ exit_free_task_event:
     hev_task_unref (task_event);
 exit_free_gateway:
     udp_remove (dns);
+    udp_remove (udp);
     tcp_close (tcp);
     netif_remove (&netif);
 exit_close_event:
@@ -166,6 +170,7 @@ hev_socks5_tunnel_fini (void)
     hev_task_unref (task_event);
 
     udp_remove (dns);
+    udp_remove (udp);
     tcp_close (tcp);
     netif_remove (&netif);
 
@@ -399,10 +404,26 @@ gateway_init (void)
 
     udp_recv (dns, dns_recv_handler, NULL);
 
+    udp = udp_new_ip_type (IPADDR_TYPE_ANY);
+    if (!udp) {
+        LOG_E ("Create UDP failed!");
+        goto exit_free_tcp;
+    }
+
+    udp_bind_netif (udp, &netif);
+    if (udp_bind (udp, NULL, 0) != ERR_OK) {
+        LOG_E ("UDP bind failed!");
+        goto exit_free_udp;
+    }
+
+    udp_recv (udp, udp_recv_handler, NULL);
+
     return 0;
 
 exit_free_dns:
     udp_remove (dns);
+exit_free_udp:
+    udp_remove (udp);
 exit_free_tcp:
     tcp_close (tcp);
 exit_free_netif:
@@ -579,6 +600,22 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
     hev_socks5_session_run (session);
 
     return ERR_OK;
+}
+
+static void
+udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
+                  const ip_addr_t *addr, u16_t port)
+{
+    HevSocks5Session *session;
+
+    session = hev_socks5_session_new_udp (pcb, &mutex, session_close_handler);
+    if (!session) {
+        udp_remove (pcb);
+        return;
+    }
+
+    session_manager_insert_session (session);
+    hev_socks5_session_run (session);
 }
 
 static void
