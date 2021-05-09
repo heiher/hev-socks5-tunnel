@@ -915,7 +915,8 @@ socks5_do_fwd_dns (HevSocks5Session *self)
 
     /* send dns response */
     hev_task_mutex_lock (self->mutex);
-    udp_sendto (self->udp, buf, &self->addr, self->port);
+    if (udp_sendto (self->udp, buf, &self->addr, self->port) != ERR_OK)
+        pbuf_free (buf);
     hev_task_mutex_unlock (self->mutex);
 
     return STEP_CLOSE_SESSION;
