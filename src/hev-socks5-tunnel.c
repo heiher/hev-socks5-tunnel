@@ -40,7 +40,7 @@ static int event_fds[2];
 
 static struct netif netif;
 static struct tcp_pcb *tcp;
-static struct udp_pcb *udp;
+static struct udp_pcb *dns;
 
 static HevTaskMutex mutex;
 static HevTask *task_event;
@@ -58,7 +58,7 @@ static void lwip_io_task_entry (void *data);
 static void lwip_timer_task_entry (void *data);
 static void session_manager_task_entry (void *data);
 static err_t tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err);
-static void udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
+static void dns_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
                               const ip_addr_t *addr, u16_t port);
 
 int
@@ -143,7 +143,7 @@ exit_free_task_lwip_io:
 exit_free_task_event:
     hev_task_unref (task_event);
 exit_free_gateway:
-    udp_remove (udp);
+    udp_remove (dns);
     tcp_close (tcp);
     netif_remove (&netif);
 exit_close_event:
@@ -165,7 +165,7 @@ hev_socks5_tunnel_fini (void)
     hev_task_unref (task_lwip_io);
     hev_task_unref (task_event);
 
-    udp_remove (udp);
+    udp_remove (dns);
     tcp_close (tcp);
     netif_remove (&netif);
 
@@ -385,24 +385,24 @@ gateway_init (void)
 
     tcp_accept (tcp, tcp_accept_handler);
 
-    udp = udp_new ();
-    if (!udp) {
+    dns = udp_new ();
+    if (!dns) {
         LOG_E ("Create UDP failed!");
         goto exit_free_tcp;
     }
 
-    udp_bind_netif (udp, &netif);
-    if (udp_bind (udp, IP_ANY_TYPE, port) != ERR_OK) {
+    udp_bind_netif (dns, &netif);
+    if (udp_bind (dns, IP_ANY_TYPE, port) != ERR_OK) {
         LOG_E ("UDP bind failed!");
-        goto exit_free_udp;
+        goto exit_free_dns;
     }
 
-    udp_recv (udp, udp_recv_handler, NULL);
+    udp_recv (dns, dns_recv_handler, NULL);
 
     return 0;
 
-exit_free_udp:
-    udp_remove (udp);
+exit_free_dns:
+    udp_remove (dns);
 exit_free_tcp:
     tcp_close (tcp);
 exit_free_netif:
@@ -582,7 +582,7 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
 }
 
 static void
-udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
+dns_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
                   const ip_addr_t *addr, u16_t port)
 {
     HevSocks5Session *session;
