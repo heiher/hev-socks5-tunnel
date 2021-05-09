@@ -2,7 +2,7 @@
  ============================================================================
  Name        : hev-socks5-session.c
  Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 - 2020 Everyone.
+ Copyright   : Copyright (c) 2019 - 2021 Everyone.
  Description : Socks5 Session
  ============================================================================
  */
@@ -22,13 +22,15 @@
 
 #include "hev-socks5-session.h"
 
-#define SESSION_HP (10)
+#define UDP_SESSION_HP (2)
+#define DEF_SESSION_HP (10)
 #define SADDR_SIZE (64)
 #define BUFFER_SIZE (8192)
 #define TASK_STACK_SIZE (20480)
 
 typedef struct _Socks5AuthHeader Socks5AuthHeader;
 typedef struct _Socks5ReqResHeader Socks5ReqResHeader;
+typedef struct _Socks5UDPHeader Socks5UDPHeader;
 
 enum
 {
@@ -37,14 +39,23 @@ enum
     STEP_WRITE_REQUEST,
     STEP_READ_RESPONSE,
     STEP_DO_SPLICE,
+    STEP_DO_FWD_UDP,
     STEP_DO_FWD_DNS,
     STEP_CLOSE_SESSION,
+};
+
+enum
+{
+    TYPE_TCP,
+    TYPE_UDP,
+    TYPE_DNS,
 };
 
 struct _HevSocks5Session
 {
     HevSocks5SessionBase base;
 
+    int type;
     int remote_fd;
     int ref_count;
 
@@ -54,6 +65,12 @@ struct _HevSocks5Session
         struct udp_pcb *udp;
     };
 
+    union
+    {
+        struct pbuf *query;
+        struct pbuf *queue;
+    };
+
     struct
     {
         ip_addr_t addr;
@@ -61,8 +78,6 @@ struct _HevSocks5Session
     };
 
     char *saddr;
-    struct pbuf *query;
-    struct pbuf *queue;
     HevTaskMutex *mutex;
     HevSocks5SessionCloseNotify notify;
 };
@@ -108,11 +123,33 @@ struct _Socks5ReqResHeader
     };
 } __attribute__ ((packed));
 
+struct _Socks5UDPHeader
+{
+    uint8_t rsv[2];
+    uint8_t frag;
+    uint8_t atype;
+    union
+    {
+        struct
+        {
+            uint32_t addr;
+            uint16_t port;
+        } ipv4;
+        struct
+        {
+            uint8_t addr[16];
+            uint16_t port;
+        } ipv6;
+    };
+} __attribute__ ((packed));
+
 static void hev_socks5_session_task_entry (void *data);
 static err_t tcp_recv_handler (void *arg, struct tcp_pcb *pcb, struct pbuf *p,
                                err_t err);
 static err_t tcp_sent_handler (void *arg, struct tcp_pcb *pcb, u16_t len);
 static void tcp_err_handler (void *arg, err_t err);
+static void udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
+                              const ip_addr_t *addr, u16_t port);
 
 static HevSocks5Session *
 hev_socks5_session_new (HevTaskMutex *mutex, HevSocks5SessionCloseNotify notify)
@@ -124,11 +161,11 @@ hev_socks5_session_new (HevTaskMutex *mutex, HevSocks5SessionCloseNotify notify)
     if (!self)
         return NULL;
 
-    self->base.hp = SESSION_HP;
     self->ref_count = 1;
     self->remote_fd = -1;
     self->notify = notify;
     self->mutex = mutex;
+    self->base.hp = DEF_SESSION_HP;
 
     if (LOG_ON ())
         self->saddr = hev_malloc (SADDR_SIZE);
@@ -158,6 +195,7 @@ hev_socks5_session_new_tcp (struct tcp_pcb *pcb, HevTaskMutex *mutex,
     self->tcp = pcb;
     self->port = pcb->local_port;
     __builtin_memcpy (&self->addr, &pcb->local_ip, sizeof (ip_addr_t));
+    self->type = TYPE_TCP;
 
     tcp_arg (pcb, self);
     tcp_recv (pcb, tcp_recv_handler);
@@ -182,6 +220,36 @@ hev_socks5_session_new_tcp (struct tcp_pcb *pcb, HevTaskMutex *mutex,
 }
 
 HevSocks5Session *
+hev_socks5_session_new_udp (struct udp_pcb *pcb, HevTaskMutex *mutex,
+                            HevSocks5SessionCloseNotify notify)
+{
+    HevSocks5Session *self;
+
+    self = hev_socks5_session_new (mutex, notify);
+    if (!self)
+        return NULL;
+
+    self->udp = pcb;
+    self->type = TYPE_UDP;
+
+    udp_recv (pcb, udp_recv_handler, self);
+
+    if (LOG_ON ()) {
+        char buf[64];
+        const char *sa;
+        int port = pcb->remote_port;
+
+        sa = ipaddr_ntoa_r (&pcb->remote_ip, buf, sizeof (buf));
+        if (self->saddr)
+            snprintf (self->saddr, SADDR_SIZE, "[%s]:%u", sa, port);
+
+        LOG_I ("Session %s: created UDP", self->saddr);
+    }
+
+    return self;
+}
+
+HevSocks5Session *
 hev_socks5_session_new_dns (struct udp_pcb *pcb, struct pbuf *p,
                             const ip_addr_t *addr, u16_t port,
                             HevTaskMutex *mutex,
@@ -197,6 +265,7 @@ hev_socks5_session_new_dns (struct udp_pcb *pcb, struct pbuf *p,
     self->query = p;
     self->port = port;
     __builtin_memcpy (&self->addr, addr, sizeof (ip_addr_t));
+    self->type = TYPE_DNS;
 
     if (LOG_ON ()) {
         char buf[64];
@@ -240,8 +309,13 @@ task_io_yielder (HevTaskYieldType type, void *data)
 {
     HevSocks5Session *self = data;
 
-    self->base.hp = SESSION_HP;
+    if (self->type == TYPE_UDP)
+        self->base.hp = UDP_SESSION_HP;
+    else
+        self->base.hp = DEF_SESSION_HP;
+
     hev_task_yield (type);
+
     return (self->base.hp > 0) ? 0 : -1;
 }
 
@@ -292,10 +366,17 @@ socks5_write_request (HevSocks5Session *self)
 
     /* write socks5 request */
     socks5_r.ver = 0x05;
-    if (self->query)
-        socks5_r.cmd = 0x04;
-    else
+    switch (self->type) {
+    case TYPE_TCP:
         socks5_r.cmd = 0x01;
+        break;
+    case TYPE_UDP:
+        socks5_r.cmd = 0x05;
+        break;
+    case TYPE_DNS:
+        socks5_r.cmd = 0x04;
+        break;
+    }
     socks5_r.rsv = 0x00;
     switch (self->addr.type) {
     case IPADDR_TYPE_V4:
@@ -380,7 +461,16 @@ socks5_read_response (HevSocks5Session *self)
         return STEP_CLOSE_SESSION;
     }
 
-    return self->query ? STEP_DO_FWD_DNS : STEP_DO_SPLICE;
+    switch (self->type) {
+    case TYPE_TCP:
+        return STEP_DO_SPLICE;
+    case TYPE_UDP:
+        return STEP_DO_FWD_UDP;
+    case TYPE_DNS:
+        return STEP_DO_FWD_DNS;
+    }
+
+    return STEP_CLOSE_SESSION;
 }
 
 static err_t
@@ -422,6 +512,69 @@ tcp_err_handler (void *arg, err_t err)
 
     self->tcp = NULL;
     self->base.hp = 0;
+    hev_task_wakeup (self->base.task);
+}
+
+static void
+udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
+                  const ip_addr_t *addr, u16_t port)
+{
+    HevSocks5Session *self = arg;
+    Socks5UDPHeader *udp;
+    struct pbuf *b;
+
+    if (!p) {
+        self->base.hp = 0;
+        goto exit;
+    }
+
+    switch (pcb->local_ip.type) {
+    case IPADDR_TYPE_V4:
+        b = pbuf_alloc (PBUF_TRANSPORT, 12, PBUF_RAM);
+        break;
+    case IPADDR_TYPE_V6:
+        b = pbuf_alloc (PBUF_TRANSPORT, 24, PBUF_RAM);
+        break;
+    default:
+        pbuf_free (p);
+        self->base.hp = 0;
+        goto exit;
+    }
+
+    if (!b) {
+        pbuf_free (p);
+        self->base.hp = 0;
+        goto exit;
+    }
+
+    udp = b->payload;
+    udp->rsv[0] = 0;
+    udp->rsv[1] = 0;
+    udp->frag = 0;
+
+    switch (pcb->local_ip.type) {
+    case IPADDR_TYPE_V4:
+        udp->atype = 0x01;
+        udp->ipv4.port = htons (pcb->local_port);
+        __builtin_memcpy (&udp->ipv4.addr, &pcb->local_ip, 4);
+        *(uint16_t *)(b->payload + 10) = htons (p->tot_len);
+        break;
+    case IPADDR_TYPE_V6:
+        udp->atype = 0x04;
+        udp->ipv6.port = htons (pcb->local_port);
+        __builtin_memcpy (udp->ipv6.addr, &pcb->local_ip, 16);
+        *(uint16_t *)(b->payload + 22) = htons (p->tot_len);
+        break;
+    }
+
+    if (!self->queue) {
+        self->queue = b;
+    } else {
+        pbuf_cat (self->queue, b);
+    }
+    pbuf_cat (self->queue, p);
+
+exit:
     hev_task_wakeup (self->base.task);
 }
 
@@ -541,6 +694,163 @@ socks5_do_splice (HevSocks5Session *self)
 }
 
 static int
+udp_fwd_f (HevSocks5Session *self)
+{
+    ssize_t s;
+
+    if (!self->queue)
+        return 0;
+
+    if (self->queue->next) {
+        struct pbuf *p = self->queue;
+        struct iovec iov[64];
+        int i;
+
+        for (i = 0; (i < 64) && p; p = p->next) {
+            iov[i].iov_base = p->payload;
+            iov[i].iov_len = p->len;
+            i++;
+        }
+
+        s = writev (self->remote_fd, iov, i);
+    } else {
+        s = write (self->remote_fd, self->queue->payload, self->queue->len);
+    }
+
+    if (0 >= s) {
+        if ((0 > s) && (EAGAIN == errno))
+            return 0;
+        return -1;
+    } else {
+        hev_task_mutex_lock (self->mutex);
+        self->queue = pbuf_free_header (self->queue, s);
+        hev_task_mutex_unlock (self->mutex);
+    }
+
+    return 1;
+}
+
+static int
+udp_fwd_b (HevSocks5Session *self)
+{
+    Socks5UDPHeader udp;
+    err_t err = ERR_OK;
+    struct pbuf *buf;
+    ip_addr_t addr;
+    uint16_t port;
+    uint16_t len;
+    ssize_t s;
+
+    /* peek */
+    s = recv (self->remote_fd, udp.rsv, sizeof (udp.rsv), MSG_PEEK);
+    if (0 >= s) {
+        if ((0 > s) && (EAGAIN == errno))
+            return 0;
+        return -1;
+    }
+
+    /* rsv - atype */
+    s = hev_task_io_socket_recv (self->remote_fd, &udp, 4, MSG_WAITALL,
+                                 task_io_yielder, self);
+    if (0 >= s)
+        return -1;
+
+    /* addr */
+    switch (udp.atype) {
+    case 0x01: /* ipv4 */
+        s = hev_task_io_socket_recv (self->remote_fd, &udp.ipv4, 6, MSG_WAITALL,
+                                     task_io_yielder, self);
+        break;
+    case 0x04: /* ipv6 */
+        s = hev_task_io_socket_recv (self->remote_fd, &udp.ipv6, 18,
+                                     MSG_WAITALL, task_io_yielder, self);
+        break;
+    default:
+        return -1;
+    }
+
+    if (0 >= s)
+        return -1;
+
+    /* data len */
+    s = hev_task_io_socket_recv (self->remote_fd, &len, sizeof (len),
+                                 MSG_WAITALL, task_io_yielder, self);
+    if (0 >= s)
+        return -1;
+
+    len = ntohs (len);
+    if (len > 2048)
+        return -1;
+
+    hev_task_mutex_lock (self->mutex);
+    buf = pbuf_alloc (PBUF_TRANSPORT, len, PBUF_RAM);
+    hev_task_mutex_unlock (self->mutex);
+    if (!buf)
+        return -1;
+
+    /* data */
+    s = hev_task_io_socket_recv (self->remote_fd, buf->payload, len,
+                                 MSG_WAITALL, task_io_yielder, self);
+    if (0 >= s)
+        return -1;
+
+    switch (udp.atype) {
+    case 0x01: /* ipv4 */
+        addr.type = IPADDR_TYPE_V4;
+        port = ntohs (udp.ipv4.port);
+        __builtin_memcpy (&addr, &udp.ipv4.addr, 4);
+        break;
+    case 0x04: /* ipv6 */
+        addr.type = IPADDR_TYPE_V6;
+        port = ntohs (udp.ipv6.port);
+        __builtin_memcpy (&addr, udp.ipv6.addr, 16);
+        err = udp_sendfrom (self->udp, buf, &addr, udp.ipv6.port);
+        break;
+    default:
+        port = 0;
+    }
+
+    hev_task_mutex_lock (self->mutex);
+    err = udp_sendfrom (self->udp, buf, &addr, port);
+    hev_task_mutex_unlock (self->mutex);
+
+    if (err != ERR_OK) {
+        pbuf_free (buf);
+        return -1;
+    }
+
+    return 1;
+}
+
+static int
+socks5_do_fwd_udp (HevSocks5Session *self)
+{
+    int res_f = 1;
+    int res_b = 1;
+
+    for (;;) {
+        HevTaskYieldType type;
+
+        if (res_f >= 0)
+            res_f = udp_fwd_f (self);
+        if (res_b >= 0)
+            res_b = udp_fwd_b (self);
+
+        if (res_f < 0 && res_b < 0)
+            break;
+        else if (res_f > 0 || res_b > 0)
+            type = HEV_TASK_YIELD;
+        else
+            type = HEV_TASK_WAITIO;
+
+        if (task_io_yielder (type, self) < 0)
+            break;
+    }
+
+    return STEP_CLOSE_SESSION;
+}
+
+static int
 socks5_do_fwd_dns (HevSocks5Session *self)
 {
     struct msghdr mh = { 0 };
@@ -618,9 +928,8 @@ socks5_close_session (HevSocks5Session *self)
         close (self->remote_fd);
 
     hev_task_mutex_lock (self->mutex);
-    if (self->query) {
-        pbuf_free (self->query);
-    } else {
+    switch (self->type) {
+    case TYPE_TCP:
         if (self->tcp) {
             tcp_recv (self->tcp, NULL);
             tcp_sent (self->tcp, NULL);
@@ -630,6 +939,17 @@ socks5_close_session (HevSocks5Session *self)
         }
         if (self->queue)
             pbuf_free (self->queue);
+        break;
+    case TYPE_UDP:
+        if (self->udp) {
+            udp_remove (self->udp);
+        }
+        if (self->queue)
+            pbuf_free (self->queue);
+        break;
+    case TYPE_DNS:
+        pbuf_free (self->query);
+        break;
     }
     hev_task_mutex_unlock (self->mutex);
 
@@ -663,6 +983,9 @@ hev_socks5_session_task_entry (void *data)
             break;
         case STEP_DO_SPLICE:
             step = socks5_do_splice (self);
+            break;
+        case STEP_DO_FWD_UDP:
+            step = socks5_do_fwd_udp (self);
             break;
         case STEP_DO_FWD_DNS:
             step = socks5_do_fwd_dns (self);
