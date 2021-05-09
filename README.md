@@ -6,6 +6,7 @@ A tunnel over Socks5 proxy.
 
 **Features**
 * Redirect TCP connections.
+* Redirect UDP packets. (see [server](https://gitlab.com/hev/hev-socks5-server))
 * Redirect DNS queries. (see [server](https://gitlab.com/hev/hev-socks5-server))
 * IPv4/IPv6. (dual stack)
 
