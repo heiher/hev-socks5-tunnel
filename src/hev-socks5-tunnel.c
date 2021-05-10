@@ -41,7 +41,6 @@ static int event_fds[2];
 static struct netif netif;
 static struct tcp_pcb *tcp;
 static struct udp_pcb *udp;
-static struct udp_pcb *dns;
 
 static HevTaskMutex mutex;
 static HevTask *task_event;
@@ -60,8 +59,6 @@ static void lwip_timer_task_entry (void *data);
 static void session_manager_task_entry (void *data);
 static err_t tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err);
 static void udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
-                              const ip_addr_t *addr, u16_t port);
-static void dns_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
                               const ip_addr_t *addr, u16_t port);
 
 int
@@ -146,7 +143,6 @@ exit_free_task_lwip_io:
 exit_free_task_event:
     hev_task_unref (task_event);
 exit_free_gateway:
-    udp_remove (dns);
     udp_remove (udp);
     tcp_close (tcp);
     netif_remove (&netif);
@@ -169,7 +165,6 @@ hev_socks5_tunnel_fini (void)
     hev_task_unref (task_lwip_io);
     hev_task_unref (task_event);
 
-    udp_remove (dns);
     udp_remove (udp);
     tcp_close (tcp);
     netif_remove (&netif);
@@ -332,11 +327,9 @@ static int
 gateway_init (void)
 {
     const char *ipv4, *ipv6;
-    unsigned int port;
 
     ipv4 = hev_config_get_tunnel_ipv4_gateway ();
     ipv6 = hev_config_get_tunnel_ipv6_gateway ();
-    port = hev_config_get_tunnel_dns_port ();
 
     if (!netif_add_noaddr (&netif, NULL, netif_init_handler, ip_input)) {
         LOG_E ("Create lwip net interface failed!");
@@ -390,20 +383,6 @@ gateway_init (void)
 
     tcp_accept (tcp, tcp_accept_handler);
 
-    dns = udp_new ();
-    if (!dns) {
-        LOG_E ("Create UDP failed!");
-        goto exit_free_tcp;
-    }
-
-    udp_bind_netif (dns, &netif);
-    if (udp_bind (dns, IP_ANY_TYPE, port) != ERR_OK) {
-        LOG_E ("UDP bind failed!");
-        goto exit_free_dns;
-    }
-
-    udp_recv (dns, dns_recv_handler, NULL);
-
     udp = udp_new_ip_type (IPADDR_TYPE_ANY);
     if (!udp) {
         LOG_E ("Create UDP failed!");
@@ -420,8 +399,6 @@ gateway_init (void)
 
     return 0;
 
-exit_free_dns:
-    udp_remove (dns);
 exit_free_udp:
     udp_remove (udp);
 exit_free_tcp:
@@ -611,23 +588,6 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
     session = hev_socks5_session_new_udp (pcb, &mutex, session_close_handler);
     if (!session) {
         udp_remove (pcb);
-        return;
-    }
-
-    session_manager_insert_session (session);
-    hev_socks5_session_run (session);
-}
-
-static void
-dns_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
-                  const ip_addr_t *addr, u16_t port)
-{
-    HevSocks5Session *session;
-
-    session = hev_socks5_session_new_dns (pcb, p, addr, port, &mutex,
-                                          session_close_handler);
-    if (!session) {
-        pbuf_free (p);
         return;
     }
 
