@@ -925,12 +925,15 @@ socks5_do_fwd_dns (HevSocks5Session *self)
 static int
 socks5_close_session (HevSocks5Session *self)
 {
+    const char *type = "";
+
     if (self->remote_fd >= 0)
         close (self->remote_fd);
 
     hev_task_mutex_lock (self->mutex);
     switch (self->type) {
     case TYPE_TCP:
+        type = "TCP";
         if (self->tcp) {
             tcp_recv (self->tcp, NULL);
             tcp_sent (self->tcp, NULL);
@@ -942,6 +945,7 @@ socks5_close_session (HevSocks5Session *self)
             pbuf_free (self->queue);
         break;
     case TYPE_UDP:
+        type = "UDP";
         if (self->udp) {
             udp_remove (self->udp);
         }
@@ -949,12 +953,13 @@ socks5_close_session (HevSocks5Session *self)
             pbuf_free (self->queue);
         break;
     case TYPE_DNS:
+        type = "DNS";
         pbuf_free (self->query);
         break;
     }
     hev_task_mutex_unlock (self->mutex);
 
-    LOG_I ("Session %s: closed", self->saddr);
+    LOG_I ("Session %s: closed %s", self->saddr, type);
 
     if (self->saddr)
         hev_free (self->saddr);
