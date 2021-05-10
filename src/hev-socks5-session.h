@@ -35,9 +35,6 @@ hev_socks5_session_new_tcp (struct tcp_pcb *pcb, HevTaskMutex *mutex,
 HevSocks5Session *
 hev_socks5_session_new_udp (struct udp_pcb *pcb, HevTaskMutex *mutex,
                             HevSocks5SessionCloseNotify notify);
-HevSocks5Session *hev_socks5_session_new_dns (
-    struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port,
-    HevTaskMutex *mutex, HevSocks5SessionCloseNotify notify);
 
 HevSocks5Session *hev_socks5_session_ref (HevSocks5Session *self);
 void hev_socks5_session_unref (HevSocks5Session *self);

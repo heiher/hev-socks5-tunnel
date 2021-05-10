@@ -40,7 +40,6 @@ enum
     STEP_READ_RESPONSE,
     STEP_DO_SPLICE,
     STEP_DO_FWD_UDP,
-    STEP_DO_FWD_DNS,
     STEP_CLOSE_SESSION,
 };
 
@@ -48,7 +47,6 @@ enum
 {
     TYPE_TCP,
     TYPE_UDP,
-    TYPE_DNS,
 };
 
 struct _HevSocks5Session
@@ -65,12 +63,6 @@ struct _HevSocks5Session
         struct udp_pcb *udp;
     };
 
-    union
-    {
-        struct pbuf *query;
-        struct pbuf *queue;
-    };
-
     struct
     {
         ip_addr_t addr;
@@ -78,6 +70,7 @@ struct _HevSocks5Session
     };
 
     char *saddr;
+    struct pbuf *queue;
     HevTaskMutex *mutex;
     HevSocks5SessionCloseNotify notify;
 };
@@ -250,37 +243,6 @@ hev_socks5_session_new_udp (struct udp_pcb *pcb, HevTaskMutex *mutex,
 }
 
 HevSocks5Session *
-hev_socks5_session_new_dns (struct udp_pcb *pcb, struct pbuf *p,
-                            const ip_addr_t *addr, u16_t port,
-                            HevTaskMutex *mutex,
-                            HevSocks5SessionCloseNotify notify)
-{
-    HevSocks5Session *self;
-
-    self = hev_socks5_session_new (mutex, notify);
-    if (!self)
-        return NULL;
-
-    self->udp = pcb;
-    self->query = p;
-    self->port = port;
-    __builtin_memcpy (&self->addr, addr, sizeof (ip_addr_t));
-    self->type = TYPE_DNS;
-
-    if (LOG_ON ()) {
-        char buf[64];
-        const char *sa;
-
-        sa = ipaddr_ntoa_r (addr, buf, sizeof (buf));
-        if (self->saddr)
-            snprintf (self->saddr, SADDR_SIZE, "[%s]:%u", sa, port);
-        LOG_I ("Session %s: created DNS", self->saddr);
-    }
-
-    return self;
-}
-
-HevSocks5Session *
 hev_socks5_session_ref (HevSocks5Session *self)
 {
     self->ref_count++;
@@ -373,9 +335,6 @@ socks5_write_request (HevSocks5Session *self)
     case TYPE_UDP:
         socks5_r.cmd = 0x05;
         break;
-    case TYPE_DNS:
-        socks5_r.cmd = 0x04;
-        break;
     }
     socks5_r.rsv = 0x00;
     switch (self->addr.type) {
@@ -466,8 +425,6 @@ socks5_read_response (HevSocks5Session *self)
         return STEP_DO_SPLICE;
     case TYPE_UDP:
         return STEP_DO_FWD_UDP;
-    case TYPE_DNS:
-        return STEP_DO_FWD_DNS;
     }
 
     return STEP_CLOSE_SESSION;
@@ -851,78 +808,6 @@ socks5_do_fwd_udp (HevSocks5Session *self)
 }
 
 static int
-socks5_do_fwd_dns (HevSocks5Session *self)
-{
-    struct msghdr mh = { 0 };
-    struct iovec iov[2];
-    struct pbuf *buf;
-    uint16_t dns_len;
-    ssize_t len;
-
-    mh.msg_iov = iov;
-    mh.msg_iovlen = 2;
-
-    /* write dns request length */
-    dns_len = htons (self->query->tot_len);
-    iov[0].iov_base = &dns_len;
-    iov[0].iov_len = 2;
-
-    /* write dns request */
-    iov[1].iov_base = self->query->payload;
-    iov[1].iov_len = self->query->tot_len;
-
-    /* send dns request */
-    len = hev_task_io_socket_sendmsg (self->remote_fd, &mh, MSG_WAITALL,
-                                      task_io_yielder, self);
-    if (len <= 0) {
-        LOG_W ("Session %s: send DNS request failed!", self->saddr);
-        return STEP_CLOSE_SESSION;
-    }
-
-    /* read dns response length */
-    len = hev_task_io_socket_recv (self->remote_fd, &dns_len, 2, MSG_WAITALL,
-                                   task_io_yielder, self);
-    if (len <= 0) {
-        LOG_W ("Session %s: receive DNS response failed!", self->saddr);
-        return STEP_CLOSE_SESSION;
-    }
-    dns_len = ntohs (dns_len);
-
-    /* check dns response length */
-    if (dns_len >= 2048) {
-        LOG_W ("Session %s: DNS response is invalid!", self->saddr);
-        return STEP_CLOSE_SESSION;
-    }
-
-    hev_task_mutex_lock (self->mutex);
-    buf = pbuf_alloc (PBUF_TRANSPORT, dns_len, PBUF_RAM);
-    hev_task_mutex_unlock (self->mutex);
-    if (!buf) {
-        LOG_W ("Session %s: alloc dns buffer failed!", self->saddr);
-        return STEP_CLOSE_SESSION;
-    }
-
-    /* read dns response */
-    len = hev_task_io_socket_recv (self->remote_fd, buf->payload, dns_len,
-                                   MSG_WAITALL, task_io_yielder, self);
-    if (len <= 0) {
-        LOG_W ("Session %s: receive DNS response failed!", self->saddr);
-        hev_task_mutex_lock (self->mutex);
-        pbuf_free (buf);
-        hev_task_mutex_unlock (self->mutex);
-        return STEP_CLOSE_SESSION;
-    }
-
-    /* send dns response */
-    hev_task_mutex_lock (self->mutex);
-    if (udp_sendto (self->udp, buf, &self->addr, self->port) != ERR_OK)
-        pbuf_free (buf);
-    hev_task_mutex_unlock (self->mutex);
-
-    return STEP_CLOSE_SESSION;
-}
-
-static int
 socks5_close_session (HevSocks5Session *self)
 {
     const char *type = "";
@@ -951,10 +836,6 @@ socks5_close_session (HevSocks5Session *self)
         }
         if (self->queue)
             pbuf_free (self->queue);
-        break;
-    case TYPE_DNS:
-        type = "DNS";
-        pbuf_free (self->query);
         break;
     }
     hev_task_mutex_unlock (self->mutex);
@@ -992,9 +873,6 @@ hev_socks5_session_task_entry (void *data)
             break;
         case STEP_DO_FWD_UDP:
             step = socks5_do_fwd_udp (self);
-            break;
-        case STEP_DO_FWD_DNS:
-            step = socks5_do_fwd_dns (self);
             break;
         case STEP_CLOSE_SESSION:
             step = socks5_close_session (self);
