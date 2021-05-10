@@ -25,8 +25,6 @@ static char tun_ipv6_address[64];
 static char tun_ipv6_gateway[64];
 static unsigned int tun_ipv6_prefix;
 
-static unsigned int tun_dns_port = 53;
-
 static struct sockaddr_in6 socks5_address;
 
 static char log_file[1024];
@@ -127,39 +125,6 @@ hev_config_parse_tunnel_ipv6 (yaml_document_t *doc, yaml_node_t *base)
 }
 
 static int
-hev_config_parse_tunnel_dns (yaml_document_t *doc, yaml_node_t *base)
-{
-    yaml_node_pair_t *pair;
-
-    if (!base || YAML_MAPPING_NODE != base->type)
-        return -1;
-
-    for (pair = base->data.mapping.pairs.start;
-         pair < base->data.mapping.pairs.top; pair++) {
-        yaml_node_t *node;
-        const char *key, *value;
-
-        if (!pair->key || !pair->value)
-            break;
-
-        node = yaml_document_get_node (doc, pair->key);
-        if (!node || YAML_SCALAR_NODE != node->type)
-            break;
-        key = (const char *)node->data.scalar.value;
-
-        node = yaml_document_get_node (doc, pair->value);
-        if (!node || YAML_SCALAR_NODE != node->type)
-            break;
-        value = (const char *)node->data.scalar.value;
-
-        if (0 == strcmp (key, "port"))
-            tun_dns_port = strtoul (value, NULL, 10);
-    }
-
-    return 0;
-}
-
-static int
 hev_config_parse_tunnel (yaml_document_t *doc, yaml_node_t *base)
 {
     yaml_node_pair_t *pair;
@@ -196,8 +161,6 @@ hev_config_parse_tunnel (yaml_document_t *doc, yaml_node_t *base)
                 hev_config_parse_tunnel_ipv4 (doc, node);
             else if (0 == strcmp (key, "ipv6"))
                 hev_config_parse_tunnel_ipv6 (doc, node);
-            else if (0 == strcmp (key, "dns"))
-                hev_config_parse_tunnel_dns (doc, node);
         }
     }
 
@@ -445,12 +408,6 @@ unsigned int
 hev_config_get_tunnel_ipv6_prefix (void)
 {
     return tun_ipv6_prefix;
-}
-
-unsigned int
-hev_config_get_tunnel_dns_port (void)
-{
-    return tun_dns_port;
 }
 
 struct sockaddr *

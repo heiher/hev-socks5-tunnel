@@ -15,9 +15,6 @@ tunnel:
     address: 'fc00::2'
     gateway: 'fc00::1'
     prefix: 126
-  # Domain name service
-  dns:
-    port: 53
 
 socks5:
   # Socks5 server port

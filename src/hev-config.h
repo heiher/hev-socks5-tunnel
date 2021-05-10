@@ -24,8 +24,6 @@ const char *hev_config_get_tunnel_ipv6_address (void);
 const char *hev_config_get_tunnel_ipv6_gateway (void);
 unsigned int hev_config_get_tunnel_ipv6_prefix (void);
 
-unsigned int hev_config_get_tunnel_dns_port (void);
-
 struct sockaddr *hev_config_get_socks5_address (socklen_t *addr_len);
 
 const char *hev_config_get_misc_pid_file (void);
