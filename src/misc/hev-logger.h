@@ -2,7 +2,7 @@
  ============================================================================
  Name        : hev-logger.h
  Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 - 2020 Everyone.
+ Copyright   : Copyright (c) 2019 - 2021 hev
  Description : Logger
  ============================================================================
  */
@@ -30,11 +30,10 @@ typedef enum
     HEV_LOGGER_UNSET,
 } HevLoggerLevel;
 
-int hev_logger_init (void);
+int hev_logger_init (HevLoggerLevel level, const char *path);
 void hev_logger_fini (void);
 
 int hev_logger_enabled (HevLoggerLevel level);
-
 void hev_logger_log (HevLoggerLevel level, const char *fmt, ...);
 
 #endif /* __HEV_LOGGER_H__ */

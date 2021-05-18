@@ -2,7 +2,7 @@
  ============================================================================
  Name        : hev-socks5-session.h
  Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 - 2020 Everyone.
+ Copyright   : Copyright (c) 2017 - 2021 hev
  Description : Socks5 Session
  ============================================================================
  */
@@ -10,35 +10,41 @@
 #ifndef __HEV_SOCKS5_SESSION_H__
 #define __HEV_SOCKS5_SESSION_H__
 
-#include <lwip/tcp.h>
-#include <lwip/udp.h>
-#include <lwip/pbuf.h>
-#include <lwip/ip_addr.h>
-
 #include <hev-task.h>
+#include <hev-socks5-client.h>
 
-typedef struct _HevSocks5SessionBase HevSocks5SessionBase;
+#include "hev-list.h"
+
+#define HEV_SOCKS5_SESSION(p) ((HevSocks5Session *)p)
+#define HEV_SOCKS5_SESSION_CLASS(p) ((HevSocks5SessionClass *)p)
+#define HEV_SOCKS5_SESSION_GET_CLASS(p) ((void *)((HevSocks5Session *)p)->klass)
+
 typedef struct _HevSocks5Session HevSocks5Session;
-typedef void (*HevSocks5SessionCloseNotify) (HevSocks5Session *self);
+typedef struct _HevSocks5SessionClass HevSocks5SessionClass;
 
-struct _HevSocks5SessionBase
+struct _HevSocks5Session
 {
-    HevSocks5SessionBase *prev;
-    HevSocks5SessionBase *next;
+    HevSocks5SessionClass *klass;
+
+    HevListNode node;
+    HevSocks5Client *client;
     HevTask *task;
-    int hp;
 };
 
-HevSocks5Session *
-hev_socks5_session_new_tcp (struct tcp_pcb *pcb, HevTaskMutex *mutex,
-                            HevSocks5SessionCloseNotify notify);
-HevSocks5Session *
-hev_socks5_session_new_udp (struct udp_pcb *pcb, HevTaskMutex *mutex,
-                            HevSocks5SessionCloseNotify notify);
+struct _HevSocks5SessionClass
+{
+    const char *name;
 
-HevSocks5Session *hev_socks5_session_ref (HevSocks5Session *self);
-void hev_socks5_session_unref (HevSocks5Session *self);
+    void (*splicer) (HevSocks5Session *self);
+    void (*finalizer) (HevSocks5Session *self);
+};
+
+int hev_socks5_session_construct (HevSocks5Session *self);
+void hev_socks5_session_destruct (HevSocks5Session *self);
+
+void hev_socks5_session_destroy (HevSocks5Session *self);
 
 void hev_socks5_session_run (HevSocks5Session *self);
+void hev_socks5_session_terminate (HevSocks5Session *self);
 
 #endif /* __HEV_SOCKS5_SESSION_H__ */

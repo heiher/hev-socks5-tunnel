@@ -2,21 +2,19 @@
  ============================================================================
  Name        : hev-logger.c
  Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 - 2020 Everyone.
+ Copyright   : Copyright (c) 2019 - 2021 hev
  Description : Logger
  ============================================================================
  */
 
+#include <time.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/uio.h>
 #include <sys/stat.h>
-#include <unistd.h>
-#include <time.h>
-
-#include "hev-config.h"
 
 #include "hev-logger.h"
 
@@ -24,35 +22,19 @@ static int fd = -1;
 static HevLoggerLevel req_level;
 
 int
-hev_logger_init (void)
+hev_logger_init (HevLoggerLevel level, const char *path)
 {
-    const char *str;
+    req_level = level;
 
-    str = hev_config_get_misc_log_file ();
-    if (!str)
-        return 0;
-
-    if (0 == strcmp ("stdout", str))
-        fd = 1;
-    else if (0 == strcmp ("stderr", str))
-        fd = 2;
+    if (0 == strcmp (path, "stdout"))
+        fd = dup (1);
+    else if (0 == strcmp (path, "stderr"))
+        fd = dup (2);
     else
-        fd = open (str, O_WRONLY | O_APPEND | O_CREAT, 0640);
+        fd = open (path, O_WRONLY | O_APPEND | O_CREAT, 0640);
 
-    if (fd < 0) {
-        fprintf (stderr, "Open log file %s failed!\n", str);
+    if (fd < 0)
         return -1;
-    }
-
-    str = hev_config_get_misc_log_level ();
-    if (0 == strcmp (str, "debug"))
-        req_level = HEV_LOGGER_DEBUG;
-    else if (0 == strcmp (str, "info"))
-        req_level = HEV_LOGGER_INFO;
-    else if (0 == strcmp (str, "error"))
-        req_level = HEV_LOGGER_ERROR;
-    else
-        req_level = HEV_LOGGER_WARN;
 
     return 0;
 }
@@ -60,9 +42,6 @@ hev_logger_init (void)
 void
 hev_logger_fini (void)
 {
-    if (fd <= 2)
-        return;
-
     close (fd);
 }
 
@@ -78,12 +57,14 @@ hev_logger_enabled (HevLoggerLevel level)
 void
 hev_logger_log (HevLoggerLevel level, const char *fmt, ...)
 {
-    va_list ap;
-    time_t now;
+    struct iovec iov[4];
+    const char *ts_fmt;
+    char msg[1024];
     struct tm *ti;
     char ts[32];
-    char msg[1024];
-    struct iovec iov[4];
+    time_t now;
+    va_list ap;
+    int len;
 
     if (fd < 0 || level < req_level)
         return;
@@ -91,10 +72,12 @@ hev_logger_log (HevLoggerLevel level, const char *fmt, ...)
     time (&now);
     ti = localtime (&now);
 
+    ts_fmt = "[%04u-%02u-%02u %02u:%02u:%02u] ";
+    len = snprintf (ts, sizeof (ts), ts_fmt, 1900 + ti->tm_year, 1 + ti->tm_mon,
+                    ti->tm_mday, ti->tm_hour, ti->tm_min, ti->tm_sec);
+
     iov[0].iov_base = ts;
-    iov[0].iov_len = snprintf (ts, 32, "[%04u-%02u-%02u %02u:%02u:%02u] ",
-                               ti->tm_year + 1900, ti->tm_mon + 1, ti->tm_mday,
-                               ti->tm_hour, ti->tm_min, ti->tm_sec);
+    iov[0].iov_len = len;
 
     switch (level) {
     case HEV_LOGGER_DEBUG:

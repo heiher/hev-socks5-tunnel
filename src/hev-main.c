@@ -2,7 +2,7 @@
  ============================================================================
  Name        : hev-main.c
  Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 - 2020 Everyone.
+ Copyright   : Copyright (c) 2019 - 2021 hev
  Description : Main
  ============================================================================
  */
@@ -21,6 +21,7 @@
 #include "hev-config.h"
 #include "hev-config-const.h"
 #include "hev-logger.h"
+#include "hev-socks5-logger.h"
 #include "hev-socks5-tunnel.h"
 
 #include "hev-main.h"
@@ -39,7 +40,7 @@ run_as_daemon (const char *pid_file)
 
     fp = fopen (pid_file, "w+");
     if (!fp) {
-        LOG_E ("Open pid file %s failed!", pid_file);
+        LOG_E ("open pid file %s", pid_file);
         return;
     }
 
@@ -94,32 +95,47 @@ int
 main (int argc, char *argv[])
 {
     const char *pid_file;
-    int tun_fd = -1, limit_nofile;
+    const char *log_file;
+    int tun_fd = -1;
+    int log_level;
+    int nofile;
+    int res;
 
-    if (2 > argc) {
+    if (argc < 2) {
         show_help (argv[0]);
         return -1;
     }
 
-    if (2 < argc)
+    if (argc > 2)
         tun_fd = strtol (argv[2], NULL, 10);
 
-    if (0 > hev_config_init (argv[1]))
+    res = hev_config_init (argv[1]);
+    if (res < 0)
         return -2;
 
-    if (0 > hev_logger_init ())
+    log_file = hev_config_get_misc_log_file ();
+    log_level = hev_config_get_misc_log_level ();
+
+    res = hev_logger_init (log_level, log_file);
+    if (res < 0)
         return -3;
 
-    limit_nofile = hev_config_get_misc_limit_nofile ();
-    if (0 > set_limit_nofile (limit_nofile)) {
-        LOG_E ("Set limit nofile failed!");
+    res = hev_socks5_logger_init (log_level, log_file);
+    if (res < 0)
         return -4;
+
+    nofile = hev_config_get_misc_limit_nofile ();
+    res = set_limit_nofile (nofile);
+    if (res < 0) {
+        LOG_E ("set limit nofile");
+        return -5;
     }
 
     lwip_init ();
 
-    if (0 > hev_socks5_tunnel_init (tun_fd))
-        return -5;
+    res = hev_socks5_tunnel_init (tun_fd);
+    if (res < 0)
+        return -6;
 
     pid_file = hev_config_get_misc_pid_file ();
     if (pid_file)
@@ -128,6 +144,7 @@ main (int argc, char *argv[])
     hev_socks5_tunnel_run ();
 
     hev_socks5_tunnel_fini ();
+    hev_socks5_logger_fini ();
     hev_logger_fini ();
     hev_config_fini ();
     lwip_fini ();

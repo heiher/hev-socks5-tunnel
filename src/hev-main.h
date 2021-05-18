@@ -2,7 +2,7 @@
  ============================================================================
  Name        : hev-main.h
  Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 - 2020 Everyone.
+ Copyright   : Copyright (c) 2019 - 2021 hev
  Description : Main
  ============================================================================
  */

@@ -7,6 +7,8 @@ PP=$(CROSS_PREFIX)cpp
 CC=$(CROSS_PREFIX)gcc
 STRIP=$(CROSS_PREFIX)strip
 CCFLAGS=-O3 -pipe -Wall -Werror $(CFLAGS) \
+		-I$(SRCDIR)/misc \
+		-I$(SRCDIR)/core/include  \
 		-I$(THIRDPARTDIR)/yaml/include \
 		-I$(THIRDPARTDIR)/lwip/include \
 		-I$(THIRDPARTDIR)/lwip/include/ports/unix \

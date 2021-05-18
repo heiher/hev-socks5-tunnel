@@ -2,7 +2,7 @@
  ============================================================================
  Name        : hev-config.c
  Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 - 2020 Everyone.
+ Copyright   : Copyright (c) 2019 - 2021 hev
  Description : Config
  ============================================================================
  */
@@ -11,8 +11,8 @@
 #include <arpa/inet.h>
 #include <yaml.h>
 
+#include "hev-logger.h"
 #include "hev-config.h"
-#include "hev-config-const.h"
 
 static char tun_name[64];
 static unsigned int tun_mtu = 8192;
@@ -25,30 +25,13 @@ static char tun_ipv6_address[64];
 static char tun_ipv6_gateway[64];
 static unsigned int tun_ipv6_prefix;
 
-static struct sockaddr_in6 socks5_address;
+static char srv_address[256];
+static char srv_port[8];
 
 static char log_file[1024];
-static char log_level[16];
 static char pid_file[1024];
 static int limit_nofile = -2;
-
-static int
-address_to_sockaddr (const char *address, unsigned short port,
-                     struct sockaddr_in6 *addr)
-{
-    __builtin_bzero (addr, sizeof (*addr));
-
-    addr->sin6_family = AF_INET6;
-    addr->sin6_port = htons (port);
-    if (inet_pton (AF_INET, address, &addr->sin6_addr.s6_addr[12]) == 1) {
-        ((uint16_t *)&addr->sin6_addr)[5] = 0xffff;
-    } else {
-        if (inet_pton (AF_INET6, address, &addr->sin6_addr) != 1)
-            return -1;
-    }
-
-    return 0;
-}
+static int log_level = HEV_LOGGER_WARN;
 
 static int
 hev_config_parse_tunnel_ipv4 (yaml_document_t *doc, yaml_node_t *base)
@@ -186,8 +169,8 @@ static int
 hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
 {
     yaml_node_pair_t *pair;
-    int port = 0;
     const char *addr = NULL;
+    const char *port = NULL;
 
     if (!base || YAML_MAPPING_NODE != base->type)
         return -1;
@@ -211,7 +194,7 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
         value = (const char *)node->data.scalar.value;
 
         if (0 == strcmp (key, "port"))
-            port = strtoul (value, NULL, 10);
+            port = value;
         else if (0 == strcmp (key, "address"))
             addr = value;
     }
@@ -226,7 +209,23 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
         return -1;
     }
 
-    return address_to_sockaddr (addr, port, &socks5_address);
+    strncpy (srv_address, addr, 256 - 1);
+    strncpy (srv_port, port, 8 - 1);
+
+    return 0;
+}
+
+static int
+hev_config_parse_log_level (const char *value)
+{
+    if (0 == strcmp (value, "debug"))
+        return HEV_LOGGER_DEBUG;
+    else if (0 == strcmp (value, "info"))
+        return HEV_LOGGER_INFO;
+    else if (0 == strcmp (value, "error"))
+        return HEV_LOGGER_ERROR;
+
+    return HEV_LOGGER_WARN;
 }
 
 static int
@@ -260,7 +259,7 @@ hev_config_parse_misc (yaml_document_t *doc, yaml_node_t *base)
         else if (0 == strcmp (key, "log-file"))
             strncpy (log_file, value, 1024 - 1);
         else if (0 == strcmp (key, "log-level"))
-            strncpy (log_level, value, 16 - 1);
+            log_level = hev_config_parse_log_level (value);
         else if (0 == strcmp (key, "limit-nofile"))
             limit_nofile = strtol (value, NULL, 10);
     }
@@ -410,11 +409,18 @@ hev_config_get_tunnel_ipv6_prefix (void)
     return tun_ipv6_prefix;
 }
 
-struct sockaddr *
-hev_config_get_socks5_address (socklen_t *addr_len)
+const char *
+hev_config_get_socks5_address (int *port)
 {
-    *addr_len = sizeof (socks5_address);
-    return (struct sockaddr *)&socks5_address;
+    *port = strtoul (srv_port, NULL, 10);
+
+    return srv_address;
+}
+
+int
+hev_config_get_misc_limit_nofile (void)
+{
+    return limit_nofile;
 }
 
 const char *
@@ -426,28 +432,17 @@ hev_config_get_misc_pid_file (void)
     return pid_file;
 }
 
-int
-hev_config_get_misc_limit_nofile (void)
-{
-    return limit_nofile;
-}
-
 const char *
 hev_config_get_misc_log_file (void)
 {
     if (!log_file[0])
-        return NULL;
-    if (0 == strcmp (log_file, "null"))
-        return NULL;
+        return "stderr";
 
     return log_file;
 }
 
-const char *
+int
 hev_config_get_misc_log_level (void)
 {
-    if (!log_level[0])
-        return "warn";
-
     return log_level;
 }
