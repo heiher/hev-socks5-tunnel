@@ -5,9 +5,9 @@
 A tunnel over Socks5 proxy.
 
 **Features**
-* Redirect TCP connections.
-* Redirect UDP packets. (see [server](https://gitlab.com/hev/hev-socks5-server))
 * IPv4/IPv6. (dual stack)
+* Redirect TCP connections.
+* Redirect UDP packets. (UDP over TCP see [server](https://gitlab.com/hev/hev-socks5-server))
 
 ## How to Build
 
@@ -54,8 +54,8 @@ socks5:
   address: 127.0.0.1
 
 #misc:
-   # null, stdout, stderr or file-path
-#  log-file: null
+   # stdout, stderr or file-path
+#  log-file: stderr
    # debug, info, warn or error
 #  log-level: warn
    # If present, run as a daemon with this pid file
