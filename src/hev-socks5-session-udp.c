@@ -19,6 +19,7 @@
 #include <hev-task-mutex.h>
 #include <hev-memory-allocator.h>
 #include <hev-socks5-udp.h>
+#include <hev-socks5-misc.h>
 #include <hev-socks5-client-udp.h>
 
 #include "hev-logger.h"
@@ -26,6 +27,8 @@
 #include "hev-config-const.h"
 
 #include "hev-socks5-session-udp.h"
+
+#define task_io_yielder hev_socks5_task_io_yielder
 
 typedef struct _HevSocks5UDPFrame HevSocks5UDPFrame;
 
@@ -156,27 +159,6 @@ hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self)
     }
 
     return 1;
-}
-
-static int
-task_io_yielder (HevTaskYieldType type, void *data)
-{
-    HevSocks5 *self = data;
-    int timeout;
-
-    timeout = self->timeout;
-
-    if (timeout < 0) {
-        hev_task_yield (HEV_TASK_WAITIO);
-    } else {
-        timeout = hev_task_sleep (timeout);
-        if (timeout <= 0) {
-            LOG_D ("%p io timeout", self);
-            return -1;
-        }
-    }
-
-    return 0;
 }
 
 static void
