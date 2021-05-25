@@ -11,7 +11,6 @@
 
 #include "hev-logger.h"
 #include "hev-config.h"
-#include "hev-config-const.h"
 
 #include "hev-socks5-session.h"
 
@@ -53,6 +52,8 @@ void
 hev_socks5_session_run (HevSocks5Session *self)
 {
     HevSocks5SessionClass *klass;
+    int read_write_timeout;
+    int connect_timeout;
     const char *addr;
     int port;
     int res;
@@ -60,8 +61,10 @@ hev_socks5_session_run (HevSocks5Session *self)
     LOG_D ("%p socks5 session run", self);
 
     addr = hev_config_get_socks5_address (&port);
+    connect_timeout = hev_config_get_misc_connect_timeout ();
+    read_write_timeout = hev_config_get_misc_read_write_timeout ();
 
-    hev_socks5_set_timeout (HEV_SOCKS5 (self->client), CONNECT_TIMEOUT);
+    hev_socks5_set_timeout (HEV_SOCKS5 (self->client), connect_timeout);
 
     res = hev_socks5_client_connect (self->client, addr, port);
     if (res < 0) {
@@ -69,7 +72,7 @@ hev_socks5_session_run (HevSocks5Session *self)
         return;
     }
 
-    hev_socks5_set_timeout (HEV_SOCKS5 (self->client), IO_TIMEOUT);
+    hev_socks5_set_timeout (HEV_SOCKS5 (self->client), read_write_timeout);
 
     res = hev_socks5_client_handshake (self->client);
     if (res < 0) {

@@ -26,6 +26,9 @@ unsigned int hev_config_get_tunnel_ipv6_prefix (void);
 
 const char *hev_config_get_socks5_address (int *port);
 
+int hev_config_get_misc_task_stack_size (void);
+int hev_config_get_misc_connect_timeout (void);
+int hev_config_get_misc_read_write_timeout (void);
 int hev_config_get_misc_limit_nofile (void);
 const char *hev_config_get_misc_pid_file (void);
 const char *hev_config_get_misc_log_file (void);

@@ -23,6 +23,12 @@ socks5:
   address: 127.0.0.1
 
 #misc:
+   # task stack size (bytes)
+#  task-stack-size: 20480
+   # connect timeout (ms)
+#  connect-timeout: 5000
+   # read-write timeout (ms)
+#  read-write-timeout: 60000
    # stdout, stderr or file-path
 #  log-file: stderr
    # debug, info, warn or error

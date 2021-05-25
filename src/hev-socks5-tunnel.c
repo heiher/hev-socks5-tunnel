@@ -31,7 +31,6 @@
 #include "hev-config.h"
 #include "hev-logger.h"
 #include "hev-compiler.h"
-#include "hev-config-const.h"
 #include "hev-tunnel-linux.h"
 #include "hev-socks5-session-tcp.h"
 #include "hev-socks5-session-udp.h"
@@ -533,6 +532,7 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
 {
     HevSocks5SessionTCP *tcp;
     HevSocks5Session *s;
+    int stack_size;
     HevTask *task;
 
     if (err != ERR_OK)
@@ -543,7 +543,8 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
         return ERR_MEM;
 
     s = HEV_SOCKS5_SESSION (tcp);
-    task = hev_task_new (TASK_STACK_SIZE);
+    stack_size = hev_config_get_misc_task_stack_size ();
+    task = hev_task_new (stack_size);
     if (!task) {
         hev_socks5_session_destroy (s);
         return ERR_ABRT;
@@ -562,6 +563,7 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
 {
     HevSocks5SessionUDP *udp;
     HevSocks5Session *s;
+    int stack_size;
     HevTask *task;
 
     udp = hev_socks5_session_udp_new (pcb, &mutex);
@@ -571,7 +573,8 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
     }
 
     s = HEV_SOCKS5_SESSION (udp);
-    task = hev_task_new (TASK_STACK_SIZE);
+    stack_size = hev_config_get_misc_task_stack_size ();
+    task = hev_task_new (stack_size);
     if (!task) {
         hev_socks5_session_destroy (s);
         return;
