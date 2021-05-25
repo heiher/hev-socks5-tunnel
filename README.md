@@ -77,9 +77,11 @@ bin/hev-socks5-tunnel conf/main.yml
 
 # Bypass upstream socks5 server
 sudo ip route add SOCKS5_SERVER dev DEFAULT_IFACE metric 10
+sudo ip -6 route add SOCKS5_SERVER dev DEFAULT_IFACE metric 10
 
 # Route others
 sudo ip route add default dev tun0 metric 20
+sudo ip -6 route add default dev tun0 metric 20
 ```
 
 ## Authors
