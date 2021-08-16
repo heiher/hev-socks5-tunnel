@@ -52,27 +52,32 @@ void
 hev_socks5_session_run (HevSocks5Session *self)
 {
     HevSocks5SessionClass *klass;
+    HevConfigServer *srv;
     int read_write_timeout;
     int connect_timeout;
-    const char *addr;
-    int port;
     int res;
 
     LOG_D ("%p socks5 session run", self);
 
-    addr = hev_config_get_socks5_address (&port);
+    srv = hev_config_get_socks5_server ();
     connect_timeout = hev_config_get_misc_connect_timeout ();
     read_write_timeout = hev_config_get_misc_read_write_timeout ();
 
     hev_socks5_set_timeout (HEV_SOCKS5 (self->client), connect_timeout);
 
-    res = hev_socks5_client_connect (self->client, addr, port);
+    res = hev_socks5_client_connect (self->client, srv->addr, srv->port);
     if (res < 0) {
         LOG_E ("%p socks5 session connect", self);
         return;
     }
 
     hev_socks5_set_timeout (HEV_SOCKS5 (self->client), read_write_timeout);
+
+    if (srv->user && srv->pass) {
+        hev_socks5_set_auth_user_pass (HEV_SOCKS5 (self->client), srv->user,
+                                       srv->pass);
+        LOG_D ("%p socks5 client auth %s:%s", self, srv->user, srv->pass);
+    }
 
     res = hev_socks5_client_handshake (self->client);
     if (res < 0) {

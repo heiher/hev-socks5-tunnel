@@ -25,8 +25,7 @@ static char tun_ipv6_address[64];
 static char tun_ipv6_gateway[64];
 static unsigned int tun_ipv6_prefix;
 
-static char srv_address[256];
-static char srv_port[8];
+static HevConfigServer srv;
 
 static char log_file[1024];
 static char pid_file[1024];
@@ -172,8 +171,12 @@ static int
 hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
 {
     yaml_node_pair_t *pair;
+    static char _user[256];
+    static char _pass[256];
     const char *addr = NULL;
     const char *port = NULL;
+    const char *user = NULL;
+    const char *pass = NULL;
 
     if (!base || YAML_MAPPING_NODE != base->type)
         return -1;
@@ -200,6 +203,10 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
             port = value;
         else if (0 == strcmp (key, "address"))
             addr = value;
+        else if (0 == strcmp (key, "username"))
+            user = value;
+        else if (0 == strcmp (key, "password"))
+            pass = value;
     }
 
     if (!port) {
@@ -212,8 +219,20 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
         return -1;
     }
 
-    strncpy (srv_address, addr, 256 - 1);
-    strncpy (srv_port, port, 8 - 1);
+    if ((user && !pass) || (!user && pass)) {
+        fprintf (stderr, "Must be set both socks5 username and password!\n");
+        return -1;
+    }
+
+    strncpy (srv.addr, addr, 256 - 1);
+    srv.port = strtoul (port, NULL, 10);
+
+    if (user && pass) {
+        strncpy (_user, user, 256 - 1);
+        strncpy (_pass, pass, 256 - 1);
+        srv.user = _user;
+        srv.pass = _pass;
+    }
 
     return 0;
 }
@@ -418,12 +437,10 @@ hev_config_get_tunnel_ipv6_prefix (void)
     return tun_ipv6_prefix;
 }
 
-const char *
-hev_config_get_socks5_address (int *port)
+HevConfigServer *
+hev_config_get_socks5_server (void)
 {
-    *port = strtoul (srv_port, NULL, 10);
-
-    return srv_address;
+    return &srv;
 }
 
 int

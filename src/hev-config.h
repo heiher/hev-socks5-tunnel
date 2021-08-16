@@ -10,6 +10,16 @@
 #ifndef __HEV_CONFIG_H__
 #define __HEV_CONFIG_H__
 
+typedef struct _HevConfigServer HevConfigServer;
+
+struct _HevConfigServer
+{
+    const char *user;
+    const char *pass;
+    unsigned short port;
+    char addr[256];
+};
+
 int hev_config_init (const char *config_path);
 void hev_config_fini (void);
 
@@ -24,7 +34,7 @@ const char *hev_config_get_tunnel_ipv6_address (void);
 const char *hev_config_get_tunnel_ipv6_gateway (void);
 unsigned int hev_config_get_tunnel_ipv6_prefix (void);
 
-const char *hev_config_get_socks5_address (int *port);
+HevConfigServer *hev_config_get_socks5_server (void);
 
 int hev_config_get_misc_task_stack_size (void);
 int hev_config_get_misc_connect_timeout (void);
