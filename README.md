@@ -52,6 +52,9 @@ socks5:
   port: 1080
   # Socks5 server address (ipv4/ipv6)
   address: 127.0.0.1
+# username: 'username'
+  # Socks5 server password
+# password: 'password'
 
 #misc:
    # task stack size (bytes)
