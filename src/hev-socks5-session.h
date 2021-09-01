@@ -11,40 +11,38 @@
 #define __HEV_SOCKS5_SESSION_H__
 
 #include <hev-task.h>
-#include <hev-socks5-client.h>
 
 #include "hev-list.h"
 
 #define HEV_SOCKS5_SESSION(p) ((HevSocks5Session *)p)
-#define HEV_SOCKS5_SESSION_CLASS(p) ((HevSocks5SessionClass *)p)
-#define HEV_SOCKS5_SESSION_GET_CLASS(p) ((void *)((HevSocks5Session *)p)->klass)
+#define HEV_SOCKS5_SESSION_IFACE(p) ((HevSocks5SessionIface *)p)
+#define HEV_SOCKS5_SESSION_TYPE (hev_socks5_session_iface ())
 
-typedef struct _HevSocks5Session HevSocks5Session;
-typedef struct _HevSocks5SessionClass HevSocks5SessionClass;
+typedef void HevSocks5Session;
+typedef struct _HevSocks5SessionData HevSocks5SessionData;
+typedef struct _HevSocks5SessionIface HevSocks5SessionIface;
 
-struct _HevSocks5Session
+struct _HevSocks5SessionData
 {
-    HevSocks5SessionClass *klass;
-
     HevListNode node;
-    HevSocks5Client *client;
     HevTask *task;
+    HevSocks5Session *self;
 };
 
-struct _HevSocks5SessionClass
+struct _HevSocks5SessionIface
 {
-    const char *name;
-
     void (*splicer) (HevSocks5Session *self);
-    void (*finalizer) (HevSocks5Session *self);
+    HevTask *(*get_task) (HevSocks5Session *self);
+    void (*set_task) (HevSocks5Session *self, HevTask *task);
+    HevListNode *(*get_node) (HevSocks5Session *self);
 };
 
-int hev_socks5_session_construct (HevSocks5Session *self);
-void hev_socks5_session_destruct (HevSocks5Session *self);
-
-void hev_socks5_session_destroy (HevSocks5Session *self);
+void *hev_socks5_session_iface (void);
 
 void hev_socks5_session_run (HevSocks5Session *self);
 void hev_socks5_session_terminate (HevSocks5Session *self);
+
+void hev_socks5_session_set_task (HevSocks5Session *self, HevTask *task);
+HevListNode *hev_socks5_session_get_node (HevSocks5Session *self);
 
 #endif /* __HEV_SOCKS5_SESSION_H__ */

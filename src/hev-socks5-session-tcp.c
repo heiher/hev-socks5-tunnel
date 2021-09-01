@@ -18,7 +18,6 @@
 #include <hev-task-mutex.h>
 #include <hev-memory-allocator.h>
 #include <hev-socks5-misc.h>
-#include <hev-socks5-client-tcp.h>
 
 #include "hev-logger.h"
 #include "hev-config-const.h"
@@ -36,7 +35,7 @@ tcp_splice_f (HevSocks5SessionTCP *self)
     if (!self->queue)
         return 0;
 
-    fd = HEV_SOCKS5 (self->base.client)->fd;
+    fd = HEV_SOCKS5 (self)->fd;
 
     if (self->queue->next) {
         struct pbuf *p = self->queue;
@@ -75,7 +74,6 @@ tcp_splice_b (HevSocks5SessionTCP *self, uint8_t *buffer)
     err_t err = ERR_OK;
     size_t size;
     ssize_t s;
-    int fd;
 
     if (!self->pcb)
         return -1;
@@ -93,9 +91,7 @@ tcp_splice_b (HevSocks5SessionTCP *self, uint8_t *buffer)
     if (size > TCP_BUF_SIZE)
         size = TCP_BUF_SIZE;
 
-    fd = HEV_SOCKS5 (self->base.client)->fd;
-
-    s = read (fd, buffer, size);
+    s = read (HEV_SOCKS5 (self)->fd, buffer, size);
     if (0 >= s) {
         if ((0 > s) && (EAGAIN == errno))
             return 0;
@@ -112,6 +108,68 @@ tcp_splice_b (HevSocks5SessionTCP *self, uint8_t *buffer)
         return -1;
 
     return 1;
+}
+
+static err_t
+tcp_recv_handler (void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
+{
+    HevSocks5SessionTCP *self = arg;
+
+    if (!p) {
+        hev_socks5_session_terminate (HEV_SOCKS5_SESSION (self));
+        return ERR_OK;
+    }
+
+    if (!self->queue) {
+        self->queue = p;
+    } else {
+        if (self->queue->tot_len > TCP_WND)
+            return ERR_WOULDBLOCK;
+        pbuf_cat (self->queue, p);
+    }
+
+    hev_task_wakeup (self->data.task);
+    return ERR_OK;
+}
+
+static err_t
+tcp_sent_handler (void *arg, struct tcp_pcb *pcb, u16_t len)
+{
+    HevSocks5SessionTCP *self = arg;
+
+    hev_task_wakeup (self->data.task);
+
+    return ERR_OK;
+}
+
+static void
+tcp_err_handler (void *arg, err_t err)
+{
+    HevSocks5SessionTCP *self = arg;
+
+    self->pcb = NULL;
+    hev_socks5_session_terminate (HEV_SOCKS5_SESSION (self));
+}
+
+HevSocks5SessionTCP *
+hev_socks5_session_tcp_new (struct tcp_pcb *pcb, HevTaskMutex *mutex)
+{
+    HevSocks5SessionTCP *self;
+    int res;
+
+    self = hev_malloc0 (sizeof (HevSocks5SessionTCP));
+    if (!self)
+        return NULL;
+
+    res = hev_socks5_session_tcp_construct (self, pcb, mutex);
+    if (res < 0) {
+        hev_free (self);
+        return NULL;
+    }
+
+    LOG_D ("%p socks5 session tcp new", self);
+
+    return self;
 }
 
 static void
@@ -143,39 +201,85 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
         else
             type = HEV_TASK_WAITIO;
 
-        if (task_io_yielder (type, base->client) < 0)
+        if (task_io_yielder (type, base) < 0)
             break;
     }
 
     hev_free (buffer);
 }
 
-static HevSocks5SessionTCPClass _klass = {
-    {
-        .name = "HevSoscks5SessionTCP",
-        .splicer = hev_socks5_session_tcp_splice,
-        .finalizer = hev_socks5_session_tcp_destruct,
-    },
-};
+static HevTask *
+hev_socks5_session_tcp_get_task (HevSocks5Session *base)
+{
+    HevSocks5SessionTCP *self = HEV_SOCKS5_SESSION_TCP (base);
+
+    return self->data.task;
+}
+
+static void
+hev_socks5_session_tcp_set_task (HevSocks5Session *base, HevTask *task)
+{
+    HevSocks5SessionTCP *self = HEV_SOCKS5_SESSION_TCP (base);
+
+    self->data.task = task;
+}
+
+static HevListNode *
+hev_socks5_session_tcp_get_node (HevSocks5Session *base)
+{
+    HevSocks5SessionTCP *self = HEV_SOCKS5_SESSION_TCP (base);
+
+    return &self->data.node;
+}
 
 int
-hev_socks5_session_tcp_construct (HevSocks5SessionTCP *self)
+hev_socks5_session_tcp_construct (HevSocks5SessionTCP *self,
+                                  struct tcp_pcb *pcb, HevTaskMutex *mutex)
 {
+    struct sockaddr_in6 ad6;
+    struct sockaddr_in ad4;
+    struct sockaddr *addr;
     int res;
 
-    res = hev_socks5_session_construct (&self->base);
+    switch (pcb->local_ip.type) {
+    case IPADDR_TYPE_V4:
+        ad4.sin_family = AF_INET;
+        ad4.sin_port = htons (pcb->local_port);
+        memcpy (&ad4.sin_addr, &pcb->local_ip, 4);
+        addr = (struct sockaddr *)&ad4;
+        break;
+    case IPADDR_TYPE_V6:
+        ad6.sin6_family = AF_INET6;
+        ad6.sin6_port = htons (pcb->local_port);
+        memcpy (&ad6.sin6_addr, &pcb->local_ip, 16);
+        addr = (struct sockaddr *)&ad6;
+        break;
+    default:
+        return -1;
+    }
+
+    res = hev_socks5_client_tcp_construct_ip (&self->base, addr);
     if (res < 0)
         return -1;
 
     LOG_D ("%p socks5 session tcp construct", self);
 
-    HEV_SOCKS5_SESSION (self)->klass = HEV_SOCKS5_SESSION_CLASS (&_klass);
+    HEV_OBJECT (self)->klass = HEV_SOCKS5_SESSION_TCP_TYPE;
+
+    tcp_arg (pcb, self);
+    tcp_recv (pcb, tcp_recv_handler);
+    tcp_sent (pcb, tcp_sent_handler);
+    tcp_err (pcb, tcp_err_handler);
+
+    self->pcb = pcb;
+    self->mutex = mutex;
+    self->data.self = self;
 
     return 0;
 }
 
 void
-hev_socks5_session_tcp_destruct (HevSocks5Session *base)
+hev_socks5_session_tcp_destruct (HevObject *base)
 {
     HevSocks5SessionTCP *self = HEV_SOCKS5_SESSION_TCP (base);
 
@@ -195,106 +299,41 @@ hev_socks5_session_tcp_destruct (HevSocks5Session *base)
         pbuf_free (self->queue);
     hev_task_mutex_unlock (self->mutex);
 
-    hev_socks5_session_destruct (base);
+    HEV_SOCKS5_CLIENT_TCP_TYPE->finalizer (base);
 }
 
-static err_t
-tcp_recv_handler (void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
+static void *
+hev_socks5_session_tcp_iface (HevObject *base, void *type)
 {
-    HevSocks5SessionTCP *self = arg;
-    HevSocks5Session *s = arg;
+    HevSocks5SessionTCPClass *klass = HEV_OBJECT_GET_CLASS (base);
 
-    if (!p) {
-        hev_socks5_session_terminate (s);
-        return ERR_OK;
-    }
-
-    if (!self->queue) {
-        self->queue = p;
-    } else {
-        if (self->queue->tot_len > TCP_WND)
-            return ERR_WOULDBLOCK;
-        pbuf_cat (self->queue, p);
-    }
-
-    hev_task_wakeup (s->task);
-    return ERR_OK;
+    return &klass->session;
 }
 
-static err_t
-tcp_sent_handler (void *arg, struct tcp_pcb *pcb, u16_t len)
+HevObjectClass *
+hev_socks5_session_tcp_class (void)
 {
-    HevSocks5Session *s = arg;
+    static HevSocks5SessionTCPClass klass;
+    HevSocks5SessionTCPClass *kptr = &klass;
+    HevObjectClass *okptr = HEV_OBJECT_CLASS (kptr);
 
-    hev_task_wakeup (s->task);
+    if (!okptr->name) {
+        HevSocks5SessionIface *siptr;
+        void *ptr;
 
-    return ERR_OK;
-}
+        ptr = HEV_SOCKS5_CLIENT_TCP_TYPE;
+        memcpy (kptr, ptr, sizeof (HevSocks5ClientTCPClass));
 
-static void
-tcp_err_handler (void *arg, err_t err)
-{
-    HevSocks5SessionTCP *self = arg;
-    HevSocks5Session *s = arg;
+        okptr->name = "HevSocks5SessionTCP";
+        okptr->finalizer = hev_socks5_session_tcp_destruct;
+        okptr->iface = hev_socks5_session_tcp_iface;
 
-    self->pcb = NULL;
-    hev_socks5_session_terminate (s);
-}
-
-HevSocks5SessionTCP *
-hev_socks5_session_tcp_new (struct tcp_pcb *pcb, HevTaskMutex *mutex)
-{
-    HevSocks5SessionTCP *self;
-    HevSocks5ClientTCP *tcp;
-    struct sockaddr_in6 ad6;
-    struct sockaddr_in ad4;
-    struct sockaddr *addr;
-    int res;
-
-    self = hev_malloc0 (sizeof (HevSocks5SessionTCP));
-    if (!self)
-        return NULL;
-
-    LOG_D ("%p socks5 session tcp new", self);
-
-    switch (pcb->local_ip.type) {
-    case IPADDR_TYPE_V4:
-        ad4.sin_family = AF_INET;
-        ad4.sin_port = htons (pcb->local_port);
-        memcpy (&ad4.sin_addr, &pcb->local_ip, 4);
-        addr = (struct sockaddr *)&ad4;
-        break;
-    case IPADDR_TYPE_V6:
-        ad6.sin6_family = AF_INET6;
-        ad6.sin6_port = htons (pcb->local_port);
-        memcpy (&ad6.sin6_addr, &pcb->local_ip, 16);
-        addr = (struct sockaddr *)&ad6;
-        break;
-    default:
-        hev_free (self);
-        return NULL;
+        siptr = &kptr->session;
+        siptr->splicer = hev_socks5_session_tcp_splice;
+        siptr->get_task = hev_socks5_session_tcp_get_task;
+        siptr->set_task = hev_socks5_session_tcp_set_task;
+        siptr->get_node = hev_socks5_session_tcp_get_node;
     }
 
-    res = hev_socks5_session_tcp_construct (self);
-    if (res < 0) {
-        hev_free (self);
-        return NULL;
-    }
-
-    tcp = hev_socks5_client_tcp_new_ip (addr);
-    if (!tcp) {
-        hev_free (self);
-        return NULL;
-    }
-
-    tcp_arg (pcb, self);
-    tcp_recv (pcb, tcp_recv_handler);
-    tcp_sent (pcb, tcp_sent_handler);
-    tcp_err (pcb, tcp_err_handler);
-
-    self->pcb = pcb;
-    self->mutex = mutex;
-    self->base.client = HEV_SOCKS5_CLIENT (tcp);
-
-    return self;
+    return okptr;
 }

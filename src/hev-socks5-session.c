@@ -7,51 +7,19 @@
  ============================================================================
  */
 
-#include <hev-memory-allocator.h>
+#include <string.h>
 
 #include "hev-logger.h"
 #include "hev-config.h"
 
+#include "hev-socks5-client.h"
+
 #include "hev-socks5-session.h"
-
-static HevSocks5SessionClass _klass = {
-    .name = "HevSocks5Session",
-    .finalizer = hev_socks5_session_destruct,
-};
-
-int
-hev_socks5_session_construct (HevSocks5Session *self)
-{
-    LOG_D ("%p socks5 session construct", self);
-
-    HEV_SOCKS5_SESSION (self)->klass = HEV_SOCKS5_SESSION_CLASS (&_klass);
-
-    return 0;
-}
-
-void
-hev_socks5_session_destruct (HevSocks5Session *self)
-{
-    LOG_D ("%p socks5 session destruct", self);
-
-    hev_socks5_unref (HEV_SOCKS5 (self->client));
-    hev_free (self);
-}
-
-void
-hev_socks5_session_destroy (HevSocks5Session *self)
-{
-    HevSocks5SessionClass *klass = HEV_SOCKS5_SESSION_GET_CLASS (self);
-
-    LOG_D ("%p socks5 session destroy", self);
-
-    klass->finalizer (self);
-}
 
 void
 hev_socks5_session_run (HevSocks5Session *self)
 {
-    HevSocks5SessionClass *klass;
+    HevSocks5SessionIface *iface;
     HevConfigServer *srv;
     int read_write_timeout;
     int connect_timeout;
@@ -63,37 +31,66 @@ hev_socks5_session_run (HevSocks5Session *self)
     connect_timeout = hev_config_get_misc_connect_timeout ();
     read_write_timeout = hev_config_get_misc_read_write_timeout ();
 
-    hev_socks5_set_timeout (HEV_SOCKS5 (self->client), connect_timeout);
+    hev_socks5_set_timeout (HEV_SOCKS5 (self), connect_timeout);
 
-    res = hev_socks5_client_connect (self->client, srv->addr, srv->port);
+    res = hev_socks5_client_connect (HEV_SOCKS5_CLIENT (self), srv->addr,
+                                     srv->port);
     if (res < 0) {
         LOG_E ("%p socks5 session connect", self);
         return;
     }
 
-    hev_socks5_set_timeout (HEV_SOCKS5 (self->client), read_write_timeout);
+    hev_socks5_set_timeout (HEV_SOCKS5 (self), read_write_timeout);
 
     if (srv->user && srv->pass) {
-        hev_socks5_set_auth_user_pass (HEV_SOCKS5 (self->client), srv->user,
-                                       srv->pass);
+        hev_socks5_set_auth_user_pass (HEV_SOCKS5 (self), srv->user, srv->pass);
         LOG_D ("%p socks5 client auth %s:%s", self, srv->user, srv->pass);
     }
 
-    res = hev_socks5_client_handshake (self->client);
+    res = hev_socks5_client_handshake (HEV_SOCKS5_CLIENT (self));
     if (res < 0) {
         LOG_E ("%p socks5 session handshake", self);
         return;
     }
 
-    klass = HEV_SOCKS5_SESSION_GET_CLASS (self);
-    klass->splicer (self);
+    iface = HEV_OBJECT_GET_IFACE (self, HEV_SOCKS5_SESSION_TYPE);
+    iface->splicer (self);
 }
 
 void
 hev_socks5_session_terminate (HevSocks5Session *self)
 {
+    HevSocks5SessionIface *iface;
+
     LOG_D ("%p socks5 session terminate", self);
 
-    hev_socks5_set_timeout (HEV_SOCKS5 (self->client), 0);
-    hev_task_wakeup (self->task);
+    iface = HEV_OBJECT_GET_IFACE (self, HEV_SOCKS5_SESSION_TYPE);
+    hev_socks5_set_timeout (HEV_SOCKS5 (self), 0);
+    hev_task_wakeup (iface->get_task (self));
+}
+
+void
+hev_socks5_session_set_task (HevSocks5Session *self, HevTask *task)
+{
+    HevSocks5SessionIface *iface;
+
+    iface = HEV_OBJECT_GET_IFACE (self, HEV_SOCKS5_SESSION_TYPE);
+    iface->set_task (self, task);
+}
+
+HevListNode *
+hev_socks5_session_get_node (HevSocks5Session *self)
+{
+    HevSocks5SessionIface *iface;
+
+    iface = HEV_OBJECT_GET_IFACE (self, HEV_SOCKS5_SESSION_TYPE);
+    return iface->get_node (self);
+}
+
+void *
+hev_socks5_session_iface (void)
+{
+    static char type;
+
+    return &type;
 }

@@ -10,17 +10,22 @@
 #ifndef __HEV_SOCKS5_SESSION_UDP_H__
 #define __HEV_SOCKS5_SESSION_UDP_H__
 
+#include <hev-socks5-client-udp.h>
+
 #include "hev-socks5-session.h"
 
 #define HEV_SOCKS5_SESSION_UDP(p) ((HevSocks5SessionUDP *)p)
 #define HEV_SOCKS5_SESSION_UDP_CLASS(p) ((HevSocks5SessionUDPClass *)p)
+#define HEV_SOCKS5_SESSION_UDP_TYPE (hev_socks5_session_udp_class ())
 
 typedef struct _HevSocks5SessionUDP HevSocks5SessionUDP;
 typedef struct _HevSocks5SessionUDPClass HevSocks5SessionUDPClass;
 
 struct _HevSocks5SessionUDP
 {
-    HevSocks5Session base;
+    HevSocks5ClientUDP base;
+
+    HevSocks5SessionData data;
 
     HevList frame_list;
     struct udp_pcb *pcb;
@@ -30,11 +35,15 @@ struct _HevSocks5SessionUDP
 
 struct _HevSocks5SessionUDPClass
 {
-    HevSocks5SessionClass base;
+    HevSocks5ClientUDPClass base;
+
+    HevSocks5SessionIface session;
 };
 
-int hev_socks5_session_udp_construct (HevSocks5SessionUDP *self);
-void hev_socks5_session_udp_destruct (HevSocks5Session *base);
+HevObjectClass *hev_socks5_session_udp_class (void);
+
+int hev_socks5_session_udp_construct (HevSocks5SessionUDP *self,
+                                      struct udp_pcb *pcb, HevTaskMutex *mutex);
 
 HevSocks5SessionUDP *hev_socks5_session_udp_new (struct udp_pcb *pcb,
                                                  HevTaskMutex *mutex);
