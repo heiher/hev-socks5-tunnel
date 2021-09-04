@@ -60,7 +60,8 @@ tcp_splice_f (HevSocks5SessionTCP *self)
     } else {
         hev_task_mutex_lock (self->mutex);
         self->queue = pbuf_free_header (self->queue, s);
-        tcp_recved (self->pcb, s);
+        if (self->pcb)
+            tcp_recved (self->pcb, s);
         hev_task_mutex_unlock (self->mutex);
     }
 
