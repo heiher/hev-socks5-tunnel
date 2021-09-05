@@ -150,10 +150,10 @@ hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self)
     hev_task_mutex_lock (self->mutex);
     err = udp_sendfrom (self->pcb, buf, &addr, port);
     hev_task_mutex_unlock (self->mutex);
+    pbuf_free (buf);
 
     if (err != ERR_OK) {
         LOG_E ("%p socks5 session udp fwd b send", self);
-        pbuf_free (buf);
         return -1;
     }
 
