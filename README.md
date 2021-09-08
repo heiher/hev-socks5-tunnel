@@ -52,6 +52,7 @@ socks5:
   port: 1080
   # Socks5 server address (ipv4/ipv6)
   address: 127.0.0.1
+  # Socks5 server username
 # username: 'username'
   # Socks5 server password
 # password: 'password'
@@ -87,8 +88,8 @@ sudo ip route add default dev tun0 metric 20
 sudo ip -6 route add default dev tun0 metric 20
 ```
 
-## Authors
-* **Heiher** - https://hev.cc
+## Contributors
+* **hev** - https://hev.cc
 
 ## License
 LGPL
