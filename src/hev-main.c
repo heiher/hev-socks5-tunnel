@@ -109,33 +109,37 @@ main (int argc, char *argv[])
     if (argc > 2)
         tun_fd = strtol (argv[2], NULL, 10);
 
-    res = hev_config_init (argv[1]);
+    res = hev_task_system_init ();
     if (res < 0)
         return -2;
+
+    res = hev_config_init (argv[1]);
+    if (res < 0)
+        return -3;
 
     log_file = hev_config_get_misc_log_file ();
     log_level = hev_config_get_misc_log_level ();
 
     res = hev_logger_init (log_level, log_file);
     if (res < 0)
-        return -3;
+        return -4;
 
     res = hev_socks5_logger_init (log_level, log_file);
     if (res < 0)
-        return -4;
+        return -5;
 
     nofile = hev_config_get_misc_limit_nofile ();
     res = set_limit_nofile (nofile);
     if (res < 0) {
         LOG_E ("set limit nofile");
-        return -5;
+        return -6;
     }
 
     lwip_init ();
 
     res = hev_socks5_tunnel_init (tun_fd);
     if (res < 0)
-        return -6;
+        return -7;
 
     pid_file = hev_config_get_misc_pid_file ();
     if (pid_file)
@@ -148,6 +152,8 @@ main (int argc, char *argv[])
     hev_logger_fini ();
     hev_config_fini ();
     lwip_fini ();
+
+    hev_task_system_fini ();
 
     return 0;
 }

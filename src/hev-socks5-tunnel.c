@@ -66,14 +66,9 @@ hev_socks5_tunnel_init (int tunfd)
 {
     LOG_D ("socks5 tunnel init");
 
-    if (hev_task_system_init () < 0) {
-        LOG_E ("socks5 tunnel task system");
-        goto exit;
-    }
-
     if (tunfd < 0) {
         if (tunnel_init () < 0)
-            goto exit_free_sys;
+            goto exit;
     } else {
         tun_fd = tunfd;
     }
@@ -145,8 +140,6 @@ exit_close_event:
     close (event_fds[1]);
 exit_close_tun:
     close (tun_fd);
-exit_free_sys:
-    hev_task_system_fini ();
 exit:
     return -1;
 }
@@ -167,8 +160,6 @@ hev_socks5_tunnel_fini (void)
     close (event_fds[0]);
     close (event_fds[1]);
     close (tun_fd);
-
-    hev_task_system_fini ();
 }
 
 int
