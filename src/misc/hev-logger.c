@@ -48,7 +48,7 @@ hev_logger_fini (void)
 int
 hev_logger_enabled (HevLoggerLevel level)
 {
-    if (fd >= 0 || level >= req_level)
+    if (fd >= 0 && level >= req_level)
         return 1;
 
     return 0;
