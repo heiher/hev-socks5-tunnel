@@ -338,9 +338,12 @@ hev_socks5_session_udp_destruct (HevObject *base)
 static void *
 hev_socks5_session_udp_iface (HevObject *base, void *type)
 {
-    HevSocks5SessionUDPClass *klass = HEV_OBJECT_GET_CLASS (base);
+    if (type == HEV_SOCKS5_SESSION_TYPE) {
+        HevSocks5SessionUDPClass *klass = HEV_OBJECT_GET_CLASS (base);
+        return &klass->session;
+    }
 
-    return &klass->session;
+    return HEV_SOCKS5_CLIENT_UDP_TYPE->iface (base, type);
 }
 
 HevObjectClass *
