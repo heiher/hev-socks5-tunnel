@@ -195,7 +195,7 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
         if (res_b >= 0)
             res_b = tcp_splice_b (self, buffer);
 
-        if (res_f < 0 && res_b < 0)
+        if (res_f < 0 || res_b < 0)
             break;
         else if (res_f > 0 || res_b > 0)
             type = HEV_TASK_YIELD;
