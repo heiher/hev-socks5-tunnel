@@ -92,4 +92,4 @@ sudo ip -6 route add default dev tun0 metric 20
 * **hev** - https://hev.cc
 
 ## License
-LGPL
+MIT
