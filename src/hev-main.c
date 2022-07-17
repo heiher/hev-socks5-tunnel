@@ -51,7 +51,7 @@ run_as_daemon (const char *pid_file)
     }
 #pragma GCC diagnostic pop
 
-    fprintf (fp, "%u", getpid ());
+    fprintf (fp, "%u\n", getpid ());
     fclose (fp);
 }
 
