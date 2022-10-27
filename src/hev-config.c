@@ -15,7 +15,7 @@
 #include "hev-config.h"
 
 static char tun_name[64];
-static unsigned int tun_mtu = 8192;
+static unsigned int tun_mtu = 4096;
 
 static char tun_ipv4_address[16];
 static char tun_ipv4_gateway[16];
