@@ -12,7 +12,7 @@
 
 #define MAJOR_VERSION (2)
 #define MINOR_VERSION (1)
-#define MICRO_VERSION (7)
+#define MICRO_VERSION (8)
 
 static const int TCP_BUF_SIZE = 4096;
 static const int UDP_BUF_SIZE = 1500;
