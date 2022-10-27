@@ -124,7 +124,7 @@ tcp_recv_handler (void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
     if (!self->queue) {
         self->queue = p;
     } else {
-        if (self->queue->tot_len > TCP_WND)
+        if (self->queue->tot_len > TCP_WND_MAX (pcb))
             return ERR_WOULDBLOCK;
         pbuf_cat (self->queue, p);
     }
