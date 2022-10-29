@@ -1,0 +1,196 @@
+name: Release
+
+on:
+  push:
+    tags:
+    - '*'
+
+env:
+  OPENWRT_SDK_URL: https://downloads.openwrt.org/releases/21.02.3/targets
+  OPENWRT_SDK_X86_32: x86/generic/openwrt-sdk-21.02.3-x86-generic_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+  OPENWRT_SDK_X86_64: x86/64/openwrt-sdk-21.02.3-x86-64_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+  OPENWRT_SDK_ARM_32: armvirt/32/openwrt-sdk-21.02.3-armvirt-32_gcc-8.4.0_musl_eabi.Linux-x86_64.tar.xz
+  OPENWRT_SDK_ARM_64: armvirt/64/openwrt-sdk-21.02.3-armvirt-64_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+  OPENWRT_SDK_MIPSEL: ramips/mt7621/openwrt-sdk-21.02.3-ramips-mt7621_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+  OPENWRT_SDK_MIPS: realtek/generic/openwrt-sdk-21.02.3-realtek-generic_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+
+jobs:
+  build:
+    name: Build and release
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Init
+        run: |
+          sudo apt -qq update
+          sudo apt -qq install -y wget git build-essential \
+            crossbuild-essential-arm64 crossbuild-essential-armhf \
+            crossbuild-essential-i386 crossbuild-essential-riscv64
+      - name: Build Linux
+        run: |
+          make clean
+          make CROSS_PREFIX=x86_64-linux-gnu- -j
+          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-amd64
+          make clean
+          make CROSS_PREFIX=i686-linux-gnu- -j
+          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-i686
+          make clean
+          make CROSS_PREFIX=aarch64-linux-gnu- -j
+          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-arm64
+          make clean
+          make CROSS_PREFIX=arm-linux-gnueabihf- -j
+          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-armhf
+          make clean
+          make CROSS_PREFIX=riscv64-linux-gnu- -j
+          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-riscv64
+      - name: Build OpenWrt
+        run: |
+          wget -q ${{ env.OPENWRT_SDK_URL }}/${{ env.OPENWRT_SDK_X86_32 }}
+          tar xf $(basename ${{ env.OPENWRT_SDK_X86_32 }})
+          export STAGING_DIR=$(pwd)/$(basename ${{ env.OPENWRT_SDK_X86_32 }} .tar.xz)/staging_dir
+          make clean
+          make CROSS_PREFIX=${STAGING_DIR}/toolchain-i386_pentium4_gcc-8.4.0_musl/bin/i486-openwrt-linux- -j
+          cp bin/hev-socks5-tunnel hev-socks5-tunnel-openwrt-i486
+          wget -q ${{ env.OPENWRT_SDK_URL }}/${{ env.OPENWRT_SDK_X86_64 }}
+          tar xf $(basename ${{ env.OPENWRT_SDK_X86_64 }})
+          export STAGING_DIR=$(pwd)/$(basename ${{ env.OPENWRT_SDK_X86_64 }} .tar.xz)/staging_dir
+          make clean
+          make CROSS_PREFIX=${STAGING_DIR}/toolchain-x86_64_gcc-8.4.0_musl/bin/x86_64-openwrt-linux- -j
+          cp bin/hev-socks5-tunnel hev-socks5-tunnel-openwrt-amd64
+          wget -q ${{ env.OPENWRT_SDK_URL }}/${{ env.OPENWRT_SDK_ARM_32 }}
+          tar xf $(basename ${{ env.OPENWRT_SDK_ARM_32 }})
+          export STAGING_DIR=$(pwd)/$(basename ${{ env.OPENWRT_SDK_ARM_32 }} .tar.xz)/staging_dir
+          make clean
+          make CROSS_PREFIX=${STAGING_DIR}/toolchain-arm_cortex-a15+neon-vfpv4_gcc-8.4.0_musl_eabi/bin/arm-openwrt-linux- -j
+          cp bin/hev-socks5-tunnel hev-socks5-tunnel-openwrt-armhf
+          wget -q ${{ env.OPENWRT_SDK_URL }}/${{ env.OPENWRT_SDK_ARM_64 }}
+          tar xf $(basename ${{ env.OPENWRT_SDK_ARM_64 }})
+          export STAGING_DIR=$(pwd)/$(basename ${{ env.OPENWRT_SDK_ARM_64 }} .tar.xz)/staging_dir
+          make clean
+          make CROSS_PREFIX=${STAGING_DIR}/toolchain-aarch64_cortex-a53_gcc-8.4.0_musl/bin/aarch64-openwrt-linux- -j
+          cp bin/hev-socks5-tunnel hev-socks5-tunnel-openwrt-arm64
+          wget -q ${{ env.OPENWRT_SDK_URL }}/${{ env.OPENWRT_SDK_MIPSEL }}
+          tar xf $(basename ${{ env.OPENWRT_SDK_MIPSEL }})
+          export STAGING_DIR=$(pwd)/$(basename ${{ env.OPENWRT_SDK_MIPSEL }} .tar.xz)/staging_dir
+          make clean
+          make CROSS_PREFIX=${STAGING_DIR}/toolchain-mipsel_24kc_gcc-8.4.0_musl/bin/mipsel-openwrt-linux- -j
+          cp bin/hev-socks5-tunnel hev-socks5-tunnel-openwrt-mipsel
+          wget -q ${{ env.OPENWRT_SDK_URL }}/${{ env.OPENWRT_SDK_MIPS }}
+          tar xf $(basename ${{ env.OPENWRT_SDK_MIPS }})
+          export STAGING_DIR=$(pwd)/$(basename ${{ env.OPENWRT_SDK_MIPS }} .tar.xz)/staging_dir
+          make clean
+          make CROSS_PREFIX=${STAGING_DIR}/toolchain-mips_4kec_gcc-8.4.0_musl/bin/mips-openwrt-linux- -j
+          cp bin/hev-socks5-tunnel hev-socks5-tunnel-openwrt-mips
+      - name: Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload linux-i686
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./hev-socks5-tunnel-linux-i686
+          asset_name: hev-socks5-tunnel-linux-i686
+          asset_content_type: application/octet-stream
+      - name: Upload linux-amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./hev-socks5-tunnel-linux-amd64
+          asset_name: hev-socks5-tunnel-linux-amd64
+          asset_content_type: application/octet-stream
+      - name: Upload linux-armhf
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./hev-socks5-tunnel-linux-armhf
+          asset_name: hev-socks5-tunnel-linux-armhf
+          asset_content_type: application/octet-stream
+      - name: Upload linux-arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./hev-socks5-tunnel-linux-arm64
+          asset_name: hev-socks5-tunnel-linux-arm64
+          asset_content_type: application/octet-stream
+      - name: Upload linux-riscv64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./hev-socks5-tunnel-linux-riscv64
+          asset_name: hev-socks5-tunnel-linux-riscv64
+          asset_content_type: application/octet-stream
+      - name: Upload openwrt-i486
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./hev-socks5-tunnel-openwrt-i486
+          asset_name: hev-socks5-tunnel-openwrt-i486
+          asset_content_type: application/octet-stream
+      - name: Upload openwrt-amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./hev-socks5-tunnel-openwrt-amd64
+          asset_name: hev-socks5-tunnel-openwrt-amd64
+          asset_content_type: application/octet-stream
+      - name: Upload openwrt-armhf
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./hev-socks5-tunnel-openwrt-armhf
+          asset_name: hev-socks5-tunnel-openwrt-armhf
+          asset_content_type: application/octet-stream
+      - name: Upload openwrt-arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./hev-socks5-tunnel-openwrt-arm64
+          asset_name: hev-socks5-tunnel-openwrt-arm64
+          asset_content_type: application/octet-stream
+      - name: Upload openwrt-mipsel
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./hev-socks5-tunnel-openwrt-mipsel
+          asset_name: hev-socks5-tunnel-openwrt-mipsel
+          asset_content_type: application/octet-stream
+      - name: Upload openwrt-mips
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./hev-socks5-tunnel-openwrt-mips
+          asset_name: hev-socks5-tunnel-openwrt-mips
+          asset_content_type: application/octet-stream
