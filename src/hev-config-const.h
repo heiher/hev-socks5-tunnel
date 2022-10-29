@@ -14,7 +14,7 @@
 #define MINOR_VERSION (1)
 #define MICRO_VERSION (8)
 
-static const int TCP_BUF_SIZE = 4096;
+static const int TCP_BUF_SIZE = 8192;
 static const int UDP_BUF_SIZE = 1500;
 static const int UDP_POOL_SIZE = 512;
 
