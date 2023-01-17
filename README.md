@@ -4,10 +4,25 @@
 
 A tunnel over Socks5 proxy.
 
-**Features**
+## Features
+
 * IPv4/IPv6. (dual stack)
 * Redirect TCP connections.
 * Redirect UDP packets. (UDP over TCP, works with [hev-socks5-server](https://gitlab.com/hev/hev-socks5-server) only)
+
+## Benchmarks
+
+See [here](https://github.com/heiher/hev-socks5-tunnel/wiki/Benchmarks) for more details.
+
+### Speed
+
+![](https://github.com/heiher/hev-socks5-tunnel/wiki/res/upload-speed.png)
+![](https://github.com/heiher/hev-socks5-tunnel/wiki/res/download-speed.png)
+
+### CPU usage
+
+![](https://github.com/heiher/hev-socks5-tunnel/wiki/res/upload-cpu.png)
+![](https://github.com/heiher/hev-socks5-tunnel/wiki/res/download-cpu.png)
 
 ## How to Build
 
