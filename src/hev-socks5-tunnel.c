@@ -485,7 +485,10 @@ lwip_timer_task_entry (void *data)
     LOG_D ("socks5 tunnel timer task run");
 
     for (i = 1;; i++) {
-        hev_task_sleep (TCP_TMR_INTERVAL);
+        if (hev_list_first (&session_set))
+            hev_task_sleep (TCP_TMR_INTERVAL);
+        else
+            hev_task_yield (HEV_TASK_WAITIO);
         if (!run)
             break;
 
@@ -544,6 +547,7 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
     node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (tcp));
     hev_list_add_tail (&session_set, node);
     hev_task_run (task, hev_socks5_session_task_entry, tcp);
+    hev_task_wakeup (task_lwip_timer);
 
     return ERR_OK;
 }
@@ -574,4 +578,5 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
     node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (udp));
     hev_list_add_tail (&session_set, node);
     hev_task_run (task, hev_socks5_session_task_entry, udp);
+    hev_task_wakeup (task_lwip_timer);
 }
