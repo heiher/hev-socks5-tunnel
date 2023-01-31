@@ -91,9 +91,6 @@ tcp_splice_b (HevSocks5SessionTCP *self, uint8_t *buffer)
         return 0;
     }
 
-    if (size > TCP_BUF_SIZE)
-        size = TCP_BUF_SIZE;
-
     s = read (HEV_SOCKS5 (self)->fd, buffer, size);
     if (0 >= s) {
         if ((0 > s) && (EAGAIN == errno))
@@ -185,7 +182,7 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
 
     LOG_D ("%p socks5 session tcp splice", self);
 
-    buffer = hev_malloc (TCP_BUF_SIZE);
+    buffer = hev_malloc (tcp_sndbuf (self->pcb));
     if (!buffer)
         return;
 
