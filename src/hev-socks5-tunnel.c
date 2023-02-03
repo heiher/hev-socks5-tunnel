@@ -2,7 +2,7 @@
  ============================================================================
  Name        : hev-socks5-tunnel.c
  Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 - 2021 hev
+ Copyright   : Copyright (c) 2019 - 2023 hev
  Description : Socks5 Tunnel
  ============================================================================
  */
@@ -39,6 +39,7 @@
 
 static int run;
 static int tun_fd;
+static int tun_fd_close;
 static int event_fds[2];
 
 static struct netif netif;
@@ -64,21 +65,26 @@ static void udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
 int
 hev_socks5_tunnel_init (int tunfd)
 {
+    int res;
+
     LOG_D ("socks5 tunnel init");
 
     if (tunfd < 0) {
-        if (tunnel_init () < 0)
+        res = tunnel_init ();
+        if (res < 0)
             goto exit;
     } else {
         tun_fd = tunfd;
     }
 
-    if (hev_task_io_pipe_pipe (event_fds) < 0) {
+    res = hev_task_io_pipe_pipe (event_fds);
+    if (res < 0) {
         LOG_E ("socks5 tunnel pipe");
         goto exit_close_tun;
     }
 
-    if (gateway_init () < 0)
+    res = gateway_init ();
+    if (res < 0)
         goto exit_close_event;
 
     hev_task_mutex_init (&mutex);
@@ -89,7 +95,8 @@ hev_socks5_tunnel_init (int tunfd)
         goto exit_free_gateway;
     }
 
-    if (hev_task_add_fd (task_event, event_fds[0], POLLIN) < 0) {
+    res = hev_task_add_fd (task_event, event_fds[0], POLLIN);
+    if (res < 0) {
         LOG_E ("socks5 tunnel add eventfd");
         goto exit_free_task_event;
     }
@@ -101,7 +108,8 @@ hev_socks5_tunnel_init (int tunfd)
     }
     hev_task_set_priority (task_lwip_io, HEV_TASK_PRIORITY_REALTIME);
 
-    if (hev_task_add_fd (task_lwip_io, tun_fd, POLLIN | POLLOUT) < 0) {
+    res = hev_task_add_fd (task_lwip_io, tun_fd, POLLIN | POLLOUT);
+    if (res < 0) {
         LOG_E ("socks5 tunnel add tunfd");
         goto exit_free_task_lwip_io;
     }
@@ -139,7 +147,8 @@ exit_close_event:
     close (event_fds[0]);
     close (event_fds[1]);
 exit_close_tun:
-    close (tun_fd);
+    if (tun_fd_close)
+        close (tun_fd);
 exit:
     return -1;
 }
@@ -159,7 +168,8 @@ hev_socks5_tunnel_fini (void)
 
     close (event_fds[0]);
     close (event_fds[1]);
-    close (tun_fd);
+    if (tun_fd_close)
+        close (tun_fd);
 }
 
 int
@@ -190,15 +200,17 @@ hev_socks5_tunnel_stop (void)
     if (event_fds[1] == -1)
         return;
 
-    if (write (event_fds[1], &val, sizeof (val)) == -1)
+    val = write (event_fds[1], &val, sizeof (val));
+    if (val < 0)
         LOG_E ("socks5 tunnel write event");
 }
 
 static int
 tunnel_init (void)
 {
-    const char *name, *ipv4, *ipv6;
     unsigned int mtu, ipv4_prefix, ipv6_prefix;
+    const char *name, *ipv4, *ipv6;
+    int res;
 
     name = hev_config_get_tunnel_name ();
     mtu = hev_config_get_tunnel_mtu ();
@@ -213,28 +225,35 @@ tunnel_init (void)
         goto exit;
     }
 
-    if (hev_tunnel_set_mtu (mtu) < 0) {
+    res = hev_tunnel_set_mtu (mtu);
+    if (res < 0) {
         LOG_E ("socks5 tunnel mtu");
-        goto exit;
+        goto exit_close;
     }
 
-    if (ipv4 && (hev_tunnel_set_ipv4 (ipv4, ipv4_prefix) < 0)) {
+    res = hev_tunnel_set_ipv4 (ipv4, ipv4_prefix);
+    if (ipv4 && (res < 0)) {
         LOG_E ("socks5 tunnel ipv4");
-        goto exit;
+        goto exit_close;
     }
 
-    if (ipv6 && (hev_tunnel_set_ipv6 (ipv6, ipv6_prefix) < 0)) {
+    res = hev_tunnel_set_ipv6 (ipv6, ipv6_prefix);
+    if (ipv6 && (res < 0)) {
         LOG_E ("socks5 tunnel ipv6");
-        goto exit;
+        goto exit_close;
     }
 
-    if (hev_tunnel_set_state (1) < 0) {
+    res = hev_tunnel_set_state (1);
+    if (res < 0) {
         LOG_E ("socks5 tunnel state");
-        goto exit;
+        goto exit_close;
     }
 
+    tun_fd_close = 1;
     return 0;
 
+exit_close:
+    close (tun_fd);
 exit:
     return -1;
 }
