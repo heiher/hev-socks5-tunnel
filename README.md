@@ -2,13 +2,14 @@
 
 [![status](https://gitlab.com/hev/hev-socks5-tunnel/badges/master/pipeline.svg)](https://gitlab.com/hev/hev-socks5-tunnel/commits/master)
 
-A tunnel over Socks5 proxy.
+A tunnel over Socks5 proxy (tun2socks) for Unix.
 
 ## Features
 
 * IPv4/IPv6. (dual stack)
 * Redirect TCP connections.
 * Redirect UDP packets. (UDP over TCP, works with [hev-socks5-server](https://gitlab.com/hev/hev-socks5-server) only)
+* Linux/MacOS.
 
 ## Benchmarks
 
@@ -26,7 +27,7 @@ See [here](https://github.com/heiher/hev-socks5-tunnel/wiki/Benchmarks) for more
 
 ## How to Build
 
-**Linux**:
+**Unix**:
 ```bash
 git clone --recursive git://github.com/heiher/hev-socks5-tunnel
 cd hev-socks5-tunnel
