@@ -31,7 +31,7 @@
 #include "hev-config.h"
 #include "hev-logger.h"
 #include "hev-compiler.h"
-#include "hev-tunnel-linux.h"
+#include "hev-tunnel.h"
 #include "hev-socks5-session-tcp.h"
 #include "hev-socks5-session-udp.h"
 
@@ -197,7 +197,6 @@ hev_socks5_tunnel_stop (void)
 static int
 tunnel_init (void)
 {
-    HevTunnelLinux *tun;
     const char *name, *ipv4, *ipv6;
     unsigned int mtu, ipv4_prefix, ipv6_prefix;
 
@@ -208,43 +207,34 @@ tunnel_init (void)
     ipv6 = hev_config_get_tunnel_ipv6_address ();
     ipv6_prefix = hev_config_get_tunnel_ipv6_prefix ();
 
-    tun = hev_tunnel_linux_new (name);
-    if (!tun) {
-        LOG_E ("socks5 tunnel new");
+    tun_fd = hev_tunnel_open (name);
+    if (tun_fd < 0) {
+        LOG_E ("socks5 tunnel open");
         goto exit;
     }
 
-    if (hev_tunnel_linux_set_mtu (tun, mtu) < 0) {
+    if (hev_tunnel_set_mtu (mtu) < 0) {
         LOG_E ("socks5 tunnel mtu");
-        goto exit_free;
+        goto exit;
     }
 
-    if (ipv4 && (hev_tunnel_linux_set_ipv4 (tun, ipv4, ipv4_prefix) < 0)) {
+    if (ipv4 && (hev_tunnel_set_ipv4 (ipv4, ipv4_prefix) < 0)) {
         LOG_E ("socks5 tunnel ipv4");
-        goto exit_free;
+        goto exit;
     }
 
-    if (ipv6 && (hev_tunnel_linux_set_ipv6 (tun, ipv6, ipv6_prefix) < 0)) {
+    if (ipv6 && (hev_tunnel_set_ipv6 (ipv6, ipv6_prefix) < 0)) {
         LOG_E ("socks5 tunnel ipv6");
-        goto exit_free;
+        goto exit;
     }
 
-    if (hev_tunnel_linux_set_state (tun, 1) < 0) {
+    if (hev_tunnel_set_state (1) < 0) {
         LOG_E ("socks5 tunnel state");
-        goto exit_free;
+        goto exit;
     }
 
-    tun_fd = dup (hev_tunnel_linux_get_fd (tun));
-    if (tun_fd < 0) {
-        LOG_E ("socks5 tunnel dup fd");
-        goto exit_free;
-    }
-
-    hev_tunnel_linux_destroy (tun);
     return 0;
 
-exit_free:
-    hev_tunnel_linux_destroy (tun);
 exit:
     return -1;
 }
@@ -266,16 +256,19 @@ netif_output_handler (struct netif *netif, struct pbuf *p)
         struct iovec iov[512];
         int i;
 
-        for (i = 0; (i < 512) && p; p = p->next) {
+        iov[0].iov_base = NULL;
+        iov[0].iov_len = 0;
+
+        for (i = 1; (i < 512) && p; p = p->next) {
             iov[i].iov_base = p->payload;
             iov[i].iov_len = p->len;
             i++;
         }
 
-        s = hev_task_io_writev (tun_fd, iov, i, task_io_yielder, NULL);
+        s = hev_tunnel_writev (tun_fd, iov, i, task_io_yielder, NULL);
     } else {
-        s = hev_task_io_write (tun_fd, p->payload, p->len, task_io_yielder,
-                               NULL);
+        s = hev_tunnel_write (tun_fd, p->payload, p->len, task_io_yielder,
+                              NULL);
     }
 
     if (s <= 0) {
@@ -452,16 +445,19 @@ lwip_io_task_entry (void *data)
             struct pbuf *p;
             int i;
 
-            for (i = 0, p = buf; (i < 512) && p; p = p->next) {
+            iov[0].iov_base = NULL;
+            iov[0].iov_len = 0;
+
+            for (i = 1, p = buf; (i < 512) && p; p = p->next) {
                 iov[i].iov_base = p->payload;
                 iov[i].iov_len = p->len;
                 i++;
             }
 
-            s = hev_task_io_readv (tun_fd, iov, i, task_io_yielder, NULL);
+            s = hev_tunnel_readv (tun_fd, iov, i, task_io_yielder, NULL);
         } else {
-            s = hev_task_io_read (tun_fd, buf->payload, buf->len,
-                                  task_io_yielder, NULL);
+            s = hev_tunnel_read (tun_fd, buf->payload, buf->len,
+                                 task_io_yielder, NULL);
         }
 
         if (s <= 0) {
