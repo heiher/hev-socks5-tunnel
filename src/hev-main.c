@@ -1,8 +1,8 @@
 /*
  ============================================================================
  Name        : hev-main.c
- Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 - 2021 hev
+ Author      : hev <r@hev.cc>
+ Copyright   : Copyright (c) 2019 - 2023 hev
  Description : Main
  ============================================================================
  */
@@ -12,8 +12,8 @@
 #include <unistd.h>
 #include <sys/resource.h>
 
-#include "lwip/init.h"
-#include "lwip/priv/tcp_priv.h"
+#include <lwip/init.h>
+#include <lwip/priv/tcp_priv.h>
 
 #include <hev-task.h>
 #include <hev-task-system.h>
