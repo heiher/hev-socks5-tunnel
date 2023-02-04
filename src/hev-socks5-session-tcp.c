@@ -1,8 +1,8 @@
 /*
  ============================================================================
  Name        : hev-socks5-session-tcp.c
- Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2017 - 2021 hev
+ Author      : hev <r@hev.cc>
+ Copyright   : Copyright (c) 2017 - 2023 hev
  Description : Socks5 Session TCP
  ============================================================================
  */
@@ -29,43 +29,33 @@
 static int
 tcp_splice_f (HevSocks5SessionTCP *self)
 {
+    struct iovec iov[64];
+    struct pbuf *p;
     ssize_t s;
-    int fd;
+    int i;
 
     if (!self->queue)
         return 0;
 
-    fd = HEV_SOCKS5 (self)->fd;
-
-    if (self->queue->next) {
-        struct pbuf *p = self->queue;
-        struct iovec iov[64];
-        int i;
-
-        for (i = 0; p && (i < 64); p = p->next) {
-            iov[i].iov_base = p->payload;
-            iov[i].iov_len = p->len;
-            i++;
-        }
-
-        s = writev (fd, iov, i);
-    } else {
-        s = write (fd, self->queue->payload, self->queue->len);
+    for (p = self->queue, i = 0; p && (i < 64); p = p->next, i++) {
+        iov[i].iov_base = p->payload;
+        iov[i].iov_len = p->len;
     }
 
+    s = writev (HEV_SOCKS5 (self)->fd, iov, i);
     if (0 >= s) {
         if ((0 > s) && (EAGAIN == errno))
             return 0;
         return -1;
-    } else {
-        hev_task_mutex_lock (self->mutex);
-        self->queue = pbuf_free_header (self->queue, s);
-        if (self->pcb)
-            tcp_recved (self->pcb, s);
-        hev_task_mutex_unlock (self->mutex);
-        if (!self->queue)
-            return 0;
     }
+
+    hev_task_mutex_lock (self->mutex);
+    self->queue = pbuf_free_header (self->queue, s);
+    if (self->pcb)
+        tcp_recved (self->pcb, s);
+    hev_task_mutex_unlock (self->mutex);
+    if (!self->queue)
+        return 0;
 
     return 1;
 }
