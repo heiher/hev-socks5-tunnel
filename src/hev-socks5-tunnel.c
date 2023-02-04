@@ -231,16 +231,20 @@ tunnel_init (void)
         goto exit_close;
     }
 
-    res = hev_tunnel_set_ipv4 (ipv4, ipv4_prefix);
-    if (ipv4 && (res < 0)) {
-        LOG_E ("socks5 tunnel ipv4");
-        goto exit_close;
+    if (ipv4) {
+        res = hev_tunnel_set_ipv4 (ipv4, ipv4_prefix);
+        if (res < 0) {
+            LOG_E ("socks5 tunnel ipv4");
+            goto exit_close;
+        }
     }
 
-    res = hev_tunnel_set_ipv6 (ipv6, ipv6_prefix);
-    if (ipv6 && (res < 0)) {
-        LOG_E ("socks5 tunnel ipv6");
-        goto exit_close;
+    if (ipv6) {
+        res = hev_tunnel_set_ipv6 (ipv6, ipv6_prefix);
+        if (res < 0) {
+            LOG_E ("socks5 tunnel ipv6");
+            goto exit_close;
+        }
     }
 
     res = hev_tunnel_set_state (1);
