@@ -42,7 +42,7 @@ tcp_splice_f (HevSocks5SessionTCP *self)
         struct iovec iov[64];
         int i;
 
-        for (i = 0; (i < 64) && p; p = p->next) {
+        for (i = 0; p && (i < 64); p = p->next) {
             iov[i].iov_base = p->payload;
             iov[i].iov_len = p->len;
             i++;
