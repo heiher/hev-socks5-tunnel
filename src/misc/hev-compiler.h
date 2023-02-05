@@ -1,8 +1,8 @@
 /*
  ============================================================================
  Name        : hev-compiler.h
- Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 everyone.
+ Author      : hev <r@hev.cc>
+ Copyright   : Copyright (c) 2019 - 2023 hev
  Description : Compiler
  ============================================================================
  */
@@ -27,7 +27,7 @@ extern "C" {
 #define EXPORT_SYMBOL __attribute__ ((visibility ("default")))
 #endif
 
-#define barrier() __asm__ __volatile__("" : : : "memory")
+#define barrier() __asm__ __volatile__ ("" : : : "memory")
 
 static inline void
 __read_once_size (void *dst, const volatile void *src, int size)
@@ -86,7 +86,7 @@ __write_once_size (volatile void *dst, const void *src, int size)
         {                                              \
             typeof (x) __val;                          \
             char __c[1];                               \
-        } __u = { .__val = (typeof (x)) (val) };       \
+        } __u = { .__val = (typeof (x))(val) };        \
         __write_once_size (&(x), __u.__c, sizeof (x)); \
         __u.__val;                                     \
     })
