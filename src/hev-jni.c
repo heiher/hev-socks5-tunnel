@@ -1,8 +1,8 @@
 /*
  ============================================================================
  Name        : hev-jni.c
- Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 - 2020 Everyone.
+ Author      : hev <r@hev.cc>
+ Copyright   : Copyright (c) 2019 - 2023 hev
  Description : Jave Native Interface
  ============================================================================
  */
@@ -35,7 +35,7 @@ static pthread_t work_thread;
 static pthread_key_t current_jni_env;
 
 static void native_start_service (JNIEnv *env, jobject thiz, jstring conig_path,
-                                  jint port);
+                                  jint fd);
 static void native_stop_service (JNIEnv *env, jobject thiz);
 
 static JNINativeMethod native_methods[] = {
@@ -88,7 +88,7 @@ thread_handler (void *data)
 }
 
 static void
-native_start_service (JNIEnv *env, jobject thiz, jstring config_path, jint port)
+native_start_service (JNIEnv *env, jobject thiz, jstring config_path, jint fd)
 {
     char **argv;
     const jbyte *bytes;
@@ -100,7 +100,7 @@ native_start_service (JNIEnv *env, jobject thiz, jstring config_path, jint port)
     (*env)->ReleaseStringUTFChars (env, config_path, (const char *)bytes);
 
     argv[2] = malloc (16);
-    snprintf (argv[2], 16, "%d", port);
+    snprintf (argv[2], 16, "%d", fd);
 
     pthread_create (&work_thread, NULL, thread_handler, argv);
 }
