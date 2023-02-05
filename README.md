@@ -29,7 +29,7 @@ See [here](https://github.com/heiher/hev-socks5-tunnel/wiki/Benchmarks) for more
 
 **Unix**:
 ```bash
-git clone --recursive git://github.com/heiher/hev-socks5-tunnel
+git clone --recursive https://github.com/heiher/hev-socks5-tunnel
 cd hev-socks5-tunnel
 make
 ```
@@ -38,7 +38,7 @@ make
 ```bash
 mkdir hev-socks5-tunnel
 cd hev-socks5-tunnel
-git clone --recursive git://github.com/heiher/hev-socks5-tunnel jni
+git clone --recursive https://github.com/heiher/hev-socks5-tunnel jni
 ndk-build
 ```
 
