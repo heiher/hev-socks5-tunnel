@@ -1,7 +1,7 @@
 /*
  ============================================================================
  Name        : hev-socks5-tunnel.c
- Author      : Heiher <r@hev.cc>
+ Author      : hev <r@hev.cc>
  Copyright   : Copyright (c) 2019 - 2023 hev
  Description : Socks5 Tunnel
  ============================================================================

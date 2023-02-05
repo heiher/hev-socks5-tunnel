@@ -1,8 +1,8 @@
 /*
  ============================================================================
  Name        : hev-jni.h
- Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 - 2020 Everyone.
+ Author      : hev <r@hev.cc>
+ Copyright   : Copyright (c) 2019 - 2023 hev
  Description : Java Native Interface
  ============================================================================
  */

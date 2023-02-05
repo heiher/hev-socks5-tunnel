@@ -1,8 +1,8 @@
 /*
  ============================================================================
  Name        : hev-list.c
- Authors     : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 everyone.
+ Authors     : hev <r@hev.cc>
+ Copyright   : Copyright (c) 2019 - 2023 hev
  Description : Double-linked List
  ============================================================================
  */

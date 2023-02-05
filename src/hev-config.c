@@ -1,8 +1,8 @@
 /*
  ============================================================================
  Name        : hev-config.c
- Author      : Heiher <r@hev.cc>
- Copyright   : Copyright (c) 2019 - 2021 hev
+ Author      : hev <r@hev.cc>
+ Copyright   : Copyright (c) 2019 - 2023 hev
  Description : Config
  ============================================================================
  */
