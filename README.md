@@ -51,7 +51,7 @@ tunnel:
   # Interface name
   name: tun0
   # Interface MTU
-  mtu: 4096
+  mtu: 9000
   # IPv4 address
   ipv4:
     address: 10.0.0.2
