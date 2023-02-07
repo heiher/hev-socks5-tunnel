@@ -8,8 +8,8 @@ A tunnel over Socks5 proxy (tun2socks) for Unix.
 
 * IPv4/IPv6. (dual stack)
 * Redirect TCP connections.
-* Redirect UDP packets. (UDP over TCP, works with [hev-socks5-server](https://gitlab.com/hev/hev-socks5-server) only)
-* Linux/MacOS.
+* Redirect UDP packets. (Fullcone NAT, UDP over TCP, works with [hev-socks5-server](https://gitlab.com/hev/hev-socks5-server) only)
+* Linux/Android/FreeBSD/macOS.
 
 ## Benchmarks
 
