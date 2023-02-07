@@ -14,6 +14,10 @@
 #include "hev-tunnel-linux.h"
 #endif /* __linux__ */
 
+#if defined(__FreeBSD__)
+#include "hev-tunnel-freebsd.h"
+#endif /* __FreeBSD__ */
+
 #if defined(__APPLE__) || defined(__MACH__)
 #include "hev-tunnel-macos.h"
 #endif /* __APPLE__ || __MACH__ */
