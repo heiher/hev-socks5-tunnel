@@ -21,7 +21,7 @@ static inline ssize_t
 hev_tunnel_readv (int fd, struct iovec *iov, int iovcnt,
                   HevTaskIOYielder yielder, void *yielder_data)
 {
-    return hev_task_io_readv (fd, iov, iovcnt, yielder, yielder_data);
+    return hev_task_io_readv (fd, &iov[1], iovcnt - 1, yielder, yielder_data);
 }
 
 static inline ssize_t
@@ -35,7 +35,7 @@ static inline ssize_t
 hev_tunnel_writev (int fd, struct iovec *iov, int iovcnt,
                    HevTaskIOYielder yielder, void *yielder_data)
 {
-    return hev_task_io_writev (fd, iov, iovcnt, yielder, yielder_data);
+    return hev_task_io_writev (fd, &iov[1], iovcnt - 1, yielder, yielder_data);
 }
 
 #endif /* __HEV_TUNNEL_LINUX_H__ */
