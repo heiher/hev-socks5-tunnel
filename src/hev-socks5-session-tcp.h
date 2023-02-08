@@ -10,6 +10,7 @@
 #ifndef __HEV_SOCKS5_SESSION_TCP_H__
 #define __HEV_SOCKS5_SESSION_TCP_H__
 
+#include <hev-ring-buffer.h>
 #include <hev-socks5-client-tcp.h>
 
 #include "hev-socks5-session.h"
@@ -30,6 +31,7 @@ struct _HevSocks5SessionTCP
     struct pbuf *queue;
     struct tcp_pcb *pcb;
     HevTaskMutex *mutex;
+    HevRingBuffer *buffer;
 };
 
 struct _HevSocks5SessionTCPClass

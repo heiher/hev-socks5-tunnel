@@ -61,29 +61,34 @@ tcp_splice_f (HevSocks5SessionTCP *self)
 }
 
 static int
-tcp_splice_b (HevSocks5SessionTCP *self, uint8_t *buffer)
+tcp_splice_b (HevSocks5SessionTCP *self)
 {
+    struct iovec iov[2];
     err_t err = ERR_OK;
-    size_t size;
+    int iovlen;
     ssize_t s;
 
-    if (!self->pcb)
-        return -1;
-
-    size = tcp_sndbuf (self->pcb);
-    if (!size)
+    iovlen = hev_ring_buffer_writing (self->buffer, iov);
+    if (iovlen <= 0)
         return 0;
 
-    s = read (HEV_SOCKS5 (self)->fd, buffer, size);
+    s = readv (HEV_SOCKS5 (self)->fd, iov, iovlen);
     if (0 >= s) {
         if ((0 > s) && (EAGAIN == errno))
             return 0;
         return -1;
     }
+    hev_ring_buffer_write_finish (self->buffer, s);
 
     hev_task_mutex_lock (self->mutex);
     if (self->pcb) {
-        err = tcp_write (self->pcb, buffer, s, TCP_WRITE_FLAG_COPY);
+        int i;
+        iovlen = hev_ring_buffer_reading (self->buffer, iov);
+        for (i = 0, s = 0; i < iovlen; i++) {
+            err |= tcp_write (self->pcb, iov[i].iov_base, iov[i].iov_len, 0);
+            s += iov[i].iov_len;
+        }
+        hev_ring_buffer_read_finish (self->buffer, s);
         err |= tcp_output (self->pcb);
     }
     hev_task_mutex_unlock (self->mutex);
@@ -120,6 +125,7 @@ tcp_sent_handler (void *arg, struct tcp_pcb *pcb, u16_t len)
 {
     HevSocks5SessionTCP *self = arg;
 
+    hev_ring_buffer_read_release (self->buffer, len);
     hev_task_wakeup (self->data.task);
 
     return ERR_OK;
@@ -159,14 +165,13 @@ static void
 hev_socks5_session_tcp_splice (HevSocks5Session *base)
 {
     HevSocks5SessionTCP *self = HEV_SOCKS5_SESSION_TCP (base);
-    uint8_t *buffer;
     int res_f = 1;
     int res_b = 1;
 
     LOG_D ("%p socks5 session tcp splice", self);
 
-    buffer = hev_malloc (tcp_sndbuf (self->pcb));
-    if (!buffer)
+    self->buffer = hev_ring_buffer_new (tcp_sndbuf (self->pcb));
+    if (!self->buffer)
         return;
 
     for (;;) {
@@ -175,7 +180,7 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
         if (res_f >= 0)
             res_f = tcp_splice_f (self);
         if (res_b >= 0)
-            res_b = tcp_splice_b (self, buffer);
+            res_b = tcp_splice_b (self);
 
         if (res_f < 0 || res_b < 0)
             break;
@@ -188,7 +193,7 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
             break;
     }
 
-    hev_free (buffer);
+    hev_ring_buffer_destroy (self->buffer);
 }
 
 static HevTask *
