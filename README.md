@@ -54,8 +54,8 @@ tunnel:
   mtu: 9000
   # IPv4 address
   ipv4:
-    address: 10.0.0.2
-    gateway: 10.0.0.1
+    address: 100.64.0.2
+    gateway: 100.64.0.1
     prefix: 30
   # IPv6 address
   ipv6:
