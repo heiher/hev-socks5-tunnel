@@ -175,6 +175,7 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
     static char _pass[256];
     const char *addr = NULL;
     const char *port = NULL;
+    const char *udpm = NULL;
     const char *user = NULL;
     const char *pass = NULL;
 
@@ -203,6 +204,8 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
             port = value;
         else if (0 == strcmp (key, "address"))
             addr = value;
+        else if (0 == strcmp (key, "udp"))
+            udpm = value;
         else if (0 == strcmp (key, "username"))
             user = value;
         else if (0 == strcmp (key, "password"))
@@ -226,6 +229,9 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
 
     strncpy (srv.addr, addr, 256 - 1);
     srv.port = strtoul (port, NULL, 10);
+
+    if (strcasecmp (udpm, "udp") == 0)
+        srv.udp_in_udp = 1;
 
     if (user && pass) {
         strncpy (_user, user, 256 - 1);

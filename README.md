@@ -8,7 +8,7 @@ A tunnel over Socks5 proxy (tun2socks) for Unix.
 
 * IPv4/IPv6. (dual stack)
 * Redirect TCP connections.
-* Redirect UDP packets. (Fullcone NAT, UDP over TCP, works with [hev-socks5-server](https://gitlab.com/hev/hev-socks5-server) only)
+* Redirect UDP packets. (Fullcone NAT, UDP in UDP/TCP)
 * Linux/Android/FreeBSD/macOS.
 
 ## Benchmarks
@@ -27,14 +27,16 @@ See [here](https://github.com/heiher/hev-socks5-tunnel/wiki/Benchmarks) for more
 
 ## How to Build
 
-**Unix**:
+### Unix
+
 ```bash
 git clone --recursive https://github.com/heiher/hev-socks5-tunnel
 cd hev-socks5-tunnel
 make
 ```
 
-**Android**:
+### Android
+
 ```bash
 mkdir hev-socks5-tunnel
 cd hev-socks5-tunnel
@@ -68,6 +70,8 @@ socks5:
   port: 1080
   # Socks5 server address (ipv4/ipv6)
   address: 127.0.0.1
+  # Socks5 UDP relay mode (tcp|udp)
+  udp: 'tcp'
   # Socks5 server username
 # username: 'username'
   # Socks5 server password
@@ -105,7 +109,9 @@ sudo ip -6 route add default dev tun0 metric 20
 ```
 
 ## Contributors
+
 * **hev** - https://hev.cc
 
 ## License
+
 MIT

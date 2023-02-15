@@ -246,7 +246,7 @@ splice_task_entry (void *data)
     HevTask *task = hev_task_self ();
     int fd;
 
-    fd = hev_task_io_dup (HEV_SOCKS5 (self)->fd);
+    fd = hev_task_io_dup (hev_socks5_udp_get_fd (self));
     if (fd < 0)
         goto exit;
 
@@ -341,9 +341,16 @@ int
 hev_socks5_session_udp_construct (HevSocks5SessionUDP *self,
                                   struct udp_pcb *pcb, HevTaskMutex *mutex)
 {
+    HevConfigServer *srv = hev_config_get_socks5_server ();
+    int type;
     int res;
 
-    res = hev_socks5_client_udp_construct (&self->base);
+    if (srv->udp_in_udp)
+        type = HEV_SOCKS5_TYPE_UDP_IN_UDP;
+    else
+        type = HEV_SOCKS5_TYPE_UDP_IN_TCP;
+
+    res = hev_socks5_client_udp_construct (&self->base, type);
     if (res < 0)
         return -1;
 
