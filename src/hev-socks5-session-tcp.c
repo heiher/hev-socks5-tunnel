@@ -170,6 +170,9 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
 
     LOG_D ("%p socks5 session tcp splice", self);
 
+    if (!self->pcb)
+        return;
+
     self->buffer = hev_ring_buffer_new (tcp_sndbuf (self->pcb));
     if (!self->buffer)
         return;
