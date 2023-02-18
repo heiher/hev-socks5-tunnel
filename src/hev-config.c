@@ -230,7 +230,7 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
     strncpy (srv.addr, addr, 256 - 1);
     srv.port = strtoul (port, NULL, 10);
 
-    if (strcasecmp (udpm, "udp") == 0)
+    if (udpm && (strcasecmp (udpm, "udp") == 0))
         srv.udp_in_udp = 1;
 
     if (user && pass) {
