@@ -74,7 +74,7 @@ hev_socks5_session_udp_fwd_f (HevSocks5SessionUDP *self)
     udp = HEV_SOCKS5_UDP (self);
     res = hev_socks5_udp_sendto (udp, buf->payload, buf->len, addr);
     if (res <= 0) {
-        LOG_E ("%p socks5 session udp fwd f send", self);
+        LOG_D ("%p socks5 session udp fwd f send", self);
         res = -1;
     }
 
@@ -102,7 +102,7 @@ hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self)
     udp = HEV_SOCKS5_UDP (self);
     fd = HEV_SOCKS5 (udp)->fd;
     if (fd < 0) {
-        LOG_E ("%p socks5 session udp fd", self);
+        LOG_D ("%p socks5 session udp fd", self);
         return -1;
     }
 
@@ -120,13 +120,13 @@ hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self)
     buf = pbuf_alloc (PBUF_TRANSPORT, UDP_BUF_SIZE, PBUF_RAM);
     hev_task_mutex_unlock (self->mutex);
     if (!buf) {
-        LOG_E ("%p socks5 session udp fwd b buf", self);
+        LOG_D ("%p socks5 session udp fwd b buf", self);
         return -1;
     }
 
     res = hev_socks5_udp_recvfrom (udp, buf->payload, buf->len, saddr);
     if (res <= 0) {
-        LOG_E ("%p socks5 session udp fwd b recv", self);
+        LOG_D ("%p socks5 session udp fwd b recv", self);
         pbuf_free (buf);
         return -1;
     }
@@ -146,7 +146,7 @@ hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self)
         port = ntohs (adp->sin6_port);
         memcpy (&addr, &adp->sin6_addr, 16);
     } else {
-        LOG_E ("%p socks5 session udp fwd b addr", self);
+        LOG_D ("%p socks5 session udp fwd b addr", self);
         pbuf_free (buf);
         return -1;
     }
@@ -160,7 +160,7 @@ hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self)
     pbuf_free (buf);
 
     if (err != ERR_OK) {
-        LOG_E ("%p socks5 session udp fwd b send", self);
+        LOG_D ("%p socks5 session udp fwd b send", self);
         return -1;
     }
 
