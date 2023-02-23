@@ -271,6 +271,7 @@ hev_socks5_session_udp_splice (HevSocks5Session *base)
     HevTask *task = hev_task_self ();
     HevSocks5UDPSplice splice;
     int stack_size;
+    int fd;
 
     LOG_D ("%p socks5 session udp splice", self);
 
@@ -281,6 +282,10 @@ hev_socks5_session_udp_splice (HevSocks5Session *base)
     task = hev_task_new (stack_size);
     hev_task_run (task, splice_task_entry, &splice);
     task = hev_task_ref (task);
+
+    fd = hev_socks5_udp_get_fd (HEV_SOCKS5_UDP (self));
+    if (hev_task_mod_fd (splice.task, fd, POLLOUT) < 0)
+        hev_task_add_fd (splice.task, fd, POLLOUT);
 
     for (;;) {
         int res;
