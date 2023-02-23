@@ -89,22 +89,14 @@ hev_socks5_session_udp_fwd_f (HevSocks5SessionUDP *self)
 static int
 hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self)
 {
+    HevSocks5UDP *udp = HEV_SOCKS5_UDP (self);
     struct sockaddr_in6 ads = { 0 };
     struct sockaddr *saddr;
     err_t err = ERR_OK;
-    HevSocks5UDP *udp;
     struct pbuf *buf;
     ip_addr_t addr;
     uint16_t port;
     int res;
-    int fd;
-
-    udp = HEV_SOCKS5_UDP (self);
-    fd = HEV_SOCKS5 (udp)->fd;
-    if (fd < 0) {
-        LOG_D ("%p socks5 session udp fd", self);
-        return -1;
-    }
 
     saddr = (struct sockaddr *)&ads;
     switch (self->pcb->remote_ip.type) {
