@@ -25,6 +25,11 @@ See [here](https://github.com/heiher/hev-socks5-tunnel/wiki/Benchmarks) for more
 ![](https://github.com/heiher/hev-socks5-tunnel/wiki/res/upload-cpu.png)
 ![](https://github.com/heiher/hev-socks5-tunnel/wiki/res/download-cpu.png)
 
+### Memory usage
+
+![](https://github.com/heiher/hev-socks5-tunnel/wiki/res/upload-mem.png)
+![](https://github.com/heiher/hev-socks5-tunnel/wiki/res/download-mem.png)
+
 ## How to Build
 
 ### Unix
