@@ -113,6 +113,10 @@ sudo ip route add default dev tun0 metric 20
 sudo ip -6 route add default dev tun0 metric 20
 ```
 
+### Android VPN
+
+* [SocksTun](https://github.com/heiher/sockstun)
+
 ## Contributors
 
 * **hev** - https://hev.cc
