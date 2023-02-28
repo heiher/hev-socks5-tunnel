@@ -5,6 +5,7 @@ PROJECT=hev-socks5-tunnel
 CROSS_PREFIX :=
 PP=$(CROSS_PREFIX)cpp
 CC=$(CROSS_PREFIX)gcc
+AR=$(CROSS_PREFIX)ar
 STRIP=$(CROSS_PREFIX)strip
 CCFLAGS=-O3 -pipe -Wall -Werror $(CFLAGS) \
 		-I$(SRCDIR)/misc \
@@ -27,7 +28,8 @@ INSTDIR=/usr/local
 THIRDPARTDIR=third-part
 
 CONFIG=$(CONFDIR)/main.yml
-TARGET=$(BINDIR)/hev-socks5-tunnel
+EXEC_TARGET=$(BINDIR)/hev-socks5-tunnel
+STATIC_TARGET=$(BINDIR)/lib$(PROJECT).a
 THIRDPARTS=$(THIRDPARTDIR)/yaml \
 		   $(THIRDPARTDIR)/lwip \
 		   $(THIRDPARTDIR)/hev-task-system
@@ -59,9 +61,11 @@ ifeq ($(V),1)
 	undefine ECHO_PREFIX
 endif
 
-.PHONY: all clean install uninstall tp-build tp-clean
+.PHONY: exec static clean install uninstall tp-build tp-clean
 
-all : $(TARGET)
+exec : $(EXEC_TARGET)
+
+static : $(STATIC_TARGET)
 
 tp-build : $(THIRDPARTS)
 	@$(foreach dir,$^,$(MAKE) --no-print-directory -C $(dir);)
@@ -81,7 +85,7 @@ uninstall :
 	$(ECHO_PREFIX) $(RM) -rf $(INSTDIR)/etc/$(PROJECT).yml
 	@printf $(UNINSMSG) $(INSTDIR)/etc/$(PROJECT).yml
 
-$(INSTDIR)/bin/$(PROJECT) : $(TARGET)
+$(INSTDIR)/bin/$(PROJECT) : $(EXEC_TARGET)
 	$(ECHO_PREFIX) install -d -m 0755 $(dir $@)
 	$(ECHO_PREFIX) install -m 0755 $< $@
 	@printf $(INSTMSG) $< $@
@@ -91,12 +95,17 @@ $(INSTDIR)/etc/$(PROJECT).yml : $(CONFIG)
 	$(ECHO_PREFIX) install -m 0644 $< $@
 	@printf $(INSTMSG) $< $@
 
-$(TARGET) : $(LDOBJS) tp-build
+$(EXEC_TARGET) : $(LDOBJS) tp-build
 	$(ECHO_PREFIX) mkdir -p $(dir $@)
 	$(ECHO_PREFIX) $(CC) -o $@ $(LDOBJS) $(LDFLAGS)
 	@printf $(LINKMSG) $@
 	$(ECHO_PREFIX) $(STRIP) $@
 	@printf $(STRIPMSG) $@
+
+$(STATIC_TARGET) : $(LDOBJS) tp-build
+	$(ECHO_PREFIX) mkdir -p $(dir $@)
+	$(ECHO_PREFIX) $(AR) csq $@ $(LDOBJS)
+	@printf $(LINKMSG) $@
 
 $(BUILDDIR)/%.dep : $(SRCDIR)/%.c
 	$(ECHO_PREFIX) mkdir -p $(dir $@)
