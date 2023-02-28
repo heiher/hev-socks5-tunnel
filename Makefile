@@ -13,7 +13,8 @@ CCFLAGS=-O3 -pipe -Wall -Werror $(CFLAGS) \
 		-I$(THIRDPARTDIR)/lwip/include \
 		-I$(THIRDPARTDIR)/lwip/include/ports/unix \
 		-I$(THIRDPARTDIR)/hev-task-system/include
-LDFLAGS=-L$(THIRDPARTDIR)/yaml/bin -lyaml \
+LDFLAGS=$(LFLAGS) \
+		-L$(THIRDPARTDIR)/yaml/bin -lyaml \
 		-L$(THIRDPARTDIR)/lwip/bin -llwip \
 		-L$(THIRDPARTDIR)/hev-task-system/bin -lhev-task-system \
 		-lpthread
