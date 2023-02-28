@@ -29,7 +29,7 @@
 static void
 show_help (const char *self_path)
 {
-    printf ("%s CONFIG_PATH [TUN_FD]\n", self_path);
+    printf ("%s CONFIG_PATH\n", self_path);
     printf ("Version: %u.%u.%u %s\n", MAJOR_VERSION, MINOR_VERSION,
             MICRO_VERSION, COMMIT_ID);
 }
@@ -85,41 +85,32 @@ lwip_fini (void)
 }
 
 int
-main (int argc, char *argv[])
+hev_socks5_tunnel_main (const char *config_path, int tun_fd)
 {
     const char *pid_file;
     const char *log_file;
-    int tun_fd = -1;
     int log_level;
     int nofile;
     int res;
 
-    if (argc < 2) {
-        show_help (argv[0]);
-        return -1;
-    }
-
-    if (argc > 2)
-        tun_fd = strtol (argv[2], NULL, 10);
-
     res = hev_task_system_init ();
     if (res < 0)
-        return -2;
+        return -1;
 
-    res = hev_config_init (argv[1]);
+    res = hev_config_init (config_path);
     if (res < 0)
-        return -3;
+        return -2;
 
     log_file = hev_config_get_misc_log_file ();
     log_level = hev_config_get_misc_log_level ();
 
     res = hev_logger_init (log_level, log_file);
     if (res < 0)
-        return -4;
+        return -3;
 
     res = hev_socks5_logger_init (log_level, log_file);
     if (res < 0)
-        return -5;
+        return -4;
 
     nofile = hev_config_get_misc_limit_nofile ();
     res = set_limit_nofile (nofile);
@@ -130,7 +121,7 @@ main (int argc, char *argv[])
 
     res = hev_socks5_tunnel_init (tun_fd);
     if (res < 0)
-        return -6;
+        return -5;
 
     pid_file = hev_config_get_misc_pid_file ();
     if (pid_file)
@@ -150,7 +141,24 @@ main (int argc, char *argv[])
 }
 
 void
-quit (void)
+hev_socks5_tunnel_quit (void)
 {
     hev_socks5_tunnel_stop ();
+}
+
+int
+main (int argc, char *argv[])
+{
+    int res;
+
+    if (argc < 2) {
+        show_help (argv[0]);
+        return -1;
+    }
+
+    res = hev_socks5_tunnel_main (argv[1], -1);
+    if (res < 0)
+        return -2;
+
+    return 0;
 }

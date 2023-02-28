@@ -7,7 +7,8 @@
  ============================================================================
  */
 
-#if defined(ANDROID)
+#ifdef ANDROID
+
 #include <jni.h>
 #include <pthread.h>
 
@@ -29,6 +30,14 @@
 #define STR(s) STR_ARG (s)
 #define STR_ARG(c) #c
 #define N_ELEMENTS(arr) (sizeof (arr) / sizeof ((arr)[0]))
+
+typedef struct _ThreadData ThreadData;
+
+struct _ThreadData
+{
+    char *path;
+    int fd;
+};
 
 static JavaVM *java_vm;
 static pthread_t work_thread;
@@ -74,15 +83,12 @@ JNI_OnLoad (JavaVM *vm, void *reserved)
 static void *
 thread_handler (void *data)
 {
-    char **argv = data;
+    ThreadData *tdata = data;
 
-    argv[0] = "hev-socks5-tunnel";
+    hev_socks5_tunnel_main (tdata->path, tdata->fd);
 
-    main (3, argv);
-
-    free (argv[2]);
-    free (argv[1]);
-    free (argv);
+    free (tdata->path);
+    free (tdata);
 
     return NULL;
 }
@@ -90,19 +96,20 @@ thread_handler (void *data)
 static void
 native_start_service (JNIEnv *env, jobject thiz, jstring config_path, jint fd)
 {
-    char **argv;
     const jbyte *bytes;
+    ThreadData *tdata;
 
-    argv = malloc (sizeof (char *) * 3);
+    if (work_thread)
+        return;
+
+    tdata = malloc (sizeof (ThreadData));
+    tdata->fd = fd;
 
     bytes = (const jbyte *)(*env)->GetStringUTFChars (env, config_path, NULL);
-    argv[1] = strdup ((const char *)bytes);
+    tdata->path = strdup ((const char *)bytes);
     (*env)->ReleaseStringUTFChars (env, config_path, (const char *)bytes);
 
-    argv[2] = malloc (16);
-    snprintf (argv[2], 16, "%d", fd);
-
-    pthread_create (&work_thread, NULL, thread_handler, argv);
+    pthread_create (&work_thread, NULL, thread_handler, tdata);
 }
 
 static void
@@ -111,8 +118,9 @@ native_stop_service (JNIEnv *env, jobject thiz)
     if (!work_thread)
         return;
 
-    quit ();
+    hev_socks5_tunnel_quit ();
     pthread_join (work_thread, NULL);
     work_thread = 0;
 }
-#endif
+
+#endif /* ANDROID */
