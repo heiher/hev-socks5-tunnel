@@ -119,6 +119,7 @@ sudo ip -6 route add default dev tun0 metric 20
 
 ## Contributors
 
+* **daemooon** - https://github.com/daemooon
 * **hev** - https://hev.cc
 
 ## License
