@@ -9,7 +9,7 @@ A tunnel over Socks5 proxy (tun2socks) for Unix.
 * IPv4/IPv6. (dual stack)
 * Redirect TCP connections.
 * Redirect UDP packets. (Fullcone NAT, UDP in UDP/TCP)
-* Linux/Android/FreeBSD/macOS.
+* Linux/Android/FreeBSD/macOS/iOS.
 
 ## Benchmarks
 
