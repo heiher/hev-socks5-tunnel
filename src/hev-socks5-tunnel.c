@@ -478,7 +478,8 @@ lwip_io_task_entry (void *data)
         }
 
         if (s <= 0) {
-            LOG_E ("socks5 tunnel read");
+            if (s > -2)
+                LOG_W ("socks5 tunnel read");
             pbuf_free (buf);
             continue;
         }
