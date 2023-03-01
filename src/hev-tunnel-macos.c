@@ -10,7 +10,6 @@
 #if defined(__APPLE__) || defined(__MACH__)
 
 #include <stdio.h>
-
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,12 +17,13 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <TargetConditionals.h>
+
+#if TARGET_OS_OSX
+#include <net/if_utun.h>
 #include <sys/sys_domain.h>
 #include <sys/kern_control.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <net/if_utun.h>
-#include <netinet6/in6_var.h>
+#endif
 
 #include <hev-task.h>
 #include <hev-task-io.h>
@@ -35,6 +35,7 @@ static char tun_name[IFNAMSIZ];
 int
 hev_tunnel_open (const char *name)
 {
+#if TARGET_OS_OSX
     socklen_t len = IFNAMSIZ;
     struct sockaddr_ctl sc;
     struct ctl_info ci;
@@ -77,6 +78,9 @@ exit_close:
     close (fd);
 exit:
     return res;
+#else
+    return 0;
+#endif
 }
 
 int
