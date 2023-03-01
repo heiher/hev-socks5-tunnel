@@ -60,15 +60,9 @@ tunnel:
   # Interface MTU
   mtu: 9000
   # IPv4 address
-  ipv4:
-    address: 100.64.0.2
-    gateway: 100.64.0.1
-    prefix: 30
+  ipv4: 198.18.0.1
   # IPv6 address
-  ipv6:
-    address: 'fc00::2'
-    gateway: 'fc00::1'
-    prefix: 126
+  ipv6: 'fc00::1'
 
 socks5:
   # Socks5 server port

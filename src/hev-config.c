@@ -141,6 +141,10 @@ hev_config_parse_tunnel (yaml_document_t *doc, yaml_node_t *base)
                 strncpy (tun_name, value, 64 - 1);
             else if (0 == strcmp (key, "mtu"))
                 tun_mtu = strtoul (value, NULL, 10);
+            else if (0 == strcmp (key, "ipv4"))
+                strncpy (tun_ipv4_address, value, 16 - 1);
+            else if (0 == strcmp (key, "ipv6"))
+                strncpy (tun_ipv6_address, value, 64 - 1);
         } else {
             if (0 == strcmp (key, "ipv4"))
                 hev_config_parse_tunnel_ipv4 (doc, node);
@@ -149,20 +153,17 @@ hev_config_parse_tunnel (yaml_document_t *doc, yaml_node_t *base)
         }
     }
 
-    if (!tun_ipv4_address[0] && !tun_ipv6_address[0]) {
-        fprintf (stderr, "Can't found tunnel.ipv4/6.address!\n");
-        return -1;
-    }
+    if (!tun_ipv4_gateway[0])
+        strcpy (tun_ipv4_gateway, "127.0.0.1");
 
-    if (!tun_ipv4_gateway[0] && !tun_ipv6_gateway[0]) {
-        fprintf (stderr, "Can't found tunnel.ipv4/6.gateway!\n");
-        return -1;
-    }
+    if (!tun_ipv6_gateway[0])
+        strcpy (tun_ipv6_gateway, "::1");
 
-    if (!tun_ipv4_prefix && !tun_ipv6_prefix) {
-        fprintf (stderr, "Can't found tunnel.ipv4/6.prefix!\n");
-        return -1;
-    }
+    if (!tun_ipv4_prefix)
+        tun_ipv4_prefix = 32;
+
+    if (!tun_ipv6_prefix)
+        tun_ipv6_prefix = 128;
 
     return 0;
 }
