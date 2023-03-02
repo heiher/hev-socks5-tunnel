@@ -10,6 +10,10 @@
 #ifndef __HEV_MAIN_H__
 #define __HEV_MAIN_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * hev_socks5_tunnel_main:
  * @config_path: config file path
@@ -32,5 +36,9 @@ int hev_socks5_tunnel_main (const char *config_path, int tun_fd);
  * Since: 2.4.6
  */
 void hev_socks5_tunnel_quit (void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __HEV_MAIN_H__ */
