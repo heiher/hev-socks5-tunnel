@@ -54,6 +54,11 @@ jobs:
           tar xf ${{ env.MUSL_SDK_RISCV_32 }}
           wget -q ${{ env.MUSL_SDK_URL }}/${{ env.MUSL_SDK_RISCV_64 }}
           tar xf ${{ env.MUSL_SDK_RISCV_64 }}
+      - name: Gen Source
+        run: |
+          mkdir -p hev-socks5-tunnel-${{ github.ref_name }}
+          git ls-files --recurse-submodules | tar c -O -T- | tar x -C hev-socks5-tunnel-${{ github.ref_name }}
+          tar caf hev-socks5-tunnel-${{ github.ref_name }}.tar.gz hev-socks5-tunnel-${{ github.ref_name }}
       - name: Build Linux
         run: |
           # x86_32
@@ -116,6 +121,15 @@ jobs:
           release_name: ${{ github.ref_name }}
           draft: false
           prerelease: false
+      - name: Upload source
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./hev-socks5-tunnel-${{ github.ref_name }}.tar.gz
+          asset_name: hev-socks5-tunnel-${{ github.ref_name }}.tar.gz
+          asset_content_type: application/octet-stream
       - name: Upload linux-x86_32
         uses: actions/upload-release-asset@v1
         env:
