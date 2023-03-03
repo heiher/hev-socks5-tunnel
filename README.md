@@ -51,23 +51,7 @@ ndk-build
 
 ### iOS
 
-```bash
-git clone --recursive https://github.com/heiher/hev-socks5-tunnel
-cd hev-socks5-tunnel
-
-make PP="xcrun --sdk iphoneos --toolchain iphoneos clang" \
-     CC="xcrun --sdk iphoneos --toolchain iphoneos clang" \
-     CFLAGS="-arch arm64 -mios-version-min=16.0" \
-     LFLAGS="-arch arm64 -mios-version-min=16.0 -Wl,-Bsymbolic-functions" static
-
-libtool -static -o libtun2socks.a \
-                   bin/libhev-socks5-tunnel.a \
-                   third-part/lwip/bin/liblwip.a \
-                   third-part/yaml/bin/libyaml.a \
-                   third-part/hev-task-system/bin/libhev-task-system.a
-
-xcodebuild -create-xcframework -library libtun2socks.a -output Tun2SocksKit.xcframework
-```
+* [Tun2SocksKit](https://github.com/daemooon/Tun2SocksKit)
 
 ## How to Use
 
