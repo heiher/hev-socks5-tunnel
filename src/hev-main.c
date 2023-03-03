@@ -26,6 +26,8 @@
 
 #include "hev-main.h"
 
+#define WEAK __attribute__ ((weak))
+
 static void
 show_help (const char *self_path)
 {
@@ -146,7 +148,7 @@ hev_socks5_tunnel_quit (void)
     hev_socks5_tunnel_stop ();
 }
 
-int
+WEAK int
 main (int argc, char *argv[])
 {
     int res;
