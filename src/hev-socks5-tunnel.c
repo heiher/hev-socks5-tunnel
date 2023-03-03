@@ -148,7 +148,7 @@ exit_close_event:
     close (event_fds[1]);
 exit_close_tun:
     if (tun_fd_close)
-        close (tun_fd);
+        hev_tunnel_close (tun_fd);
 exit:
     return -1;
 }
@@ -169,7 +169,7 @@ hev_socks5_tunnel_fini (void)
     close (event_fds[0]);
     close (event_fds[1]);
     if (tun_fd_close)
-        close (tun_fd);
+        hev_tunnel_close (tun_fd);
 }
 
 int

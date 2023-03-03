@@ -23,6 +23,7 @@
 #endif /* __APPLE__ || __MACH__ */
 
 int hev_tunnel_open (const char *name);
+void hev_tunnel_close (int fd);
 
 int hev_tunnel_set_mtu (int mtu);
 int hev_tunnel_set_state (int state);

@@ -56,6 +56,12 @@ exit:
     return res;
 }
 
+void
+hev_tunnel_close (int fd)
+{
+    close (fd);
+}
+
 int
 hev_tunnel_set_mtu (int mtu)
 {
