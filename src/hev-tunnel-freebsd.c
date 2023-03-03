@@ -59,6 +59,17 @@ exit:
 void
 hev_tunnel_close (int fd)
 {
+    struct ifreq ifr = { 0 };
+
+    close (fd);
+
+    fd = socket (AF_INET, SOCK_STREAM, 0);
+    if (fd < 0)
+        return;
+
+    memcpy (ifr.ifr_name, tun_name, IFNAMSIZ);
+    ioctl (fd, SIOCIFDESTROY, (void *)&ifr);
+
     close (fd);
 }
 
