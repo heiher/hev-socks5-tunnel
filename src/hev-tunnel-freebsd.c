@@ -9,6 +9,7 @@
 
 #if defined(__FreeBSD__)
 
+#include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
@@ -27,8 +28,16 @@ int
 hev_tunnel_open (const char *name)
 {
     struct ifreq ifr;
+    char path[256];
     int res = -1;
     int fd;
+
+    snprintf (path, sizeof (path), "/dev/%s", name);
+    fd = hev_task_io_open (path, O_RDWR);
+    if (fd >= 0) {
+        memcpy (tun_name, name, IFNAMSIZ);
+        return fd;
+    }
 
     fd = hev_task_io_open ("/dev/tun", O_RDWR);
     if (fd < 0)
