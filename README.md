@@ -49,10 +49,6 @@ git clone --recursive https://github.com/heiher/hev-socks5-tunnel jni
 ndk-build
 ```
 
-### iOS
-
-* [Tun2SocksKit](https://github.com/daemooon/Tun2SocksKit)
-
 ## How to Use
 
 ### Config
@@ -111,9 +107,15 @@ sudo ip route add default dev tun0 metric 20
 sudo ip -6 route add default dev tun0 metric 20
 ```
 
+## Use Cases
+
 ### Android VPN
 
 * [SocksTun](https://github.com/heiher/sockstun)
+
+### iOS
+
+* [Tun2SocksKit](https://github.com/daemooon/Tun2SocksKit)
 
 ## API
 
