@@ -210,16 +210,17 @@ tunnel_init (void)
 {
     unsigned int mtu, ipv4_prefix, ipv6_prefix;
     const char *name, *ipv4, *ipv6;
-    int res;
+    int multi_queue, res;
 
     name = hev_config_get_tunnel_name ();
     mtu = hev_config_get_tunnel_mtu ();
+    multi_queue = hev_config_get_tunnel_multi_queue ();
     ipv4 = hev_config_get_tunnel_ipv4_address ();
     ipv4_prefix = hev_config_get_tunnel_ipv4_prefix ();
     ipv6 = hev_config_get_tunnel_ipv6_address ();
     ipv6_prefix = hev_config_get_tunnel_ipv6_prefix ();
 
-    tun_fd = hev_tunnel_open (name);
+    tun_fd = hev_tunnel_open (name, multi_queue);
     if (tun_fd < 0) {
         LOG_E ("socks5 tunnel open");
         goto exit;

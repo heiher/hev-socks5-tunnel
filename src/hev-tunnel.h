@@ -22,7 +22,7 @@
 #include "hev-tunnel-macos.h"
 #endif /* __APPLE__ || __MACH__ */
 
-int hev_tunnel_open (const char *name);
+int hev_tunnel_open (const char *name, int multi_queue);
 void hev_tunnel_close (int fd);
 
 int hev_tunnel_set_mtu (int mtu);

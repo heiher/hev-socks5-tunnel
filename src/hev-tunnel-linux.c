@@ -30,7 +30,7 @@
 static char tun_name[IFNAMSIZ];
 
 int
-hev_tunnel_open (const char *name)
+hev_tunnel_open (const char *name, int multi_queue)
 {
     struct ifreq ifr = { 0 };
     int res = -1;

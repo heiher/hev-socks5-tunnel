@@ -37,7 +37,7 @@
 static char tun_name[IFNAMSIZ];
 
 int
-hev_tunnel_open (const char *name)
+hev_tunnel_open (const char *name, int multi_queue)
 {
 #if TARGET_OS_OSX
     socklen_t len = IFNAMSIZ;
