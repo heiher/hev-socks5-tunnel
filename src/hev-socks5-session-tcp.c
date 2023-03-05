@@ -195,8 +195,6 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
         if (task_io_yielder (type, base) < 0)
             break;
     }
-
-    hev_ring_buffer_destroy (self->buffer);
 }
 
 static HevTask *
@@ -289,6 +287,9 @@ hev_socks5_session_tcp_destruct (HevObject *base)
     if (self->queue)
         pbuf_free (self->queue);
     hev_task_mutex_unlock (self->mutex);
+
+    if (self->buffer)
+        hev_ring_buffer_destroy (self->buffer);
 
     HEV_SOCKS5_CLIENT_TCP_TYPE->finalizer (base);
 }
