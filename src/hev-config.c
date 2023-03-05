@@ -16,6 +16,7 @@
 
 static char tun_name[64];
 static unsigned int tun_mtu = 9000;
+static int multi_queue;
 
 static char tun_ipv4_address[16];
 static char tun_ipv4_gateway[16];
@@ -141,6 +142,8 @@ hev_config_parse_tunnel (yaml_document_t *doc, yaml_node_t *base)
                 strncpy (tun_name, value, 64 - 1);
             else if (0 == strcmp (key, "mtu"))
                 tun_mtu = strtoul (value, NULL, 10);
+            else if (0 == strcmp (key, "multi-queue"))
+                multi_queue = strcasecmp (value, "false");
             else if (0 == strcmp (key, "ipv4"))
                 strncpy (tun_ipv4_address, value, 16 - 1);
             else if (0 == strcmp (key, "ipv6"))
@@ -394,6 +397,12 @@ unsigned int
 hev_config_get_tunnel_mtu (void)
 {
     return tun_mtu;
+}
+
+int
+hev_config_get_tunnel_multi_queue (void)
+{
+    return multi_queue;
 }
 
 const char *

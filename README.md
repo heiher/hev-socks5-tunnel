@@ -84,6 +84,8 @@ tunnel:
   name: tun0
   # Interface MTU
   mtu: 9000
+  # Multi-queue
+  multi-queue: false
   # IPv4 address
   ipv4: 198.18.0.1
   # IPv6 address
