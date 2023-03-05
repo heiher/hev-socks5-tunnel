@@ -9,6 +9,7 @@
 
 #if defined(__linux__)
 
+#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
@@ -41,6 +42,8 @@ hev_tunnel_open (const char *name, int multi_queue)
         goto exit;
 
     ifr.ifr_flags = IFF_TUN | IFF_NO_PI;
+    if (multi_queue)
+        ifr.ifr_flags |= IFF_MULTI_QUEUE;
     if (name)
         strncpy (ifr.ifr_name, name, IFNAMSIZ - 1);
 
@@ -136,6 +139,8 @@ hev_tunnel_set_ipv4 (const char *addr, unsigned int prefix)
     pa->sin_family = AF_INET;
     pa->sin_addr.s_addr = htonl (((unsigned int)(-1)) << (32 - prefix));
     res = ioctl (fd, SIOCSIFNETMASK, (void *)&ifr);
+    if ((res < 0) && (errno == EEXIST))
+        res = 0;
 
 exit_close:
     close (fd);
@@ -166,6 +171,8 @@ hev_tunnel_set_ipv6 (const char *addr, unsigned int prefix)
     if (!res)
         goto exit_close;
     res = ioctl (fd, SIOCSIFADDR, (void *)&ifr6);
+    if ((res < 0) && (errno == EEXIST))
+        res = 0;
 
 exit_close:
     close (fd);
