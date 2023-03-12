@@ -4,7 +4,7 @@ tunnel:
   # Interface name
   name: tun0
   # Interface MTU
-  mtu: 9000
+  mtu: 8500
   # Multi-queue
   multi-queue: false
   # IPv4 address
