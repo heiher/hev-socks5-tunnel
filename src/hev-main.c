@@ -95,29 +95,33 @@ hev_socks5_tunnel_main (const char *config_path, int tun_fd)
     int nofile;
     int res;
 
-    res = hev_task_system_init ();
-    if (res < 0)
-        return -1;
-
     res = hev_config_init (config_path);
     if (res < 0)
-        return -2;
+        return -1;
 
     log_file = hev_config_get_misc_log_file ();
     log_level = hev_config_get_misc_log_level ();
 
     res = hev_logger_init (log_level, log_file);
     if (res < 0)
-        return -3;
+        return -2;
 
     res = hev_socks5_logger_init (log_level, log_file);
     if (res < 0)
-        return -4;
+        return -3;
 
     nofile = hev_config_get_misc_limit_nofile ();
     res = set_limit_nofile (nofile);
     if (res < 0)
         LOG_W ("set limit nofile");
+
+    pid_file = hev_config_get_misc_pid_file ();
+    if (pid_file)
+        run_as_daemon (pid_file);
+
+    res = hev_task_system_init ();
+    if (res < 0)
+        return -4;
 
     lwip_init ();
 
@@ -125,19 +129,14 @@ hev_socks5_tunnel_main (const char *config_path, int tun_fd)
     if (res < 0)
         return -5;
 
-    pid_file = hev_config_get_misc_pid_file ();
-    if (pid_file)
-        run_as_daemon (pid_file);
-
     hev_socks5_tunnel_run ();
 
     hev_socks5_tunnel_fini ();
     hev_socks5_logger_fini ();
     hev_logger_fini ();
     hev_config_fini ();
-    lwip_fini ();
-
     hev_task_system_fini ();
+    lwip_fini ();
 
     return 0;
 }
