@@ -490,6 +490,8 @@ lwip_io_task_entry (void *data)
             pbuf_free (buf);
         hev_task_mutex_unlock (&mutex);
     }
+
+    hev_task_del_fd (task_lwip_io, tun_fd);
 }
 
 static void
