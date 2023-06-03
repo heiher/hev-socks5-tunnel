@@ -173,7 +173,7 @@ void hev_socks5_tunnel_quit (void);
 
 ## Contributors
 
-* **daemooon** - https://github.com/daemooon
+* **arror** - https://github.com/arror
 * **hev** - https://hev.cc
 
 ## License
