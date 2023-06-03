@@ -12,7 +12,7 @@
 
 #define MAJOR_VERSION (2)
 #define MINOR_VERSION (5)
-#define MICRO_VERSION (1)
+#define MICRO_VERSION (2)
 
 static const int UDP_BUF_SIZE = 1500;
 static const int UDP_POOL_SIZE = 512;
