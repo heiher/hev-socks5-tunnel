@@ -135,8 +135,8 @@ hev_socks5_tunnel_main (const char *config_path, int tun_fd)
     hev_socks5_logger_fini ();
     hev_logger_fini ();
     hev_config_fini ();
-    hev_task_system_fini ();
     lwip_fini ();
+    hev_task_system_fini ();
 
     return 0;
 }
