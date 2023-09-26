@@ -1,4 +1,4 @@
 module HevSocks5Tunnel {
-    umbrella header "hev-socks5-tunnel.h"
+    umbrella header "hev-main.h"
     export *
 }
