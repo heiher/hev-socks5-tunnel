@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# buildStatic iphoneos -mios-version-min=16.0 arm64
+# buildStatic iphoneos -mios-version-min=15.0 arm64
 buildStatic()
 {
-	echo "build for '$1', '$2', '$3'"
+     echo "build for '$1', '$2', '$3'"
      make PP="xcrun --sdk $1 --toolchain $1 clang" \
           CC="xcrun --sdk $1 --toolchain $1 clang" \
           CFLAGS="-arch $3 $2" \
@@ -19,32 +19,33 @@ buildStatic()
      make clean
 }
 
-buildStatic iphoneos -mios-version-min=16.0 arm64
-buildStatic iphonesimulator -miphonesimulator-version-min=16.0 x86_64
-buildStatic iphonesimulator -miphonesimulator-version-min=16.0 arm64
-buildStatic macosx -mmacosx-version-min=13.3 x86_64
-buildStatic macosx -mmacosx-version-min=13.3 arm64
+mergeStatic()
+{
+     local AMD_LIB_FILE="libhev-socks5-tunnel-$1-x86_64.a"
+     local ARM_LIB_FILE="libhev-socks5-tunnel-$1-arm64.a"
+     local OUTPUT_LIB_FILE="libhev-socks5-tunnel-$1.a"
+     lipo -create \
+	-arch x86_64 $AMD_LIB_FILE \
+	-arch arm64  $ARM_LIB_FILE \
+	-output $OUTPUT_LIB_FILE
+}
 
-lipo -create \
-	-arch x86_64 libhev-socks5-tunnel-iphonesimulator-x86_64.a \
-	-arch arm64  libhev-socks5-tunnel-iphonesimulator-arm64.a \
-	-output libhev-socks5-tunnel-iphonesimulator.a
+buildStatic iphoneos -mios-version-min=15.0 arm64
+buildStatic iphonesimulator -miphonesimulator-version-min=15.0 x86_64
+buildStatic iphonesimulator -miphonesimulator-version-min=15.0 arm64
+mergeStatic iphonesimulator
 
-lipo -create \
-	-arch x86_64 libhev-socks5-tunnel-macosx-x86_64.a \
-	-arch arm64 libhev-socks5-tunnel-macosx-arm64.a \
-	-output libhev-socks5-tunnel-macosx.a
+buildStatic macosx -mmacosx-version-min=12.0 x86_64
+buildStatic macosx -mmacosx-version-min=12.0 arm64
+mergeStatic macosx
 
+cp module.modulemap include/
+rm -rf HevSocks5Tunnel.xcframework
 xcodebuild -create-xcframework \
     -library libhev-socks5-tunnel-iphoneos-arm64.a -headers include \
-    -library libhev-socks5-tunnel-macosx.a -headers include \
     -library libhev-socks5-tunnel-iphonesimulator.a -headers include \
-    -output libhev-socks5-tunnel.xcframework
+    -library libhev-socks5-tunnel-macosx.a -headers include \
+    -output HevSocks5Tunnel.xcframework
 
-rm -rf libhev-socks5-tunnel-iphoneos-arm64.a
-rm -rf libhev-socks5-tunnel-macosx-arm64.a
-rm -rf libhev-socks5-tunnel-macosx-x86_64.a
-rm -rf libhev-socks5-tunnel-macosx.a
-rm -rf libhev-socks5-tunnel-iphonesimulator-x86_64.a
-rm -rf libhev-socks5-tunnel-iphonesimulator-arm64.a
-rm -rf libhev-socks5-tunnel-iphonesimulator.a
+rm -rf include/module.modulemap
+rm -rf libhev-socks5-tunnel-*.a
