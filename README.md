@@ -125,15 +125,18 @@ socks5:
 ### Run
 
 ```bash
+# Set socks5.mark = 438
 bin/hev-socks5-tunnel conf/main.yml
 
 # Bypass upstream socks5 server
-sudo ip route add SOCKS5_SERVER dev DEFAULT_IFACE metric 10
-sudo ip -6 route add SOCKS5_SERVER dev DEFAULT_IFACE metric 10
+sudo ip rule add fwmark 0x438 lookup main pref 10
+sudo ip -6 rule add fwmark 0x438 lookup main pref 10
 
 # Route others
-sudo ip route add default dev tun0 metric 20
-sudo ip -6 route add default dev tun0 metric 20
+sudo ip route add default dev tun0 table 20
+sudo ip rule add lookup 20 pref 20
+sudo ip -6 route add default dev tun0 table 20
+sudo ip -6 rule add lookup 20 pref 20
 ```
 
 ## API
