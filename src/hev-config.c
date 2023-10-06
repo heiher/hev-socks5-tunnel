@@ -182,6 +182,7 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
     const char *udpm = NULL;
     const char *user = NULL;
     const char *pass = NULL;
+    const char *mark = NULL;
 
     if (!base || YAML_MAPPING_NODE != base->type)
         return -1;
@@ -214,6 +215,8 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
             user = value;
         else if (0 == strcmp (key, "password"))
             pass = value;
+        else if (0 == strcmp (key, "mark"))
+            mark = value;
     }
 
     if (!port) {
@@ -243,6 +246,9 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
         srv.user = _user;
         srv.pass = _pass;
     }
+
+    if (mark)
+        srv.mark = strtoul (mark, NULL, 16);
 
     return 0;
 }

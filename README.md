@@ -102,6 +102,8 @@ socks5:
 # username: 'username'
   # Socks5 server password
 # password: 'password'
+  # Socket mark
+# mark: 0
 
 #misc:
    # task stack size (bytes)

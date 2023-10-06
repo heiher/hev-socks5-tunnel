@@ -19,6 +19,7 @@
 #include <hev-memory-allocator.h>
 #include <hev-socks5-misc.h>
 
+#include "hev-config.h"
 #include "hev-logger.h"
 #include "hev-config-const.h"
 
@@ -159,6 +160,31 @@ hev_socks5_session_tcp_new (struct tcp_pcb *pcb, HevTaskMutex *mutex)
     LOG_D ("%p socks5 session tcp new", self);
 
     return self;
+}
+
+static int
+hev_socks5_session_tcp_bind (HevSocks5 *self, int fd,
+                             const struct sockaddr *dest)
+{
+    LOG_D ("%p socks5 session tcp bind", self);
+
+#if defined(__linux__)
+    HevConfigServer *srv;
+
+    srv = hev_config_get_socks5_server ();
+
+    if (srv->mark) {
+        unsigned int mark;
+        int res;
+
+        mark = srv->mark;
+        res = setsockopt (fd, SOL_SOCKET, SO_MARK, &mark, sizeof (mark));
+        if (res < 0)
+            return -1;
+    }
+#endif
+
+    return 0;
 }
 
 static void
@@ -313,6 +339,7 @@ hev_socks5_session_tcp_class (void)
     HevObjectClass *okptr = HEV_OBJECT_CLASS (kptr);
 
     if (!okptr->name) {
+        HevSocks5Class *skptr;
         HevSocks5SessionIface *siptr;
         void *ptr;
 
@@ -322,6 +349,9 @@ hev_socks5_session_tcp_class (void)
         okptr->name = "HevSocks5SessionTCP";
         okptr->finalizer = hev_socks5_session_tcp_destruct;
         okptr->iface = hev_socks5_session_tcp_iface;
+
+        skptr = HEV_SOCKS5_CLASS (kptr);
+        skptr->binder = hev_socks5_session_tcp_bind;
 
         siptr = &kptr->session;
         siptr->splicer = hev_socks5_session_tcp_splice;

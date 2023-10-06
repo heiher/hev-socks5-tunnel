@@ -16,6 +16,7 @@ struct _HevConfigServer
 {
     const char *user;
     const char *pass;
+    unsigned int mark;
     short udp_in_udp;
     unsigned short port;
     char addr[256];

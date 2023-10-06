@@ -257,6 +257,31 @@ exit:
     hev_task_wakeup (splice->task);
 }
 
+static int
+hev_socks5_session_udp_bind (HevSocks5 *self, int fd,
+                             const struct sockaddr *dest)
+{
+    LOG_D ("%p socks5 session udp bind", self);
+
+#if defined(__linux__)
+    HevConfigServer *srv;
+
+    srv = hev_config_get_socks5_server ();
+
+    if (srv->mark) {
+        unsigned int mark;
+        int res;
+
+        mark = srv->mark;
+        res = setsockopt (fd, SOL_SOCKET, SO_MARK, &mark, sizeof (mark));
+        if (res < 0)
+            return -1;
+    }
+#endif
+
+    return 0;
+}
+
 static void
 hev_socks5_session_udp_splice (HevSocks5Session *base)
 {
@@ -397,6 +422,7 @@ hev_socks5_session_udp_class (void)
     HevObjectClass *okptr = HEV_OBJECT_CLASS (kptr);
 
     if (!okptr->name) {
+        HevSocks5Class *skptr;
         HevSocks5SessionIface *siptr;
         void *ptr;
 
@@ -406,6 +432,9 @@ hev_socks5_session_udp_class (void)
         okptr->name = "HevSocks5SessionUDP";
         okptr->finalizer = hev_socks5_session_udp_destruct;
         okptr->iface = hev_socks5_session_udp_iface;
+
+        skptr = HEV_SOCKS5_CLASS (kptr);
+        skptr->binder = hev_socks5_session_udp_bind;
 
         siptr = &kptr->session;
         siptr->splicer = hev_socks5_session_udp_splice;
