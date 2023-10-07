@@ -166,23 +166,25 @@ static int
 hev_socks5_session_tcp_bind (HevSocks5 *self, int fd,
                              const struct sockaddr *dest)
 {
-    LOG_D ("%p socks5 session tcp bind", self);
-
-#if defined(__linux__)
     HevConfigServer *srv;
+
+    LOG_D ("%p socks5 session tcp bind", self);
 
     srv = hev_config_get_socks5_server ();
 
     if (srv->mark) {
         unsigned int mark;
-        int res;
+        int res = 0;
 
         mark = srv->mark;
+#if defined(__linux__)
         res = setsockopt (fd, SOL_SOCKET, SO_MARK, &mark, sizeof (mark));
+#elif defined(__FreeBSD__)
+        res = setsockopt (fd, SOL_SOCKET, SO_USER_COOKIE, &mark, sizeof (mark));
+#endif
         if (res < 0)
             return -1;
     }
-#endif
 
     return 0;
 }
