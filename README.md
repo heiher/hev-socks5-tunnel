@@ -179,7 +179,9 @@ void hev_socks5_tunnel_quit (void);
 ## Contributors
 
 * **arror** - https://github.com/arror
+* **heiby** - https://github.com/heiby
 * **hev** - https://hev.cc
+* **yiguoapp** - https://github.com/yiguoapp
 
 ## License
 
