@@ -290,16 +290,16 @@ hev_socks5_session_udp_bind (HevSocks5 *self, int fd,
                              const struct sockaddr *dest)
 {
     HevConfigServer *srv;
+    unsigned int mark;
 
     LOG_D ("%p socks5 session udp bind", self);
 
     srv = hev_config_get_socks5_server ();
+    mark = srv->mark;
 
-    if (srv->mark) {
-        unsigned int mark;
+    if (mark) {
         int res = 0;
 
-        mark = srv->mark;
 #if defined(__linux__)
         res = setsockopt (fd, SOL_SOCKET, SO_MARK, &mark, sizeof (mark));
 #elif defined(__FreeBSD__)

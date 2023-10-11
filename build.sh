@@ -9,7 +9,7 @@ buildStatic()
 
      make PP="xcrun --sdk $1 --toolchain $1 clang" \
           CC="xcrun --sdk $1 --toolchain $1 clang" \
-          CFLAGS="-arch $2 $3 -Wno-unused-but-set-variable" \
+          CFLAGS="-arch $2 $3" \
           LFLAGS="-arch $2 $3 -Wl,-Bsymbolic-functions" static
 
      local OUTPUT_DIR="$XCFRAMEWORK_DIR/$1-$2"
