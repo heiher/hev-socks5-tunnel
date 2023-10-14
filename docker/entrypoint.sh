@@ -2,6 +2,7 @@
 
 TUN="${TUN:-tun0}"
 MTU="${MTU:-8500}"
+NET="${NET:-172.17.0.0/16}"
 IPV4="${IPV4:-198.18.0.1}"
 SOCKS5_ADDR="${SOCKS5_ADDR:-192.168.0.1}"
 SOCKS5_PORT="${SOCKS5_PORT:-1080}"
@@ -37,8 +38,12 @@ config_route() {
   ip route flush table ${TABLE} > /dev/null 2>&1
   ip route add default dev ${TUN} table ${TABLE}
   ip rule delete pref 10 > /dev/null 2>&1
+  ip rule delete pref 11 > /dev/null 2>&1
+  ip rule delete pref 12 > /dev/null 2>&1
   ip rule delete pref 20 > /dev/null 2>&1
   ip rule add fwmark 0x${MARK} lookup main pref 10
+  ip rule add from ${NET} lookup main pref 11
+  ip rule add to ${NET} lookup main pref 12
   ip rule add lookup ${TABLE} pref 20
 }
 
