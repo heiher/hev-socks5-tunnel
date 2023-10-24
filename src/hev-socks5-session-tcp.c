@@ -223,6 +223,14 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
         if (task_io_yielder (type, base) < 0)
             break;
     }
+
+    while (self->pcb) {
+        if (hev_ring_buffer_get_use_size (self->buffer) == 0)
+            break;
+
+        if (task_io_yielder (HEV_TASK_WAITIO, base) < 0)
+            break;
+    }
 }
 
 static HevTask *
@@ -307,9 +315,7 @@ hev_socks5_session_tcp_destruct (HevObject *base)
         tcp_recv (self->pcb, NULL);
         tcp_sent (self->pcb, NULL);
         tcp_err (self->pcb, NULL);
-
-        if (tcp_close (self->pcb) != ERR_OK)
-            tcp_abort (self->pcb);
+        tcp_abort (self->pcb);
     }
 
     if (self->queue)
