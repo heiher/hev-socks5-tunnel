@@ -174,7 +174,7 @@ void hev_socks5_tunnel_quit (void);
 
 ### iOS
 
-* [Tun2SocksKit](https://github.com/daemooon/Tun2SocksKit)
+* [Tun2SocksKit](https://github.com/EbrahimTahernejad/Tun2SocksKit)
 
 ## Contributors
 
