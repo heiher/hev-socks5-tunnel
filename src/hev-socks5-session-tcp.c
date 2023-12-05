@@ -77,7 +77,9 @@ tcp_splice_b (HevSocks5SessionTCP *self)
     if (0 >= s) {
         if ((0 > s) && (EAGAIN == errno))
             return 0;
-        return -1;
+        iovlen = hev_ring_buffer_reading (self->buffer, iov);
+        if (iovlen <= 0)
+            return -1;
     }
     hev_ring_buffer_write_finish (self->buffer, s);
 
@@ -213,7 +215,7 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
         if (res_b >= 0)
             res_b = tcp_splice_b (self);
 
-        if (res_f < 0 || res_b < 0)
+        if (res_f < 0 && res_b < 0)
             break;
         else if (res_f > 0 || res_b > 0)
             type = HEV_TASK_YIELD;
