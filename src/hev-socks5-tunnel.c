@@ -42,6 +42,11 @@ static int tun_fd;
 static int tun_fd_close;
 static int event_fds[2];
 
+static size_t stat_tx_packets;
+static size_t stat_rx_packets;
+static size_t stat_tx_bytes;
+static size_t stat_rx_bytes;
+
 static struct netif netif;
 static struct tcp_pcb *tcp;
 static struct udp_pcb *udp;
@@ -131,6 +136,11 @@ hev_socks5_tunnel_init (int tunfd)
         goto exit_free_task_lwip_timer;
     }
 
+    stat_tx_packets = 0;
+    stat_rx_packets = 0;
+    stat_tx_bytes = 0;
+    stat_rx_bytes = 0;
+
     return 0;
 
 exit_free_task_lwip_timer:
@@ -203,6 +213,25 @@ hev_socks5_tunnel_stop (void)
     val = write (event_fds[1], &val, sizeof (val));
     if (val < 0)
         LOG_E ("socks5 tunnel write event");
+}
+
+void
+hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
+                         size_t *rx_packets, size_t *rx_bytes)
+{
+    LOG_D ("socks5 tunnel stats");
+
+    if (tx_packets)
+        *tx_packets = stat_tx_packets;
+
+    if (tx_bytes)
+        *tx_bytes = stat_tx_bytes;
+
+    if (rx_packets)
+        *rx_packets = stat_rx_packets;
+
+    if (rx_bytes)
+        *rx_bytes = stat_rx_bytes;
 }
 
 static int
@@ -296,6 +325,9 @@ netif_output_handler (struct netif *netif, struct pbuf *p)
         LOG_W ("socks5 tunnel write");
         return ERR_IF;
     }
+
+    stat_rx_packets++;
+    stat_rx_bytes += s;
 
     return ERR_OK;
 }
@@ -484,6 +516,9 @@ lwip_io_task_entry (void *data)
             pbuf_free (buf);
             continue;
         }
+
+        stat_tx_packets++;
+        stat_tx_bytes += s;
 
         hev_task_mutex_lock (&mutex);
         if (netif.input (buf, &netif) != ERR_OK)

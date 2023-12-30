@@ -164,6 +164,20 @@ int hev_socks5_tunnel_main (const char *config_path, int tun_fd);
  * Since: 2.4.6
  */
 void hev_socks5_tunnel_quit (void);
+
+/**
+ * hev_socks5_tunnel_stats:
+ * @tx_packets (out): transmitted packets
+ * @tx_bytes (out): transmitted bytes
+ * @rx_packets (out): received packets
+ * @rx_bytes (out): received bytes
+ *
+ * Retrieve tunnel interface traffic statistics.
+ *
+ * Since: 2.6.5
+ */
+void hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
+                              size_t *rx_packets, size_t *rx_bytes);
 ```
 
 ## Use Cases
