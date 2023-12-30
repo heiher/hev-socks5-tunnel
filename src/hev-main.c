@@ -13,7 +13,6 @@
 #include <sys/resource.h>
 
 #include <lwip/init.h>
-#include <lwip/priv/tcp_priv.h>
 
 #include <hev-task.h>
 #include <hev-task-system.h>
@@ -69,23 +68,6 @@ set_limit_nofile (int limit_nofile)
     return setrlimit (RLIMIT_NOFILE, &limit);
 }
 
-static void
-lwip_fini (void)
-{
-    int i;
-
-    for (i = 0; i < NUM_TCP_PCB_LISTS; i++) {
-        struct tcp_pcb *cpcb;
-
-        for (cpcb = *tcp_pcb_lists[i]; cpcb;) {
-            struct tcp_pcb *p = cpcb;
-
-            cpcb = cpcb->next;
-            tcp_abort (p);
-        }
-    }
-}
-
 int
 hev_socks5_tunnel_main (const char *config_path, int tun_fd)
 {
@@ -135,7 +117,6 @@ hev_socks5_tunnel_main (const char *config_path, int tun_fd)
     hev_socks5_logger_fini ();
     hev_logger_fini ();
     hev_config_fini ();
-    lwip_fini ();
     hev_task_system_fini ();
 
     return 0;
