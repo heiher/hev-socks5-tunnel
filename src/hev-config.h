@@ -30,12 +30,7 @@ unsigned int hev_config_get_tunnel_mtu (void);
 int hev_config_get_tunnel_multi_queue (void);
 
 const char *hev_config_get_tunnel_ipv4_address (void);
-const char *hev_config_get_tunnel_ipv4_gateway (void);
-unsigned int hev_config_get_tunnel_ipv4_prefix (void);
-
 const char *hev_config_get_tunnel_ipv6_address (void);
-const char *hev_config_get_tunnel_ipv6_gateway (void);
-unsigned int hev_config_get_tunnel_ipv6_prefix (void);
 
 HevConfigServer *hev_config_get_socks5_server (void);
 

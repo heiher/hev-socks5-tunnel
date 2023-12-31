@@ -19,12 +19,7 @@ static unsigned int tun_mtu = 8500;
 static int multi_queue;
 
 static char tun_ipv4_address[16];
-static char tun_ipv4_gateway[16];
-static unsigned int tun_ipv4_prefix;
-
 static char tun_ipv6_address[64];
-static char tun_ipv6_gateway[64];
-static unsigned int tun_ipv6_prefix;
 
 static HevConfigServer srv;
 
@@ -64,10 +59,6 @@ hev_config_parse_tunnel_ipv4 (yaml_document_t *doc, yaml_node_t *base)
 
         if (0 == strcmp (key, "address"))
             strncpy (tun_ipv4_address, value, 16 - 1);
-        else if (0 == strcmp (key, "gateway"))
-            strncpy (tun_ipv4_gateway, value, 16 - 1);
-        else if (0 == strcmp (key, "prefix"))
-            tun_ipv4_prefix = strtoul (value, NULL, 10);
     }
 
     return 0;
@@ -101,10 +92,6 @@ hev_config_parse_tunnel_ipv6 (yaml_document_t *doc, yaml_node_t *base)
 
         if (0 == strcmp (key, "address"))
             strncpy (tun_ipv6_address, value, 64 - 1);
-        else if (0 == strcmp (key, "gateway"))
-            strncpy (tun_ipv6_gateway, value, 64 - 1);
-        else if (0 == strcmp (key, "prefix"))
-            tun_ipv6_prefix = strtoul (value, NULL, 10);
     }
 
     return 0;
@@ -155,18 +142,6 @@ hev_config_parse_tunnel (yaml_document_t *doc, yaml_node_t *base)
                 hev_config_parse_tunnel_ipv6 (doc, node);
         }
     }
-
-    if (!tun_ipv4_gateway[0])
-        strcpy (tun_ipv4_gateway, "127.0.0.1");
-
-    if (!tun_ipv6_gateway[0])
-        strcpy (tun_ipv6_gateway, "::1");
-
-    if (!tun_ipv4_prefix)
-        tun_ipv4_prefix = 32;
-
-    if (!tun_ipv6_prefix)
-        tun_ipv6_prefix = 128;
 
     return 0;
 }
@@ -421,42 +396,12 @@ hev_config_get_tunnel_ipv4_address (void)
 }
 
 const char *
-hev_config_get_tunnel_ipv4_gateway (void)
-{
-    if (!tun_ipv4_gateway[0])
-        return NULL;
-
-    return tun_ipv4_gateway;
-}
-
-unsigned int
-hev_config_get_tunnel_ipv4_prefix (void)
-{
-    return tun_ipv4_prefix;
-}
-
-const char *
 hev_config_get_tunnel_ipv6_address (void)
 {
     if (!tun_ipv6_address[0])
         return NULL;
 
     return tun_ipv6_address;
-}
-
-const char *
-hev_config_get_tunnel_ipv6_gateway (void)
-{
-    if (!tun_ipv6_gateway[0])
-        return NULL;
-
-    return tun_ipv6_gateway;
-}
-
-unsigned int
-hev_config_get_tunnel_ipv6_prefix (void)
-{
-    return tun_ipv6_prefix;
 }
 
 HevConfigServer *

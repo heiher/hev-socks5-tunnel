@@ -10,7 +10,7 @@
 #ifndef __HEV_SOCKS5_TUNNEL_H__
 #define __HEV_SOCKS5_TUNNEL_H__
 
-int hev_socks5_tunnel_init (int tunfd);
+int hev_socks5_tunnel_init (int tun_fd);
 void hev_socks5_tunnel_fini (void);
 
 int hev_socks5_tunnel_run (void);

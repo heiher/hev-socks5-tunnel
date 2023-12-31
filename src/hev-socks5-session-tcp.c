@@ -9,8 +9,8 @@
 
 #include <errno.h>
 #include <string.h>
+
 #include <lwip/tcp.h>
-#include <netinet/in.h>
 
 #include <hev-task.h>
 #include <hev-task-io.h>
@@ -19,6 +19,7 @@
 #include <hev-memory-allocator.h>
 #include <hev-socks5-misc.h>
 
+#include "hev-utils.h"
 #include "hev-config.h"
 #include "hev-logger.h"
 #include "hev-config-const.h"
@@ -177,13 +178,9 @@ hev_socks5_session_tcp_bind (HevSocks5 *self, int fd,
     mark = srv->mark;
 
     if (mark) {
-        int res = 0;
+        int res;
 
-#if defined(__linux__)
-        res = setsockopt (fd, SOL_SOCKET, SO_MARK, &mark, sizeof (mark));
-#elif defined(__FreeBSD__)
-        res = setsockopt (fd, SOL_SOCKET, SO_USER_COOKIE, &mark, sizeof (mark));
-#endif
+        res = set_sock_mark (fd, mark);
         if (res < 0)
             return -1;
     }
@@ -233,6 +230,8 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
         if (task_io_yielder (HEV_TASK_WAITIO, base) < 0)
             break;
     }
+
+    hev_ring_buffer_destroy (self->buffer);
 }
 
 static HevTask *
@@ -263,27 +262,14 @@ int
 hev_socks5_session_tcp_construct (HevSocks5SessionTCP *self,
                                   struct tcp_pcb *pcb, HevTaskMutex *mutex)
 {
-    struct sockaddr_in6 ad6;
-    struct sockaddr_in ad4;
+    struct sockaddr_in6 addr6;
     struct sockaddr *addr;
     int res;
 
-    switch (pcb->local_ip.type) {
-    case IPADDR_TYPE_V4:
-        ad4.sin_family = AF_INET;
-        ad4.sin_port = htons (pcb->local_port);
-        memcpy (&ad4.sin_addr, &pcb->local_ip, 4);
-        addr = (struct sockaddr *)&ad4;
-        break;
-    case IPADDR_TYPE_V6:
-        ad6.sin6_family = AF_INET6;
-        ad6.sin6_port = htons (pcb->local_port);
-        memcpy (&ad6.sin6_addr, &pcb->local_ip, 16);
-        addr = (struct sockaddr *)&ad6;
-        break;
-    default:
+    addr = (struct sockaddr *)&addr6;
+    res = lwip_to_sock_addr (&pcb->local_ip, pcb->local_port, addr);
+    if (res < 0)
         return -1;
-    }
 
     res = hev_socks5_client_tcp_construct_ip (&self->base, addr);
     if (res < 0)
@@ -323,9 +309,6 @@ hev_socks5_session_tcp_destruct (HevObject *base)
     if (self->queue)
         pbuf_free (self->queue);
     hev_task_mutex_unlock (self->mutex);
-
-    if (self->buffer)
-        hev_ring_buffer_destroy (self->buffer);
 
     HEV_SOCKS5_CLIENT_TCP_TYPE->finalizer (base);
 }
