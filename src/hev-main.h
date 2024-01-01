@@ -10,6 +10,8 @@
 #ifndef __HEV_MAIN_H__
 #define __HEV_MAIN_H__
 
+#include<stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
