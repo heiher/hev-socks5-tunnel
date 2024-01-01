@@ -11,6 +11,10 @@ tunnel:
   ipv4: 198.18.0.1
   # IPv6 address
   ipv6: 'fc00::1'
+  # Post up script
+# post-up-script: up.sh
+  # Pre down script
+# pre-down-script: down.sh
 
 socks5:
   # Socks5 server port

@@ -32,6 +32,9 @@ int hev_config_get_tunnel_multi_queue (void);
 const char *hev_config_get_tunnel_ipv4_address (void);
 const char *hev_config_get_tunnel_ipv6_address (void);
 
+const char *hev_config_get_tunnel_post_up_script (void);
+const char *hev_config_get_tunnel_pre_down_script (void);
+
 HevConfigServer *hev_config_get_socks5_server (void);
 
 int hev_config_get_misc_task_stack_size (void);

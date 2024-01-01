@@ -1,0 +1,46 @@
+/*
+ ============================================================================
+ Name        : hev-exec.c
+ Author      : hev <r@hev.cc>
+ Copyright   : Copyright (c) 2023 hev
+ Description : Exec
+ ============================================================================
+ */
+
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
+#include "hev-logger.h"
+
+#include "hev-exec.h"
+
+static void
+signal_handler (int signum)
+{
+    waitpid (-1, NULL, WNOHANG);
+}
+
+void
+hev_exec_run (const char *script_path, const char *tun_name, int wait)
+{
+    pid_t pid;
+
+    signal (SIGCHLD, signal_handler);
+
+    pid = fork ();
+    if (pid < 0) {
+        LOG_E ("exec fork");
+        return;
+    } else if (pid != 0) {
+        if (wait)
+            waitpid (pid, NULL, 0);
+        return;
+    }
+
+    execl (script_path, script_path, tun_name, NULL);
+
+    LOG_E ("exec %s %s", script_path, tun_name);
+    exit (-1);
+}

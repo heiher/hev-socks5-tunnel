@@ -27,6 +27,7 @@ void hev_tunnel_close (int fd);
 
 int hev_tunnel_set_mtu (int mtu);
 int hev_tunnel_set_state (int state);
+const char *hev_tunnel_get_name (void);
 
 int hev_tunnel_set_ipv4 (const char *addr, unsigned int prefix);
 int hev_tunnel_set_ipv6 (const char *addr, unsigned int prefix);

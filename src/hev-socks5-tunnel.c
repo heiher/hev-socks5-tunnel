@@ -26,6 +26,7 @@
 #include <hev-task-system.h>
 #include <hev-memory-allocator.h>
 
+#include "hev-exec.h"
 #include "hev-list.h"
 #include "hev-compiler.h"
 #include "hev-config.h"
@@ -297,7 +298,7 @@ lwip_timer_task_entry (void *data)
 static int
 tunnel_init (int extern_tun_fd)
 {
-    const char *name, *ipv4, *ipv6;
+    const char *script_path, *name, *ipv4, *ipv6;
     int multi_queue, res;
     unsigned int mtu;
 
@@ -345,6 +346,10 @@ tunnel_init (int extern_tun_fd)
         return -1;
     }
 
+    script_path = hev_config_get_tunnel_post_up_script ();
+    if (script_path)
+        hev_exec_run (script_path, hev_tunnel_get_name (), 0);
+
     tun_fd_local = 1;
     return 0;
 }
@@ -352,10 +357,17 @@ tunnel_init (int extern_tun_fd)
 static void
 tunnel_fini (void)
 {
-    if (tun_fd_local) {
-        hev_tunnel_close (tun_fd);
-        tun_fd = -1;
-    }
+    const char *script_path;
+
+    if (!tun_fd_local)
+        return;
+
+    script_path = hev_config_get_tunnel_pre_down_script ();
+    if (script_path)
+        hev_exec_run (script_path, hev_tunnel_get_name (), 1);
+
+    hev_tunnel_close (tun_fd);
+    tun_fd = -1;
 }
 
 static int

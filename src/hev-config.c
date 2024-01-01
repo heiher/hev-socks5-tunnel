@@ -21,6 +21,9 @@ static int multi_queue;
 static char tun_ipv4_address[16];
 static char tun_ipv6_address[64];
 
+static char tun_post_up_script[1024];
+static char tun_pre_down_script[1024];
+
 static HevConfigServer srv;
 
 static char log_file[1024];
@@ -135,6 +138,10 @@ hev_config_parse_tunnel (yaml_document_t *doc, yaml_node_t *base)
                 strncpy (tun_ipv4_address, value, 16 - 1);
             else if (0 == strcmp (key, "ipv6"))
                 strncpy (tun_ipv6_address, value, 64 - 1);
+            else if (0 == strcmp (key, "post-up-script"))
+                strncpy (tun_post_up_script, value, 64 - 1);
+            else if (0 == strcmp (key, "pre-down-script"))
+                strncpy (tun_pre_down_script, value, 64 - 1);
         } else {
             if (0 == strcmp (key, "ipv4"))
                 hev_config_parse_tunnel_ipv4 (doc, node);
@@ -402,6 +409,24 @@ hev_config_get_tunnel_ipv6_address (void)
         return NULL;
 
     return tun_ipv6_address;
+}
+
+const char *
+hev_config_get_tunnel_post_up_script (void)
+{
+    if (!tun_post_up_script[0])
+        return NULL;
+
+    return tun_post_up_script;
+}
+
+const char *
+hev_config_get_tunnel_pre_down_script (void)
+{
+    if (!tun_pre_down_script[0])
+        return NULL;
+
+    return tun_pre_down_script;
 }
 
 HevConfigServer *

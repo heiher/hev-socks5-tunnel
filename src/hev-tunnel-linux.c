@@ -112,6 +112,12 @@ exit:
     return res;
 }
 
+const char *
+hev_tunnel_get_name (void)
+{
+    return tun_name;
+}
+
 int
 hev_tunnel_set_ipv4 (const char *addr, unsigned int prefix)
 {
