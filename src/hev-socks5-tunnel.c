@@ -547,11 +547,6 @@ hev_socks5_tunnel_init (int tun_fd)
 
     hev_task_mutex_init (&mutex);
 
-    stat_tx_packets = 0;
-    stat_rx_packets = 0;
-    stat_tx_bytes = 0;
-    stat_rx_bytes = 0;
-
     return 0;
 
 exit:
@@ -569,6 +564,11 @@ hev_socks5_tunnel_fini (void)
     event_task_fini ();
     gateway_fini ();
     tunnel_fini ();
+
+    stat_tx_packets = 0;
+    stat_rx_packets = 0;
+    stat_tx_bytes = 0;
+    stat_rx_bytes = 0;
 }
 
 int
