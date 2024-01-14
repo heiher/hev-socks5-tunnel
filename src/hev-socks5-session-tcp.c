@@ -310,7 +310,7 @@ hev_socks5_session_tcp_destruct (HevObject *base)
         pbuf_free (self->queue);
     hev_task_mutex_unlock (self->mutex);
 
-    HEV_SOCKS5_CLIENT_TCP_TYPE->finalizer (base);
+    HEV_SOCKS5_CLIENT_TCP_TYPE->destruct (base);
 }
 
 static void *
@@ -340,7 +340,7 @@ hev_socks5_session_tcp_class (void)
         memcpy (kptr, ptr, sizeof (HevSocks5ClientTCPClass));
 
         okptr->name = "HevSocks5SessionTCP";
-        okptr->finalizer = hev_socks5_session_tcp_destruct;
+        okptr->destruct = hev_socks5_session_tcp_destruct;
         okptr->iface = hev_socks5_session_tcp_iface;
 
         skptr = HEV_SOCKS5_CLASS (kptr);

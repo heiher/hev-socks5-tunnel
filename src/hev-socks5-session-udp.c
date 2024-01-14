@@ -346,7 +346,7 @@ hev_socks5_session_udp_destruct (HevObject *base)
     }
     hev_task_mutex_unlock (self->mutex);
 
-    HEV_SOCKS5_CLIENT_UDP_TYPE->finalizer (base);
+    HEV_SOCKS5_CLIENT_UDP_TYPE->destruct (base);
 }
 
 static void *
@@ -376,7 +376,7 @@ hev_socks5_session_udp_class (void)
         memcpy (kptr, ptr, sizeof (HevSocks5ClientUDPClass));
 
         okptr->name = "HevSocks5SessionUDP";
-        okptr->finalizer = hev_socks5_session_udp_destruct;
+        okptr->destruct = hev_socks5_session_udp_destruct;
         okptr->iface = hev_socks5_session_udp_iface;
 
         skptr = HEV_SOCKS5_CLASS (kptr);
