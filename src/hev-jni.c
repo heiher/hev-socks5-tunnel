@@ -46,11 +46,13 @@ static pthread_key_t current_jni_env;
 static void native_start_service (JNIEnv *env, jobject thiz, jstring conig_path,
                                   jint fd);
 static void native_stop_service (JNIEnv *env, jobject thiz);
+static jlongArray native_get_stats (JNIEnv *env, jobject thiz);
 
 static JNINativeMethod native_methods[] = {
     { "TProxyStartService", "(Ljava/lang/String;I)V",
       (void *)native_start_service },
     { "TProxyStopService", "()V", (void *)native_stop_service },
+    { "TProxyGetStats", "()[J", (void *)native_get_stats },
 };
 
 static void
@@ -121,6 +123,25 @@ native_stop_service (JNIEnv *env, jobject thiz)
     hev_socks5_tunnel_quit ();
     pthread_join (work_thread, NULL);
     work_thread = 0;
+}
+
+static jlongArray
+native_get_stats (JNIEnv *env, jobject thiz)
+{
+    size_t tx_packets, rx_packets, tx_bytes, rx_bytes;
+    jlongArray res;
+    jlong array[4];
+
+    hev_socks5_tunnel_stats (&tx_packets, &tx_bytes, &rx_packets, &rx_bytes);
+    array[0] = tx_packets;
+    array[1] = tx_bytes;
+    array[2] = rx_packets;
+    array[3] = rx_bytes;
+
+    res = (*env)->NewLongArray (env, 4);
+    (*env)->SetLongArrayRegion (env, res, 0, 4, array);
+
+    return res;
 }
 
 #endif /* ANDROID */
