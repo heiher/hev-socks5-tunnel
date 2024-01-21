@@ -19,6 +19,7 @@ struct _HevConfigServer
     unsigned int mark;
     short udp_in_udp;
     unsigned short port;
+    unsigned char pipeline;
     char addr[256];
 };
 

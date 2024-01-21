@@ -23,6 +23,8 @@ socks5:
   address: 127.0.0.1
   # Socks5 UDP relay mode (tcp|udp)
   udp: 'udp'
+  # Socks5 handshake using pipeline mode
+# pipeline: false
   # Socks5 server username
 # username: 'username'
   # Socks5 server password
