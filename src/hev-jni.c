@@ -41,6 +41,7 @@ struct _ThreadData
 
 static JavaVM *java_vm;
 static pthread_t work_thread;
+static pthread_mutex_t mutex;
 static pthread_key_t current_jni_env;
 
 static void native_start_service (JNIEnv *env, jobject thiz, jstring conig_path,
@@ -78,6 +79,7 @@ JNI_OnLoad (JavaVM *vm, void *reserved)
     (*env)->DeleteLocalRef (env, klass);
 
     pthread_key_create (&current_jni_env, detach_current_thread);
+    pthread_mutex_init (&mutex, NULL);
 
     return JNI_VERSION_1_4;
 }
@@ -101,6 +103,7 @@ native_start_service (JNIEnv *env, jobject thiz, jstring config_path, jint fd)
     const jbyte *bytes;
     ThreadData *tdata;
 
+    pthread_mutex_lock (&mutex);
     if (work_thread)
         return;
 
@@ -112,17 +115,20 @@ native_start_service (JNIEnv *env, jobject thiz, jstring config_path, jint fd)
     (*env)->ReleaseStringUTFChars (env, config_path, (const char *)bytes);
 
     pthread_create (&work_thread, NULL, thread_handler, tdata);
+    pthread_mutex_unlock (&mutex);
 }
 
 static void
 native_stop_service (JNIEnv *env, jobject thiz)
 {
+    pthread_mutex_lock (&mutex);
     if (!work_thread)
         return;
 
     hev_socks5_tunnel_quit ();
     pthread_join (work_thread, NULL);
     work_thread = 0;
+    pthread_mutex_unlock (&mutex);
 }
 
 static jlongArray
