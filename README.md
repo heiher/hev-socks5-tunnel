@@ -130,6 +130,8 @@ socks5:
 
 ### Run
 
+#### Linux
+
 ```bash
 # Set socks5.mark = 438
 bin/hev-socks5-tunnel conf/main.yml
@@ -143,6 +145,19 @@ sudo ip route add default dev tun0 table 20
 sudo ip rule add lookup 20 pref 20
 sudo ip -6 route add default dev tun0 table 20
 sudo ip -6 rule add lookup 20 pref 20
+```
+
+#### FreeBSD/macOS
+
+```zsh
+# Bypass upstream socks5 server
+# 10.0.0.1: socks5 server
+# 10.0.2.2: default gateway
+sudo route add -net 10.0.0.1/32 10.0.2.2
+
+# Route others
+sudo route change -inet default -interface utun99
+sudo route change -inet6 default -interface utun99
 ```
 
 ## API
