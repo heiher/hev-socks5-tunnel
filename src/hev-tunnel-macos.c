@@ -64,6 +64,10 @@ hev_tunnel_open (const char *name, int multi_queue)
     sc.ss_sysaddr = AF_SYS_CONTROL;
     sc.sc_unit = 0;
 
+    res = sscanf (name, "utun%u", &sc.sc_unit);
+    if (res > 0)
+        sc.sc_unit += 1;
+
     res = connect (fd, (struct sockaddr *)&sc, sizeof (sc));
     if (res < 0)
         goto exit_close;
