@@ -340,7 +340,7 @@ hev_config_parse_doc (yaml_document_t *doc)
 }
 
 int
-hev_config_init (const char *config_path)
+hev_config_init_from_file (const char *config_path)
 {
     yaml_parser_t parser;
     yaml_document_t doc;
@@ -367,6 +367,32 @@ hev_config_init (const char *config_path)
 
 exit_close_fp:
     fclose (fp);
+exit_free_parser:
+    yaml_parser_delete (&parser);
+exit:
+    return res;
+}
+
+int
+hev_config_init_from_str (const unsigned char *config_str,
+                          unsigned int config_len)
+{
+    yaml_parser_t parser;
+    yaml_document_t doc;
+    int res = -1;
+
+    if (!yaml_parser_initialize (&parser))
+        goto exit;
+
+    yaml_parser_set_input_string (&parser, config_str, config_len);
+    if (!yaml_parser_load (&parser, &doc)) {
+        fprintf (stderr, "Failed to parse config.");
+        goto exit_free_parser;
+    }
+
+    res = hev_config_parse_doc (&doc);
+    yaml_document_delete (&doc);
+
 exit_free_parser:
     yaml_parser_delete (&parser);
 exit:
