@@ -180,11 +180,43 @@ sudo route change -inet6 default -interface utun99
  * Start and run the socks5 tunnel, this function will blocks until the
  * hev_socks5_tunnel_quit is called or an error occurs.
  *
+ * Alias of hev_socks5_tunnel_main_from_file
+ *
  * Returns: returns zero on successful, otherwise returns -1.
  *
  * Since: 2.4.6
  */
 int hev_socks5_tunnel_main (const char *config_path, int tun_fd);
+
+/**
+ * hev_socks5_tunnel_main_from_file:
+ * @config_path: config file path
+ * @tun_fd: tunnel file descriptor
+ *
+ * Start and run the socks5 tunnel, this function will blocks until the
+ * hev_socks5_tunnel_quit is called or an error occurs.
+ *
+ * Returns: returns zero on successful, otherwise returns -1.
+ *
+ * Since: 2.6.7
+ */
+int hev_socks5_tunnel_main_from_file (const char *config_path, int tun_fd);
+
+/**
+ * hev_socks5_tunnel_main_from_str:
+ * @config_str: string config
+ * @config_len: the byte length of string config
+ * @tun_fd: tunnel file descriptor
+ *
+ * Start and run the socks5 tunnel, this function will blocks until the
+ * hev_socks5_tunnel_quit is called or an error occurs.
+ *
+ * Returns: returns zero on successful, otherwise returns -1.
+ *
+ * Since: 2.6.7
+ */
+int hev_socks5_tunnel_main_from_str (const unsigned char *config_str,
+                                     unsigned int config_len, int tun_fd);
 
 /**
  * hev_socks5_tunnel_quit:

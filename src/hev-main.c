@@ -40,18 +40,14 @@ sigint_handler (int signum)
     hev_socks5_tunnel_stop ();
 }
 
-int
-hev_socks5_tunnel_main (const char *config_path, int tun_fd)
+static int
+hev_socks5_tunnel_main_inner (int tun_fd)
 {
     const char *pid_file;
     const char *log_file;
     int log_level;
     int nofile;
     int res;
-
-    res = hev_config_init (config_path);
-    if (res < 0)
-        return -1;
 
     log_file = hev_config_get_misc_log_file ();
     log_level = hev_config_get_misc_log_level ();
@@ -92,6 +88,33 @@ hev_socks5_tunnel_main (const char *config_path, int tun_fd)
     hev_task_system_fini ();
 
     return 0;
+}
+
+int
+hev_socks5_tunnel_main_from_file (const char *config_path, int tun_fd)
+{
+    int res = hev_config_init_from_file (config_path);
+    if (res < 0)
+        return -1;
+
+    return hev_socks5_tunnel_main_inner (tun_fd);
+}
+
+int
+hev_socks5_tunnel_main_from_str (const unsigned char *config_str,
+                                 unsigned int config_len, int tun_fd)
+{
+    int res = hev_config_init_from_str (config_str, config_len);
+    if (res < 0)
+        return -1;
+
+    return hev_socks5_tunnel_main_inner (tun_fd);
+}
+
+int
+hev_socks5_tunnel_main (const char *config_path, int tun_fd)
+{
+    return hev_socks5_tunnel_main_from_file (config_path, tun_fd);
 }
 
 void
