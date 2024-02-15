@@ -8,6 +8,7 @@
  */
 
 #include <stdio.h>
+#include <signal.h>
 
 #include <lwip/init.h>
 
@@ -31,6 +32,12 @@ show_help (const char *self_path)
     printf ("%s CONFIG_PATH\n", self_path);
     printf ("Version: %u.%u.%u %s\n", MAJOR_VERSION, MINOR_VERSION,
             MICRO_VERSION, COMMIT_ID);
+}
+
+static void
+sigint_handler (int signum)
+{
+    hev_socks5_tunnel_stop ();
 }
 
 int
@@ -102,6 +109,8 @@ main (int argc, char *argv[])
         show_help (argv[0]);
         return -1;
     }
+
+    signal (SIGINT, sigint_handler);
 
     res = hev_socks5_tunnel_main (argv[1], -1);
     if (res < 0)
