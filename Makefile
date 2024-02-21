@@ -12,7 +12,7 @@ CCFLAGS=-O3 -pipe -Wall -Werror $(CFLAGS) \
 		-I$(SRCDIR)/core/include  \
 		-I$(THIRDPARTDIR)/yaml/include \
 		-I$(THIRDPARTDIR)/lwip/include \
-		-I$(THIRDPARTDIR)/lwip/include/ports/unix \
+		-I$(THIRDPARTDIR)/lwip/include/ports \
 		-I$(THIRDPARTDIR)/hev-task-system/include
 LDFLAGS=$(LFLAGS) \
 		-L$(THIRDPARTDIR)/yaml/bin -lyaml \
