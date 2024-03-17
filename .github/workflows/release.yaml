@@ -1,28 +1,13 @@
 name: Release
 
 on:
-  workflow_dispatch:
-
-  push:
-    tags:
-    - '*'
-
-env:
-  MUSL_SDK_URL: https://musl.cc
-  MUSL_SDK_X86_32: i486-linux-musl-cross.tgz
-  MUSL_SDK_X86_64: x86_64-linux-musl-cross.tgz
-  MUSL_SDK_ARM_32: arm-linux-musleabi-cross.tgz
-  MUSL_SDK_ARM_64: aarch64-linux-musl-cross.tgz
-  MUSL_SDK_MIPS_32: mips-linux-muslsf-cross.tgz
-  MUSL_SDK_MIPS_32_EL: mipsel-linux-muslsf-cross.tgz
-  MUSL_SDK_MIPS_64: mips64-linux-musl-cross.tgz
-  MUSL_SDK_MIPS_64_EL: mips64el-linux-musl-cross.tgz
-  MUSL_SDK_RISCV_32: riscv32-linux-musl-cross.tgz
-  MUSL_SDK_RISCV_64: riscv64-linux-musl-cross.tgz
+  release:
+    types:
+      - published
 
 jobs:
-  build:
-    name: Build and release
+  source:
+    name: Source
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -30,193 +15,71 @@ jobs:
         with:
           fetch-depth: 1
           submodules: true
-      - name: Init
-        run: |
-          sudo apt -qq update
-          sudo apt -qq install -y wget git
-          wget -q ${{ env.MUSL_SDK_URL }}/${{ env.MUSL_SDK_X86_32 }}
-          tar xf ${{ env.MUSL_SDK_X86_32 }}
-          wget -q ${{ env.MUSL_SDK_URL }}/${{ env.MUSL_SDK_X86_64 }}
-          tar xf ${{ env.MUSL_SDK_X86_64 }}
-          wget -q ${{ env.MUSL_SDK_URL }}/${{ env.MUSL_SDK_ARM_32 }}
-          tar xf ${{ env.MUSL_SDK_ARM_32 }}
-          wget -q ${{ env.MUSL_SDK_URL }}/${{ env.MUSL_SDK_ARM_64 }}
-          tar xf ${{ env.MUSL_SDK_ARM_64 }}
-          wget -q ${{ env.MUSL_SDK_URL }}/${{ env.MUSL_SDK_MIPS_32 }}
-          tar xf ${{ env.MUSL_SDK_MIPS_32 }}
-          wget -q ${{ env.MUSL_SDK_URL }}/${{ env.MUSL_SDK_MIPS_32_EL }}
-          tar xf ${{ env.MUSL_SDK_MIPS_32_EL }}
-          wget -q ${{ env.MUSL_SDK_URL }}/${{ env.MUSL_SDK_MIPS_64 }}
-          tar xf ${{ env.MUSL_SDK_MIPS_64 }}
-          wget -q ${{ env.MUSL_SDK_URL }}/${{ env.MUSL_SDK_MIPS_64_EL }}
-          tar xf ${{ env.MUSL_SDK_MIPS_64_EL }}
-          wget -q ${{ env.MUSL_SDK_URL }}/${{ env.MUSL_SDK_RISCV_32 }}
-          tar xf ${{ env.MUSL_SDK_RISCV_32 }}
-          wget -q ${{ env.MUSL_SDK_URL }}/${{ env.MUSL_SDK_RISCV_64 }}
-          tar xf ${{ env.MUSL_SDK_RISCV_64 }}
       - name: Gen Source
         run: |
           mkdir -p hev-socks5-tunnel-${{ github.ref_name }}
           git ls-files --recurse-submodules | tar c -O -T- | tar x -C hev-socks5-tunnel-${{ github.ref_name }}
           tar caf hev-socks5-tunnel-${{ github.ref_name }}.tar.gz hev-socks5-tunnel-${{ github.ref_name }}
-      - name: Build Linux
-        run: |
-          # x86_32
-          PREFIX=$(basename ${{ env.MUSL_SDK_X86_32 }} cross.tgz)
-          make clean
-          make CROSS_PREFIX=$(pwd)/${PREFIX}cross/bin/${PREFIX} ENABLE_STATIC=1 -j
-          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-x86_32
-          # x86_64
-          PREFIX=$(basename ${{ env.MUSL_SDK_X86_64 }} cross.tgz)
-          make clean
-          make CROSS_PREFIX=$(pwd)/${PREFIX}cross/bin/${PREFIX} ENABLE_STATIC=1 -j
-          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-x86_64
-          # arm32
-          PREFIX=$(basename ${{ env.MUSL_SDK_ARM_32 }} cross.tgz)
-          make clean
-          make CROSS_PREFIX=$(pwd)/${PREFIX}cross/bin/${PREFIX} ENABLE_STATIC=1 -j
-          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-arm32
-          # arm64
-          PREFIX=$(basename ${{ env.MUSL_SDK_ARM_64 }} cross.tgz)
-          make clean
-          make CROSS_PREFIX=$(pwd)/${PREFIX}cross/bin/${PREFIX} ENABLE_STATIC=1 -j
-          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-arm64
-          # mips32
-          PREFIX=$(basename ${{ env.MUSL_SDK_MIPS_32 }} cross.tgz)
-          make clean
-          make CROSS_PREFIX=$(pwd)/${PREFIX}cross/bin/${PREFIX} ENABLE_STATIC=1 -j
-          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-mips32
-          # mips32el
-          PREFIX=$(basename ${{ env.MUSL_SDK_MIPS_32_EL }} cross.tgz)
-          make clean
-          make CROSS_PREFIX=$(pwd)/${PREFIX}cross/bin/${PREFIX} ENABLE_STATIC=1 -j
-          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-mips32el
-          # mips64
-          PREFIX=$(basename ${{ env.MUSL_SDK_MIPS_64 }} cross.tgz)
-          make clean
-          make CROSS_PREFIX=$(pwd)/${PREFIX}cross/bin/${PREFIX} ENABLE_STATIC=1 -j
-          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-mips64
-          # mips64el
-          PREFIX=$(basename ${{ env.MUSL_SDK_MIPS_64_EL }} cross.tgz)
-          make clean
-          make CROSS_PREFIX=$(pwd)/${PREFIX}cross/bin/${PREFIX} ENABLE_STATIC=1 -j
-          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-mips64el
-          # riscv32
-          PREFIX=$(basename ${{ env.MUSL_SDK_RISCV_32 }} cross.tgz)
-          make clean
-          make CROSS_PREFIX=$(pwd)/${PREFIX}cross/bin/${PREFIX} ENABLE_STATIC=1 -j
-          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-riscv32
-          # riscv64
-          PREFIX=$(basename ${{ env.MUSL_SDK_RISCV_64 }} cross.tgz)
-          make clean
-          make CROSS_PREFIX=$(pwd)/${PREFIX}cross/bin/${PREFIX} ENABLE_STATIC=1 -j
-          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-riscv64
-      - name: Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref_name }}
-          release_name: ${{ github.ref_name }}
-          draft: false
-          prerelease: false
       - name: Upload source
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hev-socks5-tunnel-${{ github.ref_name }}.tar.gz
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: hev-socks5-tunnel-${{ github.ref_name }}.tar.gz
           asset_name: hev-socks5-tunnel-${{ github.ref_name }}.tar.gz
           asset_content_type: application/octet-stream
-      - name: Upload linux-x86_32
+
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        include:
+          - name: arm64
+            tool: aarch64-unknown-linux-musl
+          - name: arm32
+            tool: arm-unknown-linux-musleabi
+          - name: arm32hf
+            tool: arm-unknown-linux-musleabihf
+          - name: loong64
+            tool: loongarch64-unknown-linux-musl
+          - name: mips64el
+            tool: mips64el-unknown-linux-musl
+          - name: mips64
+            tool: mips64-unknown-linux-musl
+          - name: mips32el
+            tool: mipsel-unknown-linux-musl
+          - name: mips32
+            tool: mips-unknown-linux-musl
+          - name: riscv32
+            tool: riscv32-unknown-linux-musl
+          - name: riscv64
+            tool: riscv64-unknown-linux-musl
+          - name: x86_32
+            tool: x86_64-multilib-linux-musl
+            env:
+              CFLAGS: "-m32"
+          - name: x86_64
+            tool: x86_64-multilib-linux-musl
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Build ${{ matrix.name }}
+        run: |
+          sudo mkdir -p /opt/x-tools
+          wget https://github.com/musl-cross/musl-cross/releases/download/20240317/${{ matrix.tool }}.tgz
+          sudo tar xf ${{ matrix.tool }}.tgz -C /opt/x-tools
+          make CROSS_PREFIX=/opt/x-tools/${{ matrix.tool }}/bin/${{ matrix.tool }}- CFLAGS=${{ matrix.env.CFLAGS }} ENABLE_STATIC=1 -j`nproc`
+      - name: Upload ${{ matrix.name }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hev-socks5-tunnel-linux-x86_32
-          asset_name: hev-socks5-tunnel-linux-x86_32
-          asset_content_type: application/octet-stream
-      - name: Upload linux-x86_64
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hev-socks5-tunnel-linux-x86_64
-          asset_name: hev-socks5-tunnel-linux-x86_64
-          asset_content_type: application/octet-stream
-      - name: Upload linux-arm32
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hev-socks5-tunnel-linux-arm32
-          asset_name: hev-socks5-tunnel-linux-arm32
-          asset_content_type: application/octet-stream
-      - name: Upload linux-arm64
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hev-socks5-tunnel-linux-arm64
-          asset_name: hev-socks5-tunnel-linux-arm64
-          asset_content_type: application/octet-stream
-      - name: Upload linux-mips32
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hev-socks5-tunnel-linux-mips32
-          asset_name: hev-socks5-tunnel-linux-mips32
-          asset_content_type: application/octet-stream
-      - name: Upload linux-mips32el
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hev-socks5-tunnel-linux-mips32el
-          asset_name: hev-socks5-tunnel-linux-mips32el
-          asset_content_type: application/octet-stream
-      - name: Upload linux-mips64
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hev-socks5-tunnel-linux-mips64
-          asset_name: hev-socks5-tunnel-linux-mips64
-          asset_content_type: application/octet-stream
-      - name: Upload linux-mips64el
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hev-socks5-tunnel-linux-mips64el
-          asset_name: hev-socks5-tunnel-linux-mips64el
-          asset_content_type: application/octet-stream
-      - name: Upload linux-riscv32
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hev-socks5-tunnel-linux-riscv32
-          asset_name: hev-socks5-tunnel-linux-riscv32
-          asset_content_type: application/octet-stream
-      - name: Upload linux-riscv64
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./hev-socks5-tunnel-linux-riscv64
-          asset_name: hev-socks5-tunnel-linux-riscv64
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: bin/hev-socks5-tunnel
+          asset_name: hev-socks5-tunnel-linux-${{ matrix.name }}
           asset_content_type: application/octet-stream
