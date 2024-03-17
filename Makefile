@@ -56,7 +56,6 @@ UNINSMSG="\e[1;34mUNINS\e[0m %s\n"
 ENABLE_STATIC :=
 ifeq ($(ENABLE_STATIC),1)
 	CCFLAGS+=-static
-	LDFLAGS+=-static
 endif
 
 V :=
@@ -106,7 +105,7 @@ $(INSTDIR)/etc/$(PROJECT).yml : $(CONFIG)
 
 $(EXEC_TARGET) : $(LDOBJS) tp-static
 	$(ECHO_PREFIX) mkdir -p $(dir $@)
-	$(ECHO_PREFIX) $(CC) -o $@ $(LDOBJS) $(LDFLAGS)
+	$(ECHO_PREFIX) $(CC) $(CCFLAGS) -o $@ $(LDOBJS) $(LDFLAGS)
 	@printf $(LINKMSG) $@
 	$(ECHO_PREFIX) $(STRIP) $@
 	@printf $(STRIPMSG) $@
@@ -118,7 +117,7 @@ $(STATIC_TARGET) : $(LDOBJS) tp-static
 
 $(SHARED_TARGET) : $(LDOBJS) tp-shared
 	$(ECHO_PREFIX) mkdir -p $(dir $@)
-	$(ECHO_PREFIX) $(CC) -o $@ $(LDOBJS) $(LDFLAGS)
+	$(ECHO_PREFIX) $(CC) $(CCFLAGS) -o $@ $(LDOBJS) $(LDFLAGS)
 	@printf $(LINKMSG) $@
 
 $(BUILDDIR)/%.dep : $(SRCDIR)/%.c
