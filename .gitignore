@@ -1,3 +1,5 @@
+project.xcworkspace/
+xcuserdata/
 bin
 build
 HevSocks5Tunnel.xcframework

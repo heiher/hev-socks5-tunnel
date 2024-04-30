@@ -1,0 +1,2415 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B603F4B52BE08D6800C025B4 /* hev-tunnel-macos.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4642BE08D6700C025B4 /* hev-tunnel-macos.c */; };
+		B603F4B62BE08D6800C025B4 /* hev-tunnel.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4652BE08D6700C025B4 /* hev-tunnel.h */; };
+		B603F4B82BE08D6800C025B4 /* hev-utils.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4682BE08D6700C025B4 /* hev-utils.h */; };
+		B603F4B92BE08D6800C025B4 /* hev-logger.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4692BE08D6700C025B4 /* hev-logger.c */; };
+		B603F4BA2BE08D6800C025B4 /* hev-exec.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F46A2BE08D6700C025B4 /* hev-exec.c */; };
+		B603F4BB2BE08D6800C025B4 /* hev-compiler.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F46B2BE08D6700C025B4 /* hev-compiler.h */; };
+		B603F4BC2BE08D6800C025B4 /* hev-ring-buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F46C2BE08D6700C025B4 /* hev-ring-buffer.h */; };
+		B603F4BD2BE08D6800C025B4 /* hev-utils.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F46D2BE08D6700C025B4 /* hev-utils.c */; };
+		B603F4BE2BE08D6800C025B4 /* hev-logger.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F46E2BE08D6700C025B4 /* hev-logger.h */; };
+		B603F4BF2BE08D6800C025B4 /* hev-list.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F46F2BE08D6700C025B4 /* hev-list.h */; };
+		B603F4C02BE08D6800C025B4 /* hev-exec.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4702BE08D6700C025B4 /* hev-exec.h */; };
+		B603F4C12BE08D6800C025B4 /* hev-ring-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4712BE08D6700C025B4 /* hev-ring-buffer.c */; };
+		B603F4C22BE08D6800C025B4 /* License in Resources */ = {isa = PBXBuildFile; fileRef = B603F4732BE08D6700C025B4 /* License */; };
+		B603F4C32BE08D6800C025B4 /* hev-socks5-user.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4752BE08D6700C025B4 /* hev-socks5-user.h */; };
+		B603F4C42BE08D6800C025B4 /* hev-socks5-client.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4762BE08D6700C025B4 /* hev-socks5-client.h */; };
+		B603F4C52BE08D6800C025B4 /* hev-socks5-client-tcp.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4772BE08D6700C025B4 /* hev-socks5-client-tcp.h */; };
+		B603F4C62BE08D6800C025B4 /* hev-socks5-tcp.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4782BE08D6800C025B4 /* hev-socks5-tcp.h */; };
+		B603F4C72BE08D6800C025B4 /* hev-socks5-proto.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4792BE08D6800C025B4 /* hev-socks5-proto.h */; };
+		B603F4C82BE08D6800C025B4 /* hev-socks5.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F47A2BE08D6800C025B4 /* hev-socks5.h */; };
+		B603F4C92BE08D6800C025B4 /* hev-rbtree.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F47B2BE08D6800C025B4 /* hev-rbtree.h */; };
+		B603F4CA2BE08D6800C025B4 /* hev-socks5-logger.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F47C2BE08D6800C025B4 /* hev-socks5-logger.h */; };
+		B603F4CB2BE08D6800C025B4 /* hev-socks5-udp.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F47D2BE08D6800C025B4 /* hev-socks5-udp.h */; };
+		B603F4CC2BE08D6800C025B4 /* hev-socks5-client-udp.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F47E2BE08D6800C025B4 /* hev-socks5-client-udp.h */; };
+		B603F4CD2BE08D6800C025B4 /* hev-socks5-misc.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F47F2BE08D6800C025B4 /* hev-socks5-misc.h */; };
+		B603F4CE2BE08D6800C025B4 /* hev-socks5-authenticator.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4802BE08D6800C025B4 /* hev-socks5-authenticator.h */; };
+		B603F4CF2BE08D6800C025B4 /* hev-socks5-server.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4812BE08D6800C025B4 /* hev-socks5-server.h */; };
+		B603F4D02BE08D6800C025B4 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B603F4822BE08D6800C025B4 /* README.md */; };
+		B603F4D12BE08D6800C025B4 /* .clang-format in Resources */ = {isa = PBXBuildFile; fileRef = B603F4832BE08D6800C025B4 /* .clang-format */; };
+		B603F4D22BE08D6800C025B4 /* hev-socks5-user.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4852BE08D6800C025B4 /* hev-socks5-user.h */; };
+		B603F4D32BE08D6800C025B4 /* hev-socks5-client.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4862BE08D6800C025B4 /* hev-socks5-client.h */; };
+		B603F4D42BE08D6800C025B4 /* hev-socks5-client-tcp.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4872BE08D6800C025B4 /* hev-socks5-client-tcp.h */; };
+		B603F4D52BE08D6800C025B4 /* hev-socks5-tcp.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4882BE08D6800C025B4 /* hev-socks5-tcp.h */; };
+		B603F4D62BE08D6800C025B4 /* hev-socks5.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4892BE08D6800C025B4 /* hev-socks5.c */; };
+		B603F4D72BE08D6800C025B4 /* hev-socks5-proto.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F48A2BE08D6800C025B4 /* hev-socks5-proto.h */; };
+		B603F4D82BE08D6800C025B4 /* hev-socks5-client-udp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F48B2BE08D6800C025B4 /* hev-socks5-client-udp.c */; };
+		B603F4D92BE08D6800C025B4 /* hev-socks5-udp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F48C2BE08D6800C025B4 /* hev-socks5-udp.c */; };
+		B603F4DB2BE08D6800C025B4 /* hev-compiler.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F48E2BE08D6800C025B4 /* hev-compiler.h */; };
+		B603F4DC2BE08D6800C025B4 /* hev-socks5-logger.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F48F2BE08D6800C025B4 /* hev-socks5-logger.c */; };
+		B603F4DD2BE08D6800C025B4 /* hev-socks5-server.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4902BE08D6800C025B4 /* hev-socks5-server.c */; };
+		B603F4DE2BE08D6800C025B4 /* hev-socks5-authenticator.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4912BE08D6800C025B4 /* hev-socks5-authenticator.c */; };
+		B603F4DF2BE08D6800C025B4 /* hev-socks5-misc.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4922BE08D6800C025B4 /* hev-socks5-misc.c */; };
+		B603F4E02BE08D6800C025B4 /* hev-socks5-client.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4932BE08D6800C025B4 /* hev-socks5-client.c */; };
+		B603F4E12BE08D6800C025B4 /* hev-socks5-user.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4942BE08D6800C025B4 /* hev-socks5-user.c */; };
+		B603F4E22BE08D6800C025B4 /* hev-socks5-misc-priv.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4952BE08D6800C025B4 /* hev-socks5-misc-priv.h */; };
+		B603F4E32BE08D6800C025B4 /* hev-socks5.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4962BE08D6800C025B4 /* hev-socks5.h */; };
+		B603F4E42BE08D6800C025B4 /* hev-socks5-tcp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4972BE08D6800C025B4 /* hev-socks5-tcp.c */; };
+		B603F4E52BE08D6800C025B4 /* hev-socks5-client-tcp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4982BE08D6800C025B4 /* hev-socks5-client-tcp.c */; };
+		B603F4E62BE08D6800C025B4 /* hev-rbtree.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4992BE08D6800C025B4 /* hev-rbtree.h */; };
+		B603F4E72BE08D6800C025B4 /* hev-socks5-logger.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F49A2BE08D6800C025B4 /* hev-socks5-logger.h */; };
+		B603F4E82BE08D6800C025B4 /* hev-socks5-udp.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F49B2BE08D6800C025B4 /* hev-socks5-udp.h */; };
+		B603F4E92BE08D6800C025B4 /* hev-socks5-client-udp.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F49C2BE08D6800C025B4 /* hev-socks5-client-udp.h */; };
+		B603F4EA2BE08D6800C025B4 /* hev-socks5-logger-priv.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F49D2BE08D6800C025B4 /* hev-socks5-logger-priv.h */; };
+		B603F4EB2BE08D6800C025B4 /* hev-socks5-misc.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F49E2BE08D6800C025B4 /* hev-socks5-misc.h */; };
+		B603F4EC2BE08D6800C025B4 /* hev-socks5-authenticator.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F49F2BE08D6800C025B4 /* hev-socks5-authenticator.h */; };
+		B603F4ED2BE08D6900C025B4 /* hev-socks5-server.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4A02BE08D6800C025B4 /* hev-socks5-server.h */; };
+		B603F4EE2BE08D6900C025B4 /* hev-socks5-session-udp.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4A12BE08D6800C025B4 /* hev-socks5-session-udp.h */; };
+		B603F4EF2BE08D6900C025B4 /* hev-config-const.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4A22BE08D6800C025B4 /* hev-config-const.h */; };
+		B603F4F02BE08D6900C025B4 /* hev-socks5-session.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4A32BE08D6800C025B4 /* hev-socks5-session.c */; };
+		B603F4F12BE08D6900C025B4 /* hev-tunnel-macos.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4A42BE08D6800C025B4 /* hev-tunnel-macos.h */; };
+		B603F4F22BE08D6900C025B4 /* hev-socks5-tunnel.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4A52BE08D6800C025B4 /* hev-socks5-tunnel.c */; };
+		B603F4F32BE08D6900C025B4 /* hev-socks5-session-tcp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4A62BE08D6800C025B4 /* hev-socks5-session-tcp.c */; };
+		B603F4F42BE08D6900C025B4 /* hev-socks5-session-tcp.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4A72BE08D6800C025B4 /* hev-socks5-session-tcp.h */; };
+		B603F4F52BE08D6900C025B4 /* hev-jni.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4A82BE08D6800C025B4 /* hev-jni.h */; };
+		B603F4F62BE08D6900C025B4 /* hev-config.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4A92BE08D6800C025B4 /* hev-config.h */; };
+		B603F4F72BE08D6900C025B4 /* hev-socks5-tunnel.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4AA2BE08D6800C025B4 /* hev-socks5-tunnel.h */; };
+		B603F4F82BE08D6900C025B4 /* hev-tunnel-freebsd.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4AB2BE08D6800C025B4 /* hev-tunnel-freebsd.h */; };
+		B603F4F92BE08D6900C025B4 /* hev-jni.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4AC2BE08D6800C025B4 /* hev-jni.c */; };
+		B603F4FA2BE08D6900C025B4 /* hev-config.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4AD2BE08D6800C025B4 /* hev-config.c */; };
+		B603F4FB2BE08D6900C025B4 /* hev-socks5-session.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4AE2BE08D6800C025B4 /* hev-socks5-session.h */; };
+		B603F4FC2BE08D6900C025B4 /* hev-tunnel-linux.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4AF2BE08D6800C025B4 /* hev-tunnel-linux.c */; };
+		B603F4FD2BE08D6900C025B4 /* hev-main.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4B02BE08D6800C025B4 /* hev-main.c */; };
+		B603F4FE2BE08D6900C025B4 /* hev-socks5-session-udp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4B12BE08D6800C025B4 /* hev-socks5-session-udp.c */; };
+		B603F4FF2BE08D6900C025B4 /* hev-main.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4B22BE08D6800C025B4 /* hev-main.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B603F5002BE08D6900C025B4 /* hev-tunnel-linux.h in Headers */ = {isa = PBXBuildFile; fileRef = B603F4B32BE08D6800C025B4 /* hev-tunnel-linux.h */; };
+		B603F5012BE08D6900C025B4 /* hev-tunnel-freebsd.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F4B42BE08D6800C025B4 /* hev-tunnel-freebsd.c */; };
+		B603F8012BE0D75500C025B4 /* sockets.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7002BE0D75400C025B4 /* sockets.c */; };
+		B603F8022BE0D75500C025B4 /* if_api.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7012BE0D75400C025B4 /* if_api.c */; };
+		B603F8032BE0D75500C025B4 /* netdb.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7022BE0D75400C025B4 /* netdb.c */; };
+		B603F8042BE0D75500C025B4 /* tcpip.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7032BE0D75400C025B4 /* tcpip.c */; };
+		B603F8052BE0D75500C025B4 /* err.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7042BE0D75400C025B4 /* err.c */; };
+		B603F8062BE0D75500C025B4 /* netifapi.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7052BE0D75400C025B4 /* netifapi.c */; };
+		B603F80A2BE0D75500C025B4 /* zepif.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F70A2BE0D75400C025B4 /* zepif.c */; };
+		B603F80B2BE0D75500C025B4 /* ethernet.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F70B2BE0D75400C025B4 /* ethernet.c */; };
+		B603F80C2BE0D75500C025B4 /* lowpan6_ble.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F70C2BE0D75400C025B4 /* lowpan6_ble.c */; };
+		B603F80D2BE0D75500C025B4 /* slipif.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F70D2BE0D75400C025B4 /* slipif.c */; };
+		B603F80E2BE0D75500C025B4 /* vj.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F70F2BE0D75400C025B4 /* vj.c */; };
+		B603F80F2BE0D75500C025B4 /* auth.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7102BE0D75400C025B4 /* auth.c */; };
+		B603F8102BE0D75500C025B4 /* pppapi.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7112BE0D75400C025B4 /* pppapi.c */; };
+		B603F8112BE0D75500C025B4 /* pppol2tp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7122BE0D75400C025B4 /* pppol2tp.c */; };
+		B603F8122BE0D75500C025B4 /* mppe.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7132BE0D75400C025B4 /* mppe.c */; };
+		B603F8132BE0D75500C025B4 /* eui64.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7142BE0D75400C025B4 /* eui64.c */; };
+		B603F8142BE0D75500C025B4 /* multilink.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7152BE0D75400C025B4 /* multilink.c */; };
+		B603F8152BE0D75500C025B4 /* pppoe.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7162BE0D75400C025B4 /* pppoe.c */; };
+		B603F8162BE0D75500C025B4 /* chap_ms.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7172BE0D75400C025B4 /* chap_ms.c */; };
+		B603F8172BE0D75500C025B4 /* eap.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7182BE0D75400C025B4 /* eap.c */; };
+		B603F8182BE0D75500C025B4 /* pppcrypt.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7192BE0D75400C025B4 /* pppcrypt.c */; };
+		B603F8192BE0D75500C025B4 /* pppos.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F71A2BE0D75400C025B4 /* pppos.c */; };
+		B603F81A2BE0D75500C025B4 /* md4.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F71C2BE0D75400C025B4 /* md4.c */; };
+		B603F81B2BE0D75500C025B4 /* des.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F71D2BE0D75400C025B4 /* des.c */; };
+		B603F81C2BE0D75500C025B4 /* sha1.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F71E2BE0D75400C025B4 /* sha1.c */; };
+		B603F81D2BE0D75500C025B4 /* md5.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F71F2BE0D75400C025B4 /* md5.c */; };
+		B603F81E2BE0D75500C025B4 /* arc4.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7202BE0D75400C025B4 /* arc4.c */; };
+		B603F81F2BE0D75500C025B4 /* lcp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7212BE0D75400C025B4 /* lcp.c */; };
+		B603F8202BE0D75500C025B4 /* ipv6cp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7222BE0D75400C025B4 /* ipv6cp.c */; };
+		B603F8212BE0D75500C025B4 /* ccp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7232BE0D75400C025B4 /* ccp.c */; };
+		B603F8222BE0D75500C025B4 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7242BE0D75400C025B4 /* utils.c */; };
+		B603F8232BE0D75500C025B4 /* chap-md5.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7252BE0D75400C025B4 /* chap-md5.c */; };
+		B603F8242BE0D75500C025B4 /* chap-new.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7262BE0D75400C025B4 /* chap-new.c */; };
+		B603F8252BE0D75500C025B4 /* upap.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7272BE0D75400C025B4 /* upap.c */; };
+		B603F8262BE0D75500C025B4 /* ecp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7282BE0D75400C025B4 /* ecp.c */; };
+		B603F8272BE0D75500C025B4 /* magic.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7292BE0D75400C025B4 /* magic.c */; };
+		B603F8282BE0D75500C025B4 /* fsm.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F72A2BE0D75400C025B4 /* fsm.c */; };
+		B603F8292BE0D75500C025B4 /* demand.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F72B2BE0D75400C025B4 /* demand.c */; };
+		B603F82A2BE0D75500C025B4 /* ppp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F72C2BE0D75400C025B4 /* ppp.c */; };
+		B603F82B2BE0D75500C025B4 /* ipcp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F72D2BE0D75400C025B4 /* ipcp.c */; };
+		B603F82C2BE0D75500C025B4 /* bridgeif.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F72E2BE0D75400C025B4 /* bridgeif.c */; };
+		B603F82D2BE0D75500C025B4 /* lowpan6.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F72F2BE0D75400C025B4 /* lowpan6.c */; };
+		B603F82E2BE0D75500C025B4 /* lowpan6_common.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7302BE0D75400C025B4 /* lowpan6_common.c */; };
+		B603F82F2BE0D75500C025B4 /* bridgeif_fdb.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7312BE0D75400C025B4 /* bridgeif_fdb.c */; };
+		B603F8302BE0D75500C025B4 /* mem.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7352BE0D75400C025B4 /* mem.c */; };
+		B603F8312BE0D75500C025B4 /* perf.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7382BE0D75400C025B4 /* perf.c */; };
+		B603F8322BE0D75500C025B4 /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F73A2BE0D75400C025B4 /* list.c */; };
+		B603F8332BE0D75500C025B4 /* tapif.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F73B2BE0D75400C025B4 /* tapif.c */; };
+		B603F8342BE0D75500C025B4 /* sio.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F73C2BE0D75400C025B4 /* sio.c */; };
+		B603F8352BE0D75500C025B4 /* fifo.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F73D2BE0D75400C025B4 /* fifo.c */; };
+		B603F8362BE0D75500C025B4 /* pcapif.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F73E2BE0D75400C025B4 /* pcapif.c */; };
+		B603F8372BE0D75500C025B4 /* sys_arch.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F74A2BE0D75400C025B4 /* sys_arch.c */; };
+		B603F8382BE0D75500C025B4 /* memp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7D92BE0D75500C025B4 /* memp.c */; };
+		B603F8392BE0D75500C025B4 /* sys.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7DA2BE0D75500C025B4 /* sys.c */; };
+		B603F83A2BE0D75500C025B4 /* inet_chksum.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7DB2BE0D75500C025B4 /* inet_chksum.c */; };
+		B603F83B2BE0D75500C025B4 /* raw.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7DC2BE0D75500C025B4 /* raw.c */; };
+		B603F83C2BE0D75500C025B4 /* tcp_out.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7DD2BE0D75500C025B4 /* tcp_out.c */; };
+		B603F83D2BE0D75500C025B4 /* ip.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7DE2BE0D75500C025B4 /* ip.c */; };
+		B603F83E2BE0D75500C025B4 /* dns.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7DF2BE0D75500C025B4 /* dns.c */; };
+		B603F83F2BE0D75500C025B4 /* init.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7E02BE0D75500C025B4 /* init.c */; };
+		B603F8402BE0D75500C025B4 /* mem.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7E12BE0D75500C025B4 /* mem.c */; };
+		B603F8412BE0D75500C025B4 /* altcp_alloc.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7E22BE0D75500C025B4 /* altcp_alloc.c */; };
+		B603F8422BE0D75500C025B4 /* def.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7E32BE0D75500C025B4 /* def.c */; };
+		B603F8432BE0D75500C025B4 /* udp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7E42BE0D75500C025B4 /* udp.c */; };
+		B603F8442BE0D75500C025B4 /* stats.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7E52BE0D75500C025B4 /* stats.c */; };
+		B603F8452BE0D75500C025B4 /* tcp_in.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7E62BE0D75500C025B4 /* tcp_in.c */; };
+		B603F8462BE0D75500C025B4 /* autoip.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7E82BE0D75500C025B4 /* autoip.c */; };
+		B603F8472BE0D75500C025B4 /* dhcp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7E92BE0D75500C025B4 /* dhcp.c */; };
+		B603F8482BE0D75500C025B4 /* acd.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7EA2BE0D75500C025B4 /* acd.c */; };
+		B603F8492BE0D75500C025B4 /* igmp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7EB2BE0D75500C025B4 /* igmp.c */; };
+		B603F84A2BE0D75500C025B4 /* etharp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7EC2BE0D75500C025B4 /* etharp.c */; };
+		B603F84B2BE0D75500C025B4 /* icmp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7ED2BE0D75500C025B4 /* icmp.c */; };
+		B603F84C2BE0D75500C025B4 /* ip4.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7EE2BE0D75500C025B4 /* ip4.c */; };
+		B603F84D2BE0D75500C025B4 /* ip4_frag.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7EF2BE0D75500C025B4 /* ip4_frag.c */; };
+		B603F84E2BE0D75500C025B4 /* ip4_addr.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7F02BE0D75500C025B4 /* ip4_addr.c */; };
+		B603F84F2BE0D75500C025B4 /* netif.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7F12BE0D75500C025B4 /* netif.c */; };
+		B603F8502BE0D75500C025B4 /* altcp_tcp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7F22BE0D75500C025B4 /* altcp_tcp.c */; };
+		B603F8512BE0D75500C025B4 /* tcp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7F32BE0D75500C025B4 /* tcp.c */; };
+		B603F8522BE0D75500C025B4 /* pbuf.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7F42BE0D75500C025B4 /* pbuf.c */; };
+		B603F8532BE0D75500C025B4 /* timeouts.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7F52BE0D75500C025B4 /* timeouts.c */; };
+		B603F8542BE0D75500C025B4 /* ip6.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7F72BE0D75500C025B4 /* ip6.c */; };
+		B603F8552BE0D75500C025B4 /* icmp6.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7F82BE0D75500C025B4 /* icmp6.c */; };
+		B603F8562BE0D75500C025B4 /* mld6.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7F92BE0D75500C025B4 /* mld6.c */; };
+		B603F8572BE0D75500C025B4 /* dhcp6.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7FA2BE0D75500C025B4 /* dhcp6.c */; };
+		B603F8582BE0D75500C025B4 /* ethip6.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7FB2BE0D75500C025B4 /* ethip6.c */; };
+		B603F8592BE0D75500C025B4 /* nd6.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7FC2BE0D75500C025B4 /* nd6.c */; };
+		B603F85A2BE0D75500C025B4 /* inet6.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7FD2BE0D75500C025B4 /* inet6.c */; };
+		B603F85B2BE0D75500C025B4 /* ip6_addr.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7FE2BE0D75500C025B4 /* ip6_addr.c */; };
+		B603F85C2BE0D75500C025B4 /* ip6_frag.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7FF2BE0D75500C025B4 /* ip6_frag.c */; };
+		B603F85D2BE0D75500C025B4 /* altcp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F8002BE0D75500C025B4 /* altcp.c */; };
+		B603F85F2BE0E39300C025B4 /* liblwip.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B603F6F52BE0D5E400C025B4 /* liblwip.a */; };
+		B603F98D2BE1149300C025B4 /* hev-memory-allocator-slice.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F91D2BE1149100C025B4 /* hev-memory-allocator-slice.c */; };
+		B603F98E2BE1149300C025B4 /* hev-memory-allocator-simple.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F91F2BE1149100C025B4 /* hev-memory-allocator-simple.c */; };
+		B603F98F2BE1149300C025B4 /* hev-memory-allocator-api.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9222BE1149100C025B4 /* hev-memory-allocator-api.c */; };
+		B603F9902BE1149300C025B4 /* hev-memory-allocator.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9252BE1149100C025B4 /* hev-memory-allocator.c */; };
+		B603F9912BE1149300C025B4 /* hev-debugger.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9292BE1149100C025B4 /* hev-debugger.c */; };
+		B603F9922BE1149300C025B4 /* hev-rbtree-cached.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F92D2BE1149100C025B4 /* hev-rbtree-cached.c */; };
+		B603F9932BE1149300C025B4 /* hev-rbtree.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F92E2BE1149100C025B4 /* hev-rbtree.c */; };
+		B603F9942BE1149300C025B4 /* hev-task-io-pipe.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9342BE1149200C025B4 /* hev-task-io-pipe.c */; };
+		B603F9952BE1149300C025B4 /* hev-task-io.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9372BE1149200C025B4 /* hev-task-io.c */; };
+		B603F9962BE1149300C025B4 /* hev-task-io-poll.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F93A2BE1149200C025B4 /* hev-task-io-poll.c */; };
+		B603F9972BE1149300C025B4 /* hev-task-io-socket.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F93D2BE1149200C025B4 /* hev-task-io-socket.c */; };
+		B603F9982BE1149300C025B4 /* hev-circular-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9402BE1149200C025B4 /* hev-circular-buffer.c */; };
+		B603F9992BE1149300C025B4 /* hev-object.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9422BE1149200C025B4 /* hev-object.c */; };
+		B603F99A2BE1149300C025B4 /* hev-object-atomic.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9432BE1149200C025B4 /* hev-object-atomic.c */; };
+		B603F99B2BE1149300C025B4 /* hev-list.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9472BE1149200C025B4 /* hev-list.c */; };
+		B603F99C2BE1149300C025B4 /* hev-task-dns.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F94C2BE1149200C025B4 /* hev-task-dns.c */; };
+		B603F99D2BE1149300C025B4 /* hev-task-dns-proxy.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F94D2BE1149200C025B4 /* hev-task-dns-proxy.c */; };
+		B603F9A32BE1149300C025B4 /* hev-task-aide.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9612BE1149200C025B4 /* hev-task-aide.c */; };
+		B603F9A42BE1149300C025B4 /* hev-task-system-schedule.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9632BE1149200C025B4 /* hev-task-system-schedule.c */; };
+		B603F9A52BE1149300C025B4 /* hev-task-system.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9652BE1149200C025B4 /* hev-task-system.c */; };
+		B603F9A62BE1149300C025B4 /* hev-task-io-reactor-epoll.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9692BE1149200C025B4 /* hev-task-io-reactor-epoll.c */; };
+		B603F9A72BE1149300C025B4 /* hev-task-io-reactor-kqueue.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F96B2BE1149200C025B4 /* hev-task-io-reactor-kqueue.c */; };
+		B603F9A82BE1149300C025B4 /* hev-task-io-reactor.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F96D2BE1149200C025B4 /* hev-task-io-reactor.c */; };
+		B603F9A92BE1149300C025B4 /* hev-task-timer.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9712BE1149200C025B4 /* hev-task-timer.c */; };
+		B603F9AA2BE1149300C025B4 /* hev-task-timer-timerfd.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9722BE1149200C025B4 /* hev-task-timer-timerfd.c */; };
+		B603F9AB2BE1149300C025B4 /* hev-task-timer-kevent.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9732BE1149200C025B4 /* hev-task-timer-kevent.c */; };
+		B603F9AC2BE1149300C025B4 /* hev-task-stack-mmap.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9762BE1149200C025B4 /* hev-task-stack-mmap.c */; };
+		B603F9AD2BE1149300C025B4 /* hev-task-call.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9782BE1149200C025B4 /* hev-task-call.c */; };
+		B603F9AE2BE1149300C025B4 /* hev-task-stack-heap.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9792BE1149200C025B4 /* hev-task-stack-heap.c */; };
+		B603F9AF2BE1149300C025B4 /* hev-task-execute.S in Sources */ = {isa = PBXBuildFile; fileRef = B603F97A2BE1149200C025B4 /* hev-task-execute.S */; };
+		B603F9B02BE1149300C025B4 /* hev-task-executer.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F97B2BE1149200C025B4 /* hev-task-executer.c */; };
+		B603F9B12BE1149300C025B4 /* hev-task.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F97C2BE1149200C025B4 /* hev-task.c */; };
+		B603F9B22BE1149300C025B4 /* hev-task-channel.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9822BE1149200C025B4 /* hev-task-channel.c */; };
+		B603F9B32BE1149300C025B4 /* hev-task-channel-select.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F9842BE1149200C025B4 /* hev-task-channel-select.c */; };
+		B603F9B42BE1149300C025B4 /* hev-task-mutex.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F98A2BE1149200C025B4 /* hev-task-mutex.c */; };
+		B603F9B52BE1149300C025B4 /* hev-task-cond.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F98B2BE1149200C025B4 /* hev-task-cond.c */; };
+		B603F9B62BE1178B00C025B4 /* libHevTaskSystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B603F9112BE1144200C025B4 /* libHevTaskSystem.a */; };
+		B60F7EB82BE0843C00DD1A96 /* tun2socks.h in Headers */ = {isa = PBXBuildFile; fileRef = B60F7EB72BE0843C00DD1A96 /* tun2socks.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B69999042BE1D6CF0044BCC5 /* writer.c in Sources */ = {isa = PBXBuildFile; fileRef = B69998FA2BE1D6CE0044BCC5 /* writer.c */; };
+		B69999052BE1D6CF0044BCC5 /* emitter.c in Sources */ = {isa = PBXBuildFile; fileRef = B69998FB2BE1D6CE0044BCC5 /* emitter.c */; };
+		B69999062BE1D6CF0044BCC5 /* dumper.c in Sources */ = {isa = PBXBuildFile; fileRef = B69998FC2BE1D6CE0044BCC5 /* dumper.c */; };
+		B69999072BE1D6CF0044BCC5 /* loader.c in Sources */ = {isa = PBXBuildFile; fileRef = B69998FD2BE1D6CE0044BCC5 /* loader.c */; };
+		B69999082BE1D6CF0044BCC5 /* parser.c in Sources */ = {isa = PBXBuildFile; fileRef = B69998FE2BE1D6CE0044BCC5 /* parser.c */; };
+		B69999092BE1D6CF0044BCC5 /* scanner.c in Sources */ = {isa = PBXBuildFile; fileRef = B69998FF2BE1D6CF0044BCC5 /* scanner.c */; };
+		B699990A2BE1D6CF0044BCC5 /* api.c in Sources */ = {isa = PBXBuildFile; fileRef = B69999002BE1D6CF0044BCC5 /* api.c */; };
+		B699990B2BE1D6CF0044BCC5 /* reader.c in Sources */ = {isa = PBXBuildFile; fileRef = B69999032BE1D6CF0044BCC5 /* reader.c */; };
+		B699990C2BE1D8560044BCC5 /* libyaml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B69998F12BE1D68D0044BCC5 /* libyaml.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B603F6F32BE0D5E400C025B4 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B603F90F2BE1144200C025B4 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B69998EF2BE1D68D0044BCC5 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		B603F4642BE08D6700C025B4 /* hev-tunnel-macos.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "hev-tunnel-macos.c"; path = "../src/hev-tunnel-macos.c"; sourceTree = "<group>"; };
+		B603F4652BE08D6700C025B4 /* hev-tunnel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "hev-tunnel.h"; path = "../src/hev-tunnel.h"; sourceTree = "<group>"; };
+		B603F4672BE08D6700C025B4 /* hev-list.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-list.c"; sourceTree = "<group>"; };
+		B603F4682BE08D6700C025B4 /* hev-utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-utils.h"; sourceTree = "<group>"; };
+		B603F4692BE08D6700C025B4 /* hev-logger.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-logger.c"; sourceTree = "<group>"; };
+		B603F46A2BE08D6700C025B4 /* hev-exec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-exec.c"; sourceTree = "<group>"; };
+		B603F46B2BE08D6700C025B4 /* hev-compiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-compiler.h"; sourceTree = "<group>"; };
+		B603F46C2BE08D6700C025B4 /* hev-ring-buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-ring-buffer.h"; sourceTree = "<group>"; };
+		B603F46D2BE08D6700C025B4 /* hev-utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-utils.c"; sourceTree = "<group>"; };
+		B603F46E2BE08D6700C025B4 /* hev-logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-logger.h"; sourceTree = "<group>"; };
+		B603F46F2BE08D6700C025B4 /* hev-list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-list.h"; sourceTree = "<group>"; };
+		B603F4702BE08D6700C025B4 /* hev-exec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-exec.h"; sourceTree = "<group>"; };
+		B603F4712BE08D6700C025B4 /* hev-ring-buffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-ring-buffer.c"; sourceTree = "<group>"; };
+		B603F4732BE08D6700C025B4 /* License */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = License; sourceTree = "<group>"; };
+		B603F4752BE08D6700C025B4 /* hev-socks5-user.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-user.h"; sourceTree = "<group>"; };
+		B603F4762BE08D6700C025B4 /* hev-socks5-client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-client.h"; sourceTree = "<group>"; };
+		B603F4772BE08D6700C025B4 /* hev-socks5-client-tcp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-client-tcp.h"; sourceTree = "<group>"; };
+		B603F4782BE08D6800C025B4 /* hev-socks5-tcp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-tcp.h"; sourceTree = "<group>"; };
+		B603F4792BE08D6800C025B4 /* hev-socks5-proto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-proto.h"; sourceTree = "<group>"; };
+		B603F47A2BE08D6800C025B4 /* hev-socks5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5.h"; sourceTree = "<group>"; };
+		B603F47B2BE08D6800C025B4 /* hev-rbtree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-rbtree.h"; sourceTree = "<group>"; };
+		B603F47C2BE08D6800C025B4 /* hev-socks5-logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-logger.h"; sourceTree = "<group>"; };
+		B603F47D2BE08D6800C025B4 /* hev-socks5-udp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-udp.h"; sourceTree = "<group>"; };
+		B603F47E2BE08D6800C025B4 /* hev-socks5-client-udp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-client-udp.h"; sourceTree = "<group>"; };
+		B603F47F2BE08D6800C025B4 /* hev-socks5-misc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-misc.h"; sourceTree = "<group>"; };
+		B603F4802BE08D6800C025B4 /* hev-socks5-authenticator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-authenticator.h"; sourceTree = "<group>"; };
+		B603F4812BE08D6800C025B4 /* hev-socks5-server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-server.h"; sourceTree = "<group>"; };
+		B603F4822BE08D6800C025B4 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		B603F4832BE08D6800C025B4 /* .clang-format */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ".clang-format"; sourceTree = "<group>"; };
+		B603F4852BE08D6800C025B4 /* hev-socks5-user.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-user.h"; sourceTree = "<group>"; };
+		B603F4862BE08D6800C025B4 /* hev-socks5-client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-client.h"; sourceTree = "<group>"; };
+		B603F4872BE08D6800C025B4 /* hev-socks5-client-tcp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-client-tcp.h"; sourceTree = "<group>"; };
+		B603F4882BE08D6800C025B4 /* hev-socks5-tcp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-tcp.h"; sourceTree = "<group>"; };
+		B603F4892BE08D6800C025B4 /* hev-socks5.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-socks5.c"; sourceTree = "<group>"; };
+		B603F48A2BE08D6800C025B4 /* hev-socks5-proto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-proto.h"; sourceTree = "<group>"; };
+		B603F48B2BE08D6800C025B4 /* hev-socks5-client-udp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-socks5-client-udp.c"; sourceTree = "<group>"; };
+		B603F48C2BE08D6800C025B4 /* hev-socks5-udp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-socks5-udp.c"; sourceTree = "<group>"; };
+		B603F48D2BE08D6800C025B4 /* hev-rbtree.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-rbtree.c"; sourceTree = "<group>"; };
+		B603F48E2BE08D6800C025B4 /* hev-compiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-compiler.h"; sourceTree = "<group>"; };
+		B603F48F2BE08D6800C025B4 /* hev-socks5-logger.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-socks5-logger.c"; sourceTree = "<group>"; };
+		B603F4902BE08D6800C025B4 /* hev-socks5-server.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-socks5-server.c"; sourceTree = "<group>"; };
+		B603F4912BE08D6800C025B4 /* hev-socks5-authenticator.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-socks5-authenticator.c"; sourceTree = "<group>"; };
+		B603F4922BE08D6800C025B4 /* hev-socks5-misc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-socks5-misc.c"; sourceTree = "<group>"; };
+		B603F4932BE08D6800C025B4 /* hev-socks5-client.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-socks5-client.c"; sourceTree = "<group>"; };
+		B603F4942BE08D6800C025B4 /* hev-socks5-user.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-socks5-user.c"; sourceTree = "<group>"; };
+		B603F4952BE08D6800C025B4 /* hev-socks5-misc-priv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-misc-priv.h"; sourceTree = "<group>"; };
+		B603F4962BE08D6800C025B4 /* hev-socks5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5.h"; sourceTree = "<group>"; };
+		B603F4972BE08D6800C025B4 /* hev-socks5-tcp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-socks5-tcp.c"; sourceTree = "<group>"; };
+		B603F4982BE08D6800C025B4 /* hev-socks5-client-tcp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-socks5-client-tcp.c"; sourceTree = "<group>"; };
+		B603F4992BE08D6800C025B4 /* hev-rbtree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-rbtree.h"; sourceTree = "<group>"; };
+		B603F49A2BE08D6800C025B4 /* hev-socks5-logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-logger.h"; sourceTree = "<group>"; };
+		B603F49B2BE08D6800C025B4 /* hev-socks5-udp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-udp.h"; sourceTree = "<group>"; };
+		B603F49C2BE08D6800C025B4 /* hev-socks5-client-udp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-client-udp.h"; sourceTree = "<group>"; };
+		B603F49D2BE08D6800C025B4 /* hev-socks5-logger-priv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-logger-priv.h"; sourceTree = "<group>"; };
+		B603F49E2BE08D6800C025B4 /* hev-socks5-misc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-misc.h"; sourceTree = "<group>"; };
+		B603F49F2BE08D6800C025B4 /* hev-socks5-authenticator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-authenticator.h"; sourceTree = "<group>"; };
+		B603F4A02BE08D6800C025B4 /* hev-socks5-server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-socks5-server.h"; sourceTree = "<group>"; };
+		B603F4A12BE08D6800C025B4 /* hev-socks5-session-udp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "hev-socks5-session-udp.h"; path = "../src/hev-socks5-session-udp.h"; sourceTree = "<group>"; };
+		B603F4A22BE08D6800C025B4 /* hev-config-const.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "hev-config-const.h"; path = "../src/hev-config-const.h"; sourceTree = "<group>"; };
+		B603F4A32BE08D6800C025B4 /* hev-socks5-session.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "hev-socks5-session.c"; path = "../src/hev-socks5-session.c"; sourceTree = "<group>"; };
+		B603F4A42BE08D6800C025B4 /* hev-tunnel-macos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "hev-tunnel-macos.h"; path = "../src/hev-tunnel-macos.h"; sourceTree = "<group>"; };
+		B603F4A52BE08D6800C025B4 /* hev-socks5-tunnel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "hev-socks5-tunnel.c"; path = "../src/hev-socks5-tunnel.c"; sourceTree = "<group>"; };
+		B603F4A62BE08D6800C025B4 /* hev-socks5-session-tcp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "hev-socks5-session-tcp.c"; path = "../src/hev-socks5-session-tcp.c"; sourceTree = "<group>"; };
+		B603F4A72BE08D6800C025B4 /* hev-socks5-session-tcp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "hev-socks5-session-tcp.h"; path = "../src/hev-socks5-session-tcp.h"; sourceTree = "<group>"; };
+		B603F4A82BE08D6800C025B4 /* hev-jni.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "hev-jni.h"; path = "../src/hev-jni.h"; sourceTree = "<group>"; };
+		B603F4A92BE08D6800C025B4 /* hev-config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "hev-config.h"; path = "../src/hev-config.h"; sourceTree = "<group>"; };
+		B603F4AA2BE08D6800C025B4 /* hev-socks5-tunnel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "hev-socks5-tunnel.h"; path = "../src/hev-socks5-tunnel.h"; sourceTree = "<group>"; };
+		B603F4AB2BE08D6800C025B4 /* hev-tunnel-freebsd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "hev-tunnel-freebsd.h"; path = "../src/hev-tunnel-freebsd.h"; sourceTree = "<group>"; };
+		B603F4AC2BE08D6800C025B4 /* hev-jni.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "hev-jni.c"; path = "../src/hev-jni.c"; sourceTree = "<group>"; };
+		B603F4AD2BE08D6800C025B4 /* hev-config.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "hev-config.c"; path = "../src/hev-config.c"; sourceTree = "<group>"; };
+		B603F4AE2BE08D6800C025B4 /* hev-socks5-session.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "hev-socks5-session.h"; path = "../src/hev-socks5-session.h"; sourceTree = "<group>"; };
+		B603F4AF2BE08D6800C025B4 /* hev-tunnel-linux.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "hev-tunnel-linux.c"; path = "../src/hev-tunnel-linux.c"; sourceTree = "<group>"; };
+		B603F4B02BE08D6800C025B4 /* hev-main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "hev-main.c"; path = "../src/hev-main.c"; sourceTree = "<group>"; };
+		B603F4B12BE08D6800C025B4 /* hev-socks5-session-udp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "hev-socks5-session-udp.c"; path = "../src/hev-socks5-session-udp.c"; sourceTree = "<group>"; };
+		B603F4B22BE08D6800C025B4 /* hev-main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "hev-main.h"; path = "../src/hev-main.h"; sourceTree = "<group>"; };
+		B603F4B32BE08D6800C025B4 /* hev-tunnel-linux.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "hev-tunnel-linux.h"; path = "../src/hev-tunnel-linux.h"; sourceTree = "<group>"; };
+		B603F4B42BE08D6800C025B4 /* hev-tunnel-freebsd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "hev-tunnel-freebsd.c"; path = "../src/hev-tunnel-freebsd.c"; sourceTree = "<group>"; };
+		B603F6F52BE0D5E400C025B4 /* liblwip.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblwip.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B603F7002BE0D75400C025B4 /* sockets.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sockets.c; sourceTree = "<group>"; };
+		B603F7012BE0D75400C025B4 /* if_api.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = if_api.c; sourceTree = "<group>"; };
+		B603F7022BE0D75400C025B4 /* netdb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = netdb.c; sourceTree = "<group>"; };
+		B603F7032BE0D75400C025B4 /* tcpip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tcpip.c; sourceTree = "<group>"; };
+		B603F7042BE0D75400C025B4 /* err.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = err.c; sourceTree = "<group>"; };
+		B603F7052BE0D75400C025B4 /* netifapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = netifapi.c; sourceTree = "<group>"; };
+		B603F7062BE0D75400C025B4 /* api_lib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = api_lib.c; sourceTree = "<group>"; };
+		B603F7072BE0D75400C025B4 /* api_msg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = api_msg.c; sourceTree = "<group>"; };
+		B603F7082BE0D75400C025B4 /* netbuf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = netbuf.c; sourceTree = "<group>"; };
+		B603F70A2BE0D75400C025B4 /* zepif.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = zepif.c; sourceTree = "<group>"; };
+		B603F70B2BE0D75400C025B4 /* ethernet.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ethernet.c; sourceTree = "<group>"; };
+		B603F70C2BE0D75400C025B4 /* lowpan6_ble.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lowpan6_ble.c; sourceTree = "<group>"; };
+		B603F70D2BE0D75400C025B4 /* slipif.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = slipif.c; sourceTree = "<group>"; };
+		B603F70F2BE0D75400C025B4 /* vj.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vj.c; sourceTree = "<group>"; };
+		B603F7102BE0D75400C025B4 /* auth.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = auth.c; sourceTree = "<group>"; };
+		B603F7112BE0D75400C025B4 /* pppapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pppapi.c; sourceTree = "<group>"; };
+		B603F7122BE0D75400C025B4 /* pppol2tp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pppol2tp.c; sourceTree = "<group>"; };
+		B603F7132BE0D75400C025B4 /* mppe.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mppe.c; sourceTree = "<group>"; };
+		B603F7142BE0D75400C025B4 /* eui64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = eui64.c; sourceTree = "<group>"; };
+		B603F7152BE0D75400C025B4 /* multilink.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = multilink.c; sourceTree = "<group>"; };
+		B603F7162BE0D75400C025B4 /* pppoe.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pppoe.c; sourceTree = "<group>"; };
+		B603F7172BE0D75400C025B4 /* chap_ms.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = chap_ms.c; sourceTree = "<group>"; };
+		B603F7182BE0D75400C025B4 /* eap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = eap.c; sourceTree = "<group>"; };
+		B603F7192BE0D75400C025B4 /* pppcrypt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pppcrypt.c; sourceTree = "<group>"; };
+		B603F71A2BE0D75400C025B4 /* pppos.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pppos.c; sourceTree = "<group>"; };
+		B603F71C2BE0D75400C025B4 /* md4.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = md4.c; sourceTree = "<group>"; };
+		B603F71D2BE0D75400C025B4 /* des.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = des.c; sourceTree = "<group>"; };
+		B603F71E2BE0D75400C025B4 /* sha1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sha1.c; sourceTree = "<group>"; };
+		B603F71F2BE0D75400C025B4 /* md5.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = md5.c; sourceTree = "<group>"; };
+		B603F7202BE0D75400C025B4 /* arc4.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = arc4.c; sourceTree = "<group>"; };
+		B603F7212BE0D75400C025B4 /* lcp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lcp.c; sourceTree = "<group>"; };
+		B603F7222BE0D75400C025B4 /* ipv6cp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ipv6cp.c; sourceTree = "<group>"; };
+		B603F7232BE0D75400C025B4 /* ccp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ccp.c; sourceTree = "<group>"; };
+		B603F7242BE0D75400C025B4 /* utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
+		B603F7252BE0D75400C025B4 /* chap-md5.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "chap-md5.c"; sourceTree = "<group>"; };
+		B603F7262BE0D75400C025B4 /* chap-new.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "chap-new.c"; sourceTree = "<group>"; };
+		B603F7272BE0D75400C025B4 /* upap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = upap.c; sourceTree = "<group>"; };
+		B603F7282BE0D75400C025B4 /* ecp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ecp.c; sourceTree = "<group>"; };
+		B603F7292BE0D75400C025B4 /* magic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = magic.c; sourceTree = "<group>"; };
+		B603F72A2BE0D75400C025B4 /* fsm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fsm.c; sourceTree = "<group>"; };
+		B603F72B2BE0D75400C025B4 /* demand.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = demand.c; sourceTree = "<group>"; };
+		B603F72C2BE0D75400C025B4 /* ppp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ppp.c; sourceTree = "<group>"; };
+		B603F72D2BE0D75400C025B4 /* ipcp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ipcp.c; sourceTree = "<group>"; };
+		B603F72E2BE0D75400C025B4 /* bridgeif.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bridgeif.c; sourceTree = "<group>"; };
+		B603F72F2BE0D75400C025B4 /* lowpan6.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lowpan6.c; sourceTree = "<group>"; };
+		B603F7302BE0D75400C025B4 /* lowpan6_common.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lowpan6_common.c; sourceTree = "<group>"; };
+		B603F7312BE0D75400C025B4 /* bridgeif_fdb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bridgeif_fdb.c; sourceTree = "<group>"; };
+		B603F7352BE0D75400C025B4 /* mem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mem.c; sourceTree = "<group>"; };
+		B603F7362BE0D75400C025B4 /* lwipopts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lwipopts.h; sourceTree = "<group>"; };
+		B603F7382BE0D75400C025B4 /* perf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = perf.c; sourceTree = "<group>"; };
+		B603F73A2BE0D75400C025B4 /* list.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = list.c; sourceTree = "<group>"; };
+		B603F73B2BE0D75400C025B4 /* tapif.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tapif.c; sourceTree = "<group>"; };
+		B603F73C2BE0D75400C025B4 /* sio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sio.c; sourceTree = "<group>"; };
+		B603F73D2BE0D75400C025B4 /* fifo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fifo.c; sourceTree = "<group>"; };
+		B603F73E2BE0D75400C025B4 /* pcapif.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pcapif.c; sourceTree = "<group>"; };
+		B603F7412BE0D75400C025B4 /* fifo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fifo.h; sourceTree = "<group>"; };
+		B603F7422BE0D75400C025B4 /* sio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sio.h; sourceTree = "<group>"; };
+		B603F7432BE0D75400C025B4 /* pcapif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pcapif.h; sourceTree = "<group>"; };
+		B603F7442BE0D75400C025B4 /* list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = list.h; sourceTree = "<group>"; };
+		B603F7452BE0D75400C025B4 /* tapif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tapif.h; sourceTree = "<group>"; };
+		B603F7472BE0D75400C025B4 /* sys_arch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sys_arch.h; sourceTree = "<group>"; };
+		B603F7482BE0D75400C025B4 /* cc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc.h; sourceTree = "<group>"; };
+		B603F7492BE0D75400C025B4 /* perf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = perf.h; sourceTree = "<group>"; };
+		B603F74A2BE0D75400C025B4 /* sys_arch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sys_arch.c; sourceTree = "<group>"; };
+		B603F74F2BE0D75400C025B4 /* if.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = if.h; sourceTree = "<group>"; };
+		B603F7512BE0D75400C025B4 /* inet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inet.h; sourceTree = "<group>"; };
+		B603F7532BE0D75400C025B4 /* socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = socket.h; sourceTree = "<group>"; };
+		B603F7542BE0D75400C025B4 /* netdb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = netdb.h; sourceTree = "<group>"; };
+		B603F7562BE0D75400C025B4 /* errno.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = errno.h; sourceTree = "<group>"; };
+		B603F7582BE0D75400C025B4 /* pbuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pbuf.h; sourceTree = "<group>"; };
+		B603F7592BE0D75400C025B4 /* tcp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tcp.h; sourceTree = "<group>"; };
+		B603F75A2BE0D75400C025B4 /* nd6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nd6.h; sourceTree = "<group>"; };
+		B603F75B2BE0D75400C025B4 /* err.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = err.h; sourceTree = "<group>"; };
+		B603F75C2BE0D75400C025B4 /* etharp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = etharp.h; sourceTree = "<group>"; };
+		B603F75D2BE0D75400C025B4 /* igmp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = igmp.h; sourceTree = "<group>"; };
+		B603F75E2BE0D75400C025B4 /* netif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = netif.h; sourceTree = "<group>"; };
+		B603F75F2BE0D75400C025B4 /* altcp_tcp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = altcp_tcp.h; sourceTree = "<group>"; };
+		B603F7602BE0D75400C025B4 /* sio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sio.h; sourceTree = "<group>"; };
+		B603F7612BE0D75400C025B4 /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
+		B603F7622BE0D75400C025B4 /* ethip6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ethip6.h; sourceTree = "<group>"; };
+		B603F7632BE0D75400C025B4 /* tcpip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tcpip.h; sourceTree = "<group>"; };
+		B603F7642BE0D75400C025B4 /* ip4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ip4.h; sourceTree = "<group>"; };
+		B603F7652BE0D75400C025B4 /* icmp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = icmp.h; sourceTree = "<group>"; };
+		B603F7662BE0D75400C025B4 /* timeouts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timeouts.h; sourceTree = "<group>"; };
+		B603F7672BE0D75400C025B4 /* altcp_tls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = altcp_tls.h; sourceTree = "<group>"; };
+		B603F7682BE0D75400C025B4 /* snmp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = snmp.h; sourceTree = "<group>"; };
+		B603F7692BE0D75400C025B4 /* ip4_frag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ip4_frag.h; sourceTree = "<group>"; };
+		B603F76A2BE0D75400C025B4 /* ip6_addr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ip6_addr.h; sourceTree = "<group>"; };
+		B603F76B2BE0D75400C025B4 /* netifapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = netifapi.h; sourceTree = "<group>"; };
+		B603F76C2BE0D75400C025B4 /* inet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inet.h; sourceTree = "<group>"; };
+		B603F76D2BE0D75400C025B4 /* altcp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = altcp.h; sourceTree = "<group>"; };
+		B603F76E2BE0D75400C025B4 /* ip6_frag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ip6_frag.h; sourceTree = "<group>"; };
+		B603F76F2BE0D75400C025B4 /* ip4_addr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ip4_addr.h; sourceTree = "<group>"; };
+		B603F7702BE0D75400C025B4 /* netbuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = netbuf.h; sourceTree = "<group>"; };
+		B603F7712BE0D75400C025B4 /* tcpbase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tcpbase.h; sourceTree = "<group>"; };
+		B603F7722BE0D75400C025B4 /* api.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = api.h; sourceTree = "<group>"; };
+		B603F7732BE0D75400C025B4 /* dhcp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dhcp.h; sourceTree = "<group>"; };
+		B603F7742BE0D75400C025B4 /* if_api.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = if_api.h; sourceTree = "<group>"; };
+		B603F7752BE0D75400C025B4 /* autoip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = autoip.h; sourceTree = "<group>"; };
+		B603F7762BE0D75400C025B4 /* memp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memp.h; sourceTree = "<group>"; };
+		B603F7782BE0D75400C025B4 /* tcp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tcp.h; sourceTree = "<group>"; };
+		B603F7792BE0D75400C025B4 /* nd6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nd6.h; sourceTree = "<group>"; };
+		B603F77A2BE0D75500C025B4 /* etharp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = etharp.h; sourceTree = "<group>"; };
+		B603F77B2BE0D75500C025B4 /* igmp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = igmp.h; sourceTree = "<group>"; };
+		B603F77C2BE0D75500C025B4 /* ip4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ip4.h; sourceTree = "<group>"; };
+		B603F77D2BE0D75500C025B4 /* icmp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = icmp.h; sourceTree = "<group>"; };
+		B603F77E2BE0D75500C025B4 /* ethernet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ethernet.h; sourceTree = "<group>"; };
+		B603F77F2BE0D75500C025B4 /* dhcp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dhcp.h; sourceTree = "<group>"; };
+		B603F7802BE0D75500C025B4 /* autoip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = autoip.h; sourceTree = "<group>"; };
+		B603F7812BE0D75500C025B4 /* acd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = acd.h; sourceTree = "<group>"; };
+		B603F7822BE0D75500C025B4 /* ip6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ip6.h; sourceTree = "<group>"; };
+		B603F7832BE0D75500C025B4 /* iana.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iana.h; sourceTree = "<group>"; };
+		B603F7842BE0D75500C025B4 /* dns.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dns.h; sourceTree = "<group>"; };
+		B603F7852BE0D75500C025B4 /* icmp6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = icmp6.h; sourceTree = "<group>"; };
+		B603F7862BE0D75500C025B4 /* ip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ip.h; sourceTree = "<group>"; };
+		B603F7872BE0D75500C025B4 /* dhcp6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dhcp6.h; sourceTree = "<group>"; };
+		B603F7882BE0D75500C025B4 /* ieee.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ieee.h; sourceTree = "<group>"; };
+		B603F7892BE0D75500C025B4 /* udp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = udp.h; sourceTree = "<group>"; };
+		B603F78A2BE0D75500C025B4 /* mld6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mld6.h; sourceTree = "<group>"; };
+		B603F78B2BE0D75500C025B4 /* sockets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sockets.h; sourceTree = "<group>"; };
+		B603F78D2BE0D75500C025B4 /* tcpip_priv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tcpip_priv.h; sourceTree = "<group>"; };
+		B603F78E2BE0D75500C025B4 /* nd6_priv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nd6_priv.h; sourceTree = "<group>"; };
+		B603F78F2BE0D75500C025B4 /* mem_priv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mem_priv.h; sourceTree = "<group>"; };
+		B603F7902BE0D75500C025B4 /* api_msg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = api_msg.h; sourceTree = "<group>"; };
+		B603F7912BE0D75500C025B4 /* tcp_priv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tcp_priv.h; sourceTree = "<group>"; };
+		B603F7922BE0D75500C025B4 /* raw_priv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = raw_priv.h; sourceTree = "<group>"; };
+		B603F7932BE0D75500C025B4 /* memp_priv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memp_priv.h; sourceTree = "<group>"; };
+		B603F7942BE0D75500C025B4 /* altcp_priv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = altcp_priv.h; sourceTree = "<group>"; };
+		B603F7952BE0D75500C025B4 /* sockets_priv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sockets_priv.h; sourceTree = "<group>"; };
+		B603F7962BE0D75500C025B4 /* memp_std.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memp_std.h; sourceTree = "<group>"; };
+		B603F7972BE0D75500C025B4 /* ip_addr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ip_addr.h; sourceTree = "<group>"; };
+		B603F7982BE0D75500C025B4 /* opt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opt.h; sourceTree = "<group>"; };
+		B603F7992BE0D75500C025B4 /* init.h.cmake.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = init.h.cmake.in; sourceTree = "<group>"; };
+		B603F79A2BE0D75500C025B4 /* acd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = acd.h; sourceTree = "<group>"; };
+		B603F79B2BE0D75500C025B4 /* inet_chksum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inet_chksum.h; sourceTree = "<group>"; };
+		B603F79C2BE0D75500C025B4 /* raw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = raw.h; sourceTree = "<group>"; };
+		B603F79D2BE0D75500C025B4 /* ip6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ip6.h; sourceTree = "<group>"; };
+		B603F79E2BE0D75500C025B4 /* sys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sys.h; sourceTree = "<group>"; };
+		B603F79F2BE0D75500C025B4 /* netdb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = netdb.h; sourceTree = "<group>"; };
+		B603F7A02BE0D75500C025B4 /* errno.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = errno.h; sourceTree = "<group>"; };
+		B603F7A12BE0D75500C025B4 /* def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = def.h; sourceTree = "<group>"; };
+		B603F7A22BE0D75500C025B4 /* mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mem.h; sourceTree = "<group>"; };
+		B603F7A32BE0D75500C025B4 /* dns.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dns.h; sourceTree = "<group>"; };
+		B603F7A42BE0D75500C025B4 /* icmp6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = icmp6.h; sourceTree = "<group>"; };
+		B603F7A52BE0D75500C025B4 /* ip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ip.h; sourceTree = "<group>"; };
+		B603F7A62BE0D75500C025B4 /* init.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = init.h; sourceTree = "<group>"; };
+		B603F7A72BE0D75500C025B4 /* dhcp6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dhcp6.h; sourceTree = "<group>"; };
+		B603F7A82BE0D75500C025B4 /* stats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stats.h; sourceTree = "<group>"; };
+		B603F7A92BE0D75500C025B4 /* udp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = udp.h; sourceTree = "<group>"; };
+		B603F7AA2BE0D75500C025B4 /* ip6_zone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ip6_zone.h; sourceTree = "<group>"; };
+		B603F7AB2BE0D75500C025B4 /* arch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = arch.h; sourceTree = "<group>"; };
+		B603F7AC2BE0D75500C025B4 /* mld6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mld6.h; sourceTree = "<group>"; };
+		B603F7AE2BE0D75500C025B4 /* etharp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = etharp.h; sourceTree = "<group>"; };
+		B603F7AF2BE0D75500C025B4 /* lowpan6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lowpan6.h; sourceTree = "<group>"; };
+		B603F7B02BE0D75500C025B4 /* lowpan6_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lowpan6_common.h; sourceTree = "<group>"; };
+		B603F7B12BE0D75500C025B4 /* lowpan6_opts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lowpan6_opts.h; sourceTree = "<group>"; };
+		B603F7B32BE0D75500C025B4 /* ccp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ccp.h; sourceTree = "<group>"; };
+		B603F7B42BE0D75500C025B4 /* chap-md5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "chap-md5.h"; sourceTree = "<group>"; };
+		B603F7B52BE0D75500C025B4 /* magic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = magic.h; sourceTree = "<group>"; };
+		B603F7B62BE0D75500C025B4 /* ecp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ecp.h; sourceTree = "<group>"; };
+		B603F7B72BE0D75500C025B4 /* upap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = upap.h; sourceTree = "<group>"; };
+		B603F7B82BE0D75500C025B4 /* chap-new.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "chap-new.h"; sourceTree = "<group>"; };
+		B603F7B92BE0D75500C025B4 /* ipcp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ipcp.h; sourceTree = "<group>"; };
+		B603F7BA2BE0D75500C025B4 /* ppp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ppp.h; sourceTree = "<group>"; };
+		B603F7BB2BE0D75500C025B4 /* fsm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fsm.h; sourceTree = "<group>"; };
+		B603F7BD2BE0D75500C025B4 /* md5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = md5.h; sourceTree = "<group>"; };
+		B603F7BE2BE0D75500C025B4 /* arc4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = arc4.h; sourceTree = "<group>"; };
+		B603F7BF2BE0D75500C025B4 /* md4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = md4.h; sourceTree = "<group>"; };
+		B603F7C02BE0D75500C025B4 /* des.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = des.h; sourceTree = "<group>"; };
+		B603F7C12BE0D75500C025B4 /* sha1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sha1.h; sourceTree = "<group>"; };
+		B603F7C22BE0D75500C025B4 /* pppdebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pppdebug.h; sourceTree = "<group>"; };
+		B603F7C32BE0D75500C025B4 /* ppp_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ppp_impl.h; sourceTree = "<group>"; };
+		B603F7C42BE0D75500C025B4 /* vj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vj.h; sourceTree = "<group>"; };
+		B603F7C52BE0D75500C025B4 /* ppp_opts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ppp_opts.h; sourceTree = "<group>"; };
+		B603F7C62BE0D75500C025B4 /* pppol2tp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pppol2tp.h; sourceTree = "<group>"; };
+		B603F7C72BE0D75500C025B4 /* pppapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pppapi.h; sourceTree = "<group>"; };
+		B603F7C82BE0D75500C025B4 /* pppoe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pppoe.h; sourceTree = "<group>"; };
+		B603F7C92BE0D75500C025B4 /* eui64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eui64.h; sourceTree = "<group>"; };
+		B603F7CA2BE0D75500C025B4 /* mppe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mppe.h; sourceTree = "<group>"; };
+		B603F7CB2BE0D75500C025B4 /* ipv6cp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ipv6cp.h; sourceTree = "<group>"; };
+		B603F7CC2BE0D75500C025B4 /* lcp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lcp.h; sourceTree = "<group>"; };
+		B603F7CD2BE0D75500C025B4 /* pppos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pppos.h; sourceTree = "<group>"; };
+		B603F7CE2BE0D75500C025B4 /* eap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eap.h; sourceTree = "<group>"; };
+		B603F7CF2BE0D75500C025B4 /* chap_ms.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chap_ms.h; sourceTree = "<group>"; };
+		B603F7D02BE0D75500C025B4 /* pppcrypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pppcrypt.h; sourceTree = "<group>"; };
+		B603F7D12BE0D75500C025B4 /* lowpan6_ble.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lowpan6_ble.h; sourceTree = "<group>"; };
+		B603F7D22BE0D75500C025B4 /* ethernet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ethernet.h; sourceTree = "<group>"; };
+		B603F7D32BE0D75500C025B4 /* zepif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zepif.h; sourceTree = "<group>"; };
+		B603F7D42BE0D75500C025B4 /* slipif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = slipif.h; sourceTree = "<group>"; };
+		B603F7D52BE0D75500C025B4 /* ieee802154.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ieee802154.h; sourceTree = "<group>"; };
+		B603F7D62BE0D75500C025B4 /* bridgeif_opts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bridgeif_opts.h; sourceTree = "<group>"; };
+		B603F7D72BE0D75500C025B4 /* bridgeif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bridgeif.h; sourceTree = "<group>"; };
+		B603F7D92BE0D75500C025B4 /* memp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = memp.c; sourceTree = "<group>"; };
+		B603F7DA2BE0D75500C025B4 /* sys.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sys.c; sourceTree = "<group>"; };
+		B603F7DB2BE0D75500C025B4 /* inet_chksum.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inet_chksum.c; sourceTree = "<group>"; };
+		B603F7DC2BE0D75500C025B4 /* raw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = raw.c; sourceTree = "<group>"; };
+		B603F7DD2BE0D75500C025B4 /* tcp_out.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tcp_out.c; sourceTree = "<group>"; };
+		B603F7DE2BE0D75500C025B4 /* ip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ip.c; sourceTree = "<group>"; };
+		B603F7DF2BE0D75500C025B4 /* dns.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = dns.c; sourceTree = "<group>"; };
+		B603F7E02BE0D75500C025B4 /* init.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = init.c; sourceTree = "<group>"; };
+		B603F7E12BE0D75500C025B4 /* mem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mem.c; sourceTree = "<group>"; };
+		B603F7E22BE0D75500C025B4 /* altcp_alloc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = altcp_alloc.c; sourceTree = "<group>"; };
+		B603F7E32BE0D75500C025B4 /* def.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = def.c; sourceTree = "<group>"; };
+		B603F7E42BE0D75500C025B4 /* udp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = udp.c; sourceTree = "<group>"; };
+		B603F7E52BE0D75500C025B4 /* stats.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = stats.c; sourceTree = "<group>"; };
+		B603F7E62BE0D75500C025B4 /* tcp_in.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tcp_in.c; sourceTree = "<group>"; };
+		B603F7E82BE0D75500C025B4 /* autoip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = autoip.c; sourceTree = "<group>"; };
+		B603F7E92BE0D75500C025B4 /* dhcp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = dhcp.c; sourceTree = "<group>"; };
+		B603F7EA2BE0D75500C025B4 /* acd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = acd.c; sourceTree = "<group>"; };
+		B603F7EB2BE0D75500C025B4 /* igmp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = igmp.c; sourceTree = "<group>"; };
+		B603F7EC2BE0D75500C025B4 /* etharp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = etharp.c; sourceTree = "<group>"; };
+		B603F7ED2BE0D75500C025B4 /* icmp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = icmp.c; sourceTree = "<group>"; };
+		B603F7EE2BE0D75500C025B4 /* ip4.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ip4.c; sourceTree = "<group>"; };
+		B603F7EF2BE0D75500C025B4 /* ip4_frag.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ip4_frag.c; sourceTree = "<group>"; };
+		B603F7F02BE0D75500C025B4 /* ip4_addr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ip4_addr.c; sourceTree = "<group>"; };
+		B603F7F12BE0D75500C025B4 /* netif.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = netif.c; sourceTree = "<group>"; };
+		B603F7F22BE0D75500C025B4 /* altcp_tcp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = altcp_tcp.c; sourceTree = "<group>"; };
+		B603F7F32BE0D75500C025B4 /* tcp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tcp.c; sourceTree = "<group>"; };
+		B603F7F42BE0D75500C025B4 /* pbuf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pbuf.c; sourceTree = "<group>"; };
+		B603F7F52BE0D75500C025B4 /* timeouts.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = timeouts.c; sourceTree = "<group>"; };
+		B603F7F72BE0D75500C025B4 /* ip6.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ip6.c; sourceTree = "<group>"; };
+		B603F7F82BE0D75500C025B4 /* icmp6.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = icmp6.c; sourceTree = "<group>"; };
+		B603F7F92BE0D75500C025B4 /* mld6.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mld6.c; sourceTree = "<group>"; };
+		B603F7FA2BE0D75500C025B4 /* dhcp6.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = dhcp6.c; sourceTree = "<group>"; };
+		B603F7FB2BE0D75500C025B4 /* ethip6.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ethip6.c; sourceTree = "<group>"; };
+		B603F7FC2BE0D75500C025B4 /* nd6.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nd6.c; sourceTree = "<group>"; };
+		B603F7FD2BE0D75500C025B4 /* inet6.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inet6.c; sourceTree = "<group>"; };
+		B603F7FE2BE0D75500C025B4 /* ip6_addr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ip6_addr.c; sourceTree = "<group>"; };
+		B603F7FF2BE0D75500C025B4 /* ip6_frag.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ip6_frag.c; sourceTree = "<group>"; };
+		B603F8002BE0D75500C025B4 /* altcp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = altcp.c; sourceTree = "<group>"; };
+		B603F9112BE1144200C025B4 /* libHevTaskSystem.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libHevTaskSystem.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B603F91C2BE1149100C025B4 /* hev-memory-allocator-slice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-memory-allocator-slice.h"; sourceTree = "<group>"; };
+		B603F91D2BE1149100C025B4 /* hev-memory-allocator-slice.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-memory-allocator-slice.c"; sourceTree = "<group>"; };
+		B603F91F2BE1149100C025B4 /* hev-memory-allocator-simple.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-memory-allocator-simple.c"; sourceTree = "<group>"; };
+		B603F9202BE1149100C025B4 /* hev-memory-allocator-simple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-memory-allocator-simple.h"; sourceTree = "<group>"; };
+		B603F9222BE1149100C025B4 /* hev-memory-allocator-api.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-memory-allocator-api.c"; sourceTree = "<group>"; };
+		B603F9232BE1149100C025B4 /* hev-memory-allocator-api.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-memory-allocator-api.h"; sourceTree = "<group>"; };
+		B603F9252BE1149100C025B4 /* hev-memory-allocator.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-memory-allocator.c"; sourceTree = "<group>"; };
+		B603F9262BE1149100C025B4 /* hev-memory-allocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-memory-allocator.h"; sourceTree = "<group>"; };
+		B603F9292BE1149100C025B4 /* hev-debugger.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-debugger.c"; sourceTree = "<group>"; };
+		B603F92A2BE1149100C025B4 /* hev-compiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-compiler.h"; sourceTree = "<group>"; };
+		B603F92B2BE1149100C025B4 /* hev-debugger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-debugger.h"; sourceTree = "<group>"; };
+		B603F92D2BE1149100C025B4 /* hev-rbtree-cached.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-rbtree-cached.c"; sourceTree = "<group>"; };
+		B603F92E2BE1149100C025B4 /* hev-rbtree.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-rbtree.c"; sourceTree = "<group>"; };
+		B603F92F2BE1149100C025B4 /* hev-rbtree-cached.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-rbtree-cached.h"; sourceTree = "<group>"; };
+		B603F9302BE1149200C025B4 /* hev-rbtree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-rbtree.h"; sourceTree = "<group>"; };
+		B603F9332BE1149200C025B4 /* hev-task-io-pipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-io-pipe.h"; sourceTree = "<group>"; };
+		B603F9342BE1149200C025B4 /* hev-task-io-pipe.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-io-pipe.c"; sourceTree = "<group>"; };
+		B603F9362BE1149200C025B4 /* hev-task-io.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-io.h"; sourceTree = "<group>"; };
+		B603F9372BE1149200C025B4 /* hev-task-io.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-io.c"; sourceTree = "<group>"; };
+		B603F9392BE1149200C025B4 /* hev-task-io-poll.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-io-poll.h"; sourceTree = "<group>"; };
+		B603F93A2BE1149200C025B4 /* hev-task-io-poll.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-io-poll.c"; sourceTree = "<group>"; };
+		B603F93C2BE1149200C025B4 /* hev-task-io-socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-io-socket.h"; sourceTree = "<group>"; };
+		B603F93D2BE1149200C025B4 /* hev-task-io-socket.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-io-socket.c"; sourceTree = "<group>"; };
+		B603F93F2BE1149200C025B4 /* hev-circular-buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-circular-buffer.h"; sourceTree = "<group>"; };
+		B603F9402BE1149200C025B4 /* hev-circular-buffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-circular-buffer.c"; sourceTree = "<group>"; };
+		B603F9422BE1149200C025B4 /* hev-object.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-object.c"; sourceTree = "<group>"; };
+		B603F9432BE1149200C025B4 /* hev-object-atomic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-object-atomic.c"; sourceTree = "<group>"; };
+		B603F9442BE1149200C025B4 /* hev-object-atomic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-object-atomic.h"; sourceTree = "<group>"; };
+		B603F9452BE1149200C025B4 /* hev-object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-object.h"; sourceTree = "<group>"; };
+		B603F9472BE1149200C025B4 /* hev-list.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-list.c"; sourceTree = "<group>"; };
+		B603F9482BE1149200C025B4 /* hev-list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-list.h"; sourceTree = "<group>"; };
+		B603F94A2BE1149200C025B4 /* hev-task-dns.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-dns.h"; sourceTree = "<group>"; };
+		B603F94B2BE1149200C025B4 /* hev-task-dns-proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-dns-proxy.h"; sourceTree = "<group>"; };
+		B603F94C2BE1149200C025B4 /* hev-task-dns.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-dns.c"; sourceTree = "<group>"; };
+		B603F94D2BE1149200C025B4 /* hev-task-dns-proxy.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-dns-proxy.c"; sourceTree = "<group>"; };
+		B603F9602BE1149200C025B4 /* hev-task-aide.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-aide.h"; sourceTree = "<group>"; };
+		B603F9612BE1149200C025B4 /* hev-task-aide.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-aide.c"; sourceTree = "<group>"; };
+		B603F9632BE1149200C025B4 /* hev-task-system-schedule.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-system-schedule.c"; sourceTree = "<group>"; };
+		B603F9642BE1149200C025B4 /* hev-task-system-private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-system-private.h"; sourceTree = "<group>"; };
+		B603F9652BE1149200C025B4 /* hev-task-system.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-system.c"; sourceTree = "<group>"; };
+		B603F9662BE1149200C025B4 /* hev-task-system.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-system.h"; sourceTree = "<group>"; };
+		B603F9682BE1149200C025B4 /* hev-task-io-reactor-kqueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-io-reactor-kqueue.h"; sourceTree = "<group>"; };
+		B603F9692BE1149200C025B4 /* hev-task-io-reactor-epoll.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-io-reactor-epoll.c"; sourceTree = "<group>"; };
+		B603F96A2BE1149200C025B4 /* hev-task-io-reactor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-io-reactor.h"; sourceTree = "<group>"; };
+		B603F96B2BE1149200C025B4 /* hev-task-io-reactor-kqueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-io-reactor-kqueue.c"; sourceTree = "<group>"; };
+		B603F96C2BE1149200C025B4 /* hev-task-io-reactor-epoll.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-io-reactor-epoll.h"; sourceTree = "<group>"; };
+		B603F96D2BE1149200C025B4 /* hev-task-io-reactor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-io-reactor.c"; sourceTree = "<group>"; };
+		B603F96F2BE1149200C025B4 /* hev-task-timer-timerfd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-timer-timerfd.h"; sourceTree = "<group>"; };
+		B603F9702BE1149200C025B4 /* hev-task-timer-kevent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-timer-kevent.h"; sourceTree = "<group>"; };
+		B603F9712BE1149200C025B4 /* hev-task-timer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-timer.c"; sourceTree = "<group>"; };
+		B603F9722BE1149200C025B4 /* hev-task-timer-timerfd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-timer-timerfd.c"; sourceTree = "<group>"; };
+		B603F9732BE1149200C025B4 /* hev-task-timer-kevent.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-timer-kevent.c"; sourceTree = "<group>"; };
+		B603F9742BE1149200C025B4 /* hev-task-timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-timer.h"; sourceTree = "<group>"; };
+		B603F9762BE1149200C025B4 /* hev-task-stack-mmap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-stack-mmap.c"; sourceTree = "<group>"; };
+		B603F9772BE1149200C025B4 /* hev-task.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task.h"; sourceTree = "<group>"; };
+		B603F9782BE1149200C025B4 /* hev-task-call.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-call.c"; sourceTree = "<group>"; };
+		B603F9792BE1149200C025B4 /* hev-task-stack-heap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-stack-heap.c"; sourceTree = "<group>"; };
+		B603F97A2BE1149200C025B4 /* hev-task-execute.S */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = "hev-task-execute.S"; sourceTree = "<group>"; };
+		B603F97B2BE1149200C025B4 /* hev-task-executer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-executer.c"; sourceTree = "<group>"; };
+		B603F97C2BE1149200C025B4 /* hev-task.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task.c"; sourceTree = "<group>"; };
+		B603F97D2BE1149200C025B4 /* hev-task-call.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-call.h"; sourceTree = "<group>"; };
+		B603F97E2BE1149200C025B4 /* hev-task-stack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-stack.h"; sourceTree = "<group>"; };
+		B603F97F2BE1149200C025B4 /* hev-task-private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-private.h"; sourceTree = "<group>"; };
+		B603F9802BE1149200C025B4 /* hev-task-executer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-executer.h"; sourceTree = "<group>"; };
+		B603F9822BE1149200C025B4 /* hev-task-channel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-channel.c"; sourceTree = "<group>"; };
+		B603F9832BE1149200C025B4 /* hev-task-channel-private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-channel-private.h"; sourceTree = "<group>"; };
+		B603F9842BE1149200C025B4 /* hev-task-channel-select.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-channel-select.c"; sourceTree = "<group>"; };
+		B603F9852BE1149200C025B4 /* hev-task-channel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-channel.h"; sourceTree = "<group>"; };
+		B603F9862BE1149200C025B4 /* hev-task-channel-select-private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-channel-select-private.h"; sourceTree = "<group>"; };
+		B603F9872BE1149200C025B4 /* hev-task-channel-select.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-channel-select.h"; sourceTree = "<group>"; };
+		B603F9892BE1149200C025B4 /* hev-task-cond.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-cond.h"; sourceTree = "<group>"; };
+		B603F98A2BE1149200C025B4 /* hev-task-mutex.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-mutex.c"; sourceTree = "<group>"; };
+		B603F98B2BE1149200C025B4 /* hev-task-cond.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-cond.c"; sourceTree = "<group>"; };
+		B603F98C2BE1149200C025B4 /* hev-task-mutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-mutex.h"; sourceTree = "<group>"; };
+		B60F7EB42BE0843C00DD1A96 /* tun2socks.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = tun2socks.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B60F7EB72BE0843C00DD1A96 /* tun2socks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tun2socks.h; sourceTree = "<group>"; };
+		B69998F12BE1D68D0044BCC5 /* libyaml.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libyaml.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B69998FA2BE1D6CE0044BCC5 /* writer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = writer.c; path = "../../third-part/yaml/src/writer.c"; sourceTree = "<group>"; };
+		B69998FB2BE1D6CE0044BCC5 /* emitter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = emitter.c; path = "../../third-part/yaml/src/emitter.c"; sourceTree = "<group>"; };
+		B69998FC2BE1D6CE0044BCC5 /* dumper.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = dumper.c; path = "../../third-part/yaml/src/dumper.c"; sourceTree = "<group>"; };
+		B69998FD2BE1D6CE0044BCC5 /* loader.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = loader.c; path = "../../third-part/yaml/src/loader.c"; sourceTree = "<group>"; };
+		B69998FE2BE1D6CE0044BCC5 /* parser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = parser.c; path = "../../third-part/yaml/src/parser.c"; sourceTree = "<group>"; };
+		B69998FF2BE1D6CF0044BCC5 /* scanner.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = scanner.c; path = "../../third-part/yaml/src/scanner.c"; sourceTree = "<group>"; };
+		B69999002BE1D6CF0044BCC5 /* api.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = api.c; path = "../../third-part/yaml/src/api.c"; sourceTree = "<group>"; };
+		B69999012BE1D6CF0044BCC5 /* yaml_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = yaml_private.h; path = "../../third-part/yaml/src/yaml_private.h"; sourceTree = "<group>"; };
+		B69999022BE1D6CF0044BCC5 /* yaml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = yaml.h; path = "../../third-part/yaml/src/yaml.h"; sourceTree = "<group>"; };
+		B69999032BE1D6CF0044BCC5 /* reader.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = reader.c; path = "../../third-part/yaml/src/reader.c"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B603F6F22BE0D5E400C025B4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B603F90E2BE1144200C025B4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B60F7EB12BE0843C00DD1A96 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B699990C2BE1D8560044BCC5 /* libyaml.a in Frameworks */,
+				B603F9B62BE1178B00C025B4 /* libHevTaskSystem.a in Frameworks */,
+				B603F85F2BE0E39300C025B4 /* liblwip.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B69998EE2BE1D68D0044BCC5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B603F4632BE08D4600C025B4 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				B603F4722BE08D6700C025B4 /* core */,
+				B603F4A22BE08D6800C025B4 /* hev-config-const.h */,
+				B603F4AD2BE08D6800C025B4 /* hev-config.c */,
+				B603F4A92BE08D6800C025B4 /* hev-config.h */,
+				B603F4AC2BE08D6800C025B4 /* hev-jni.c */,
+				B603F4A82BE08D6800C025B4 /* hev-jni.h */,
+				B603F4B02BE08D6800C025B4 /* hev-main.c */,
+				B603F4B22BE08D6800C025B4 /* hev-main.h */,
+				B603F4A62BE08D6800C025B4 /* hev-socks5-session-tcp.c */,
+				B603F4A72BE08D6800C025B4 /* hev-socks5-session-tcp.h */,
+				B603F4B12BE08D6800C025B4 /* hev-socks5-session-udp.c */,
+				B603F4A12BE08D6800C025B4 /* hev-socks5-session-udp.h */,
+				B603F4A32BE08D6800C025B4 /* hev-socks5-session.c */,
+				B603F4AE2BE08D6800C025B4 /* hev-socks5-session.h */,
+				B603F4A52BE08D6800C025B4 /* hev-socks5-tunnel.c */,
+				B603F4AA2BE08D6800C025B4 /* hev-socks5-tunnel.h */,
+				B603F4B42BE08D6800C025B4 /* hev-tunnel-freebsd.c */,
+				B603F4AB2BE08D6800C025B4 /* hev-tunnel-freebsd.h */,
+				B603F4AF2BE08D6800C025B4 /* hev-tunnel-linux.c */,
+				B603F4B32BE08D6800C025B4 /* hev-tunnel-linux.h */,
+				B603F4642BE08D6700C025B4 /* hev-tunnel-macos.c */,
+				B603F4A42BE08D6800C025B4 /* hev-tunnel-macos.h */,
+				B603F4652BE08D6700C025B4 /* hev-tunnel.h */,
+				B603F4662BE08D6700C025B4 /* misc */,
+			);
+			name = src;
+			sourceTree = "<group>";
+		};
+		B603F4662BE08D6700C025B4 /* misc */ = {
+			isa = PBXGroup;
+			children = (
+				B603F4672BE08D6700C025B4 /* hev-list.c */,
+				B603F4682BE08D6700C025B4 /* hev-utils.h */,
+				B603F4692BE08D6700C025B4 /* hev-logger.c */,
+				B603F46A2BE08D6700C025B4 /* hev-exec.c */,
+				B603F46B2BE08D6700C025B4 /* hev-compiler.h */,
+				B603F46C2BE08D6700C025B4 /* hev-ring-buffer.h */,
+				B603F46D2BE08D6700C025B4 /* hev-utils.c */,
+				B603F46E2BE08D6700C025B4 /* hev-logger.h */,
+				B603F46F2BE08D6700C025B4 /* hev-list.h */,
+				B603F4702BE08D6700C025B4 /* hev-exec.h */,
+				B603F4712BE08D6700C025B4 /* hev-ring-buffer.c */,
+			);
+			name = misc;
+			path = ../src/misc;
+			sourceTree = "<group>";
+		};
+		B603F4722BE08D6700C025B4 /* core */ = {
+			isa = PBXGroup;
+			children = (
+				B603F4732BE08D6700C025B4 /* License */,
+				B603F4742BE08D6700C025B4 /* include */,
+				B603F4822BE08D6800C025B4 /* README.md */,
+				B603F4832BE08D6800C025B4 /* .clang-format */,
+				B603F4842BE08D6800C025B4 /* src */,
+			);
+			name = core;
+			path = ../src/core;
+			sourceTree = "<group>";
+		};
+		B603F4742BE08D6700C025B4 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				B603F4752BE08D6700C025B4 /* hev-socks5-user.h */,
+				B603F4762BE08D6700C025B4 /* hev-socks5-client.h */,
+				B603F4772BE08D6700C025B4 /* hev-socks5-client-tcp.h */,
+				B603F4782BE08D6800C025B4 /* hev-socks5-tcp.h */,
+				B603F4792BE08D6800C025B4 /* hev-socks5-proto.h */,
+				B603F47A2BE08D6800C025B4 /* hev-socks5.h */,
+				B603F47B2BE08D6800C025B4 /* hev-rbtree.h */,
+				B603F47C2BE08D6800C025B4 /* hev-socks5-logger.h */,
+				B603F47D2BE08D6800C025B4 /* hev-socks5-udp.h */,
+				B603F47E2BE08D6800C025B4 /* hev-socks5-client-udp.h */,
+				B603F47F2BE08D6800C025B4 /* hev-socks5-misc.h */,
+				B603F4802BE08D6800C025B4 /* hev-socks5-authenticator.h */,
+				B603F4812BE08D6800C025B4 /* hev-socks5-server.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		B603F4842BE08D6800C025B4 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				B603F4852BE08D6800C025B4 /* hev-socks5-user.h */,
+				B603F4862BE08D6800C025B4 /* hev-socks5-client.h */,
+				B603F4872BE08D6800C025B4 /* hev-socks5-client-tcp.h */,
+				B603F4882BE08D6800C025B4 /* hev-socks5-tcp.h */,
+				B603F4892BE08D6800C025B4 /* hev-socks5.c */,
+				B603F48A2BE08D6800C025B4 /* hev-socks5-proto.h */,
+				B603F48B2BE08D6800C025B4 /* hev-socks5-client-udp.c */,
+				B603F48C2BE08D6800C025B4 /* hev-socks5-udp.c */,
+				B603F48D2BE08D6800C025B4 /* hev-rbtree.c */,
+				B603F48E2BE08D6800C025B4 /* hev-compiler.h */,
+				B603F48F2BE08D6800C025B4 /* hev-socks5-logger.c */,
+				B603F4902BE08D6800C025B4 /* hev-socks5-server.c */,
+				B603F4912BE08D6800C025B4 /* hev-socks5-authenticator.c */,
+				B603F4922BE08D6800C025B4 /* hev-socks5-misc.c */,
+				B603F4932BE08D6800C025B4 /* hev-socks5-client.c */,
+				B603F4942BE08D6800C025B4 /* hev-socks5-user.c */,
+				B603F4952BE08D6800C025B4 /* hev-socks5-misc-priv.h */,
+				B603F4962BE08D6800C025B4 /* hev-socks5.h */,
+				B603F4972BE08D6800C025B4 /* hev-socks5-tcp.c */,
+				B603F4982BE08D6800C025B4 /* hev-socks5-client-tcp.c */,
+				B603F4992BE08D6800C025B4 /* hev-rbtree.h */,
+				B603F49A2BE08D6800C025B4 /* hev-socks5-logger.h */,
+				B603F49B2BE08D6800C025B4 /* hev-socks5-udp.h */,
+				B603F49C2BE08D6800C025B4 /* hev-socks5-client-udp.h */,
+				B603F49D2BE08D6800C025B4 /* hev-socks5-logger-priv.h */,
+				B603F49E2BE08D6800C025B4 /* hev-socks5-misc.h */,
+				B603F49F2BE08D6800C025B4 /* hev-socks5-authenticator.h */,
+				B603F4A02BE08D6800C025B4 /* hev-socks5-server.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		B603F6F62BE0D5E400C025B4 /* lwip */ = {
+			isa = PBXGroup;
+			children = (
+				B603F6FF2BE0D75400C025B4 /* api */,
+				B603F7D82BE0D75500C025B4 /* core */,
+				B603F74B2BE0D75400C025B4 /* include */,
+				B603F7092BE0D75400C025B4 /* netif */,
+				B603F7322BE0D75400C025B4 /* ports */,
+			);
+			path = lwip;
+			sourceTree = "<group>";
+		};
+		B603F6FF2BE0D75400C025B4 /* api */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7002BE0D75400C025B4 /* sockets.c */,
+				B603F7012BE0D75400C025B4 /* if_api.c */,
+				B603F7022BE0D75400C025B4 /* netdb.c */,
+				B603F7032BE0D75400C025B4 /* tcpip.c */,
+				B603F7042BE0D75400C025B4 /* err.c */,
+				B603F7052BE0D75400C025B4 /* netifapi.c */,
+				B603F7062BE0D75400C025B4 /* api_lib.c */,
+				B603F7072BE0D75400C025B4 /* api_msg.c */,
+				B603F7082BE0D75400C025B4 /* netbuf.c */,
+			);
+			name = api;
+			path = "../../third-part/lwip/src/api";
+			sourceTree = "<group>";
+		};
+		B603F7092BE0D75400C025B4 /* netif */ = {
+			isa = PBXGroup;
+			children = (
+				B603F70A2BE0D75400C025B4 /* zepif.c */,
+				B603F70B2BE0D75400C025B4 /* ethernet.c */,
+				B603F70C2BE0D75400C025B4 /* lowpan6_ble.c */,
+				B603F70D2BE0D75400C025B4 /* slipif.c */,
+				B603F70E2BE0D75400C025B4 /* ppp */,
+				B603F72E2BE0D75400C025B4 /* bridgeif.c */,
+				B603F72F2BE0D75400C025B4 /* lowpan6.c */,
+				B603F7302BE0D75400C025B4 /* lowpan6_common.c */,
+				B603F7312BE0D75400C025B4 /* bridgeif_fdb.c */,
+			);
+			name = netif;
+			path = "../../third-part/lwip/src/netif";
+			sourceTree = "<group>";
+		};
+		B603F70E2BE0D75400C025B4 /* ppp */ = {
+			isa = PBXGroup;
+			children = (
+				B603F70F2BE0D75400C025B4 /* vj.c */,
+				B603F7102BE0D75400C025B4 /* auth.c */,
+				B603F7112BE0D75400C025B4 /* pppapi.c */,
+				B603F7122BE0D75400C025B4 /* pppol2tp.c */,
+				B603F7132BE0D75400C025B4 /* mppe.c */,
+				B603F7142BE0D75400C025B4 /* eui64.c */,
+				B603F7152BE0D75400C025B4 /* multilink.c */,
+				B603F7162BE0D75400C025B4 /* pppoe.c */,
+				B603F7172BE0D75400C025B4 /* chap_ms.c */,
+				B603F7182BE0D75400C025B4 /* eap.c */,
+				B603F7192BE0D75400C025B4 /* pppcrypt.c */,
+				B603F71A2BE0D75400C025B4 /* pppos.c */,
+				B603F71B2BE0D75400C025B4 /* polarssl */,
+				B603F7212BE0D75400C025B4 /* lcp.c */,
+				B603F7222BE0D75400C025B4 /* ipv6cp.c */,
+				B603F7232BE0D75400C025B4 /* ccp.c */,
+				B603F7242BE0D75400C025B4 /* utils.c */,
+				B603F7252BE0D75400C025B4 /* chap-md5.c */,
+				B603F7262BE0D75400C025B4 /* chap-new.c */,
+				B603F7272BE0D75400C025B4 /* upap.c */,
+				B603F7282BE0D75400C025B4 /* ecp.c */,
+				B603F7292BE0D75400C025B4 /* magic.c */,
+				B603F72A2BE0D75400C025B4 /* fsm.c */,
+				B603F72B2BE0D75400C025B4 /* demand.c */,
+				B603F72C2BE0D75400C025B4 /* ppp.c */,
+				B603F72D2BE0D75400C025B4 /* ipcp.c */,
+			);
+			path = ppp;
+			sourceTree = "<group>";
+		};
+		B603F71B2BE0D75400C025B4 /* polarssl */ = {
+			isa = PBXGroup;
+			children = (
+				B603F71C2BE0D75400C025B4 /* md4.c */,
+				B603F71D2BE0D75400C025B4 /* des.c */,
+				B603F71E2BE0D75400C025B4 /* sha1.c */,
+				B603F71F2BE0D75400C025B4 /* md5.c */,
+				B603F7202BE0D75400C025B4 /* arc4.c */,
+			);
+			path = polarssl;
+			sourceTree = "<group>";
+		};
+		B603F7322BE0D75400C025B4 /* ports */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7332BE0D75400C025B4 /* unix */,
+			);
+			name = ports;
+			path = "../../third-part/lwip/src/ports";
+			sourceTree = "<group>";
+		};
+		B603F7332BE0D75400C025B4 /* unix */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7342BE0D75400C025B4 /* lib */,
+				B603F7372BE0D75400C025B4 /* port */,
+			);
+			path = unix;
+			sourceTree = "<group>";
+		};
+		B603F7342BE0D75400C025B4 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7352BE0D75400C025B4 /* mem.c */,
+				B603F7362BE0D75400C025B4 /* lwipopts.h */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		B603F7372BE0D75400C025B4 /* port */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7382BE0D75400C025B4 /* perf.c */,
+				B603F7392BE0D75400C025B4 /* netif */,
+				B603F73F2BE0D75400C025B4 /* include */,
+				B603F74A2BE0D75400C025B4 /* sys_arch.c */,
+			);
+			path = port;
+			sourceTree = "<group>";
+		};
+		B603F7392BE0D75400C025B4 /* netif */ = {
+			isa = PBXGroup;
+			children = (
+				B603F73A2BE0D75400C025B4 /* list.c */,
+				B603F73B2BE0D75400C025B4 /* tapif.c */,
+				B603F73C2BE0D75400C025B4 /* sio.c */,
+				B603F73D2BE0D75400C025B4 /* fifo.c */,
+				B603F73E2BE0D75400C025B4 /* pcapif.c */,
+			);
+			path = netif;
+			sourceTree = "<group>";
+		};
+		B603F73F2BE0D75400C025B4 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7402BE0D75400C025B4 /* netif */,
+				B603F7462BE0D75400C025B4 /* arch */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		B603F7402BE0D75400C025B4 /* netif */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7412BE0D75400C025B4 /* fifo.h */,
+				B603F7422BE0D75400C025B4 /* sio.h */,
+				B603F7432BE0D75400C025B4 /* pcapif.h */,
+				B603F7442BE0D75400C025B4 /* list.h */,
+				B603F7452BE0D75400C025B4 /* tapif.h */,
+			);
+			path = netif;
+			sourceTree = "<group>";
+		};
+		B603F7462BE0D75400C025B4 /* arch */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7472BE0D75400C025B4 /* sys_arch.h */,
+				B603F7482BE0D75400C025B4 /* cc.h */,
+				B603F7492BE0D75400C025B4 /* perf.h */,
+			);
+			path = arch;
+			sourceTree = "<group>";
+		};
+		B603F74B2BE0D75400C025B4 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				B603F74C2BE0D75400C025B4 /* compat */,
+				B603F7572BE0D75400C025B4 /* lwip */,
+				B603F7AD2BE0D75500C025B4 /* netif */,
+			);
+			name = include;
+			path = "../../third-part/lwip/src/include";
+			sourceTree = "<group>";
+		};
+		B603F74C2BE0D75400C025B4 /* compat */ = {
+			isa = PBXGroup;
+			children = (
+				B603F74D2BE0D75400C025B4 /* posix */,
+				B603F7552BE0D75400C025B4 /* stdc */,
+			);
+			path = compat;
+			sourceTree = "<group>";
+		};
+		B603F74D2BE0D75400C025B4 /* posix */ = {
+			isa = PBXGroup;
+			children = (
+				B603F74E2BE0D75400C025B4 /* net */,
+				B603F7502BE0D75400C025B4 /* arpa */,
+				B603F7522BE0D75400C025B4 /* sys */,
+				B603F7542BE0D75400C025B4 /* netdb.h */,
+			);
+			path = posix;
+			sourceTree = "<group>";
+		};
+		B603F74E2BE0D75400C025B4 /* net */ = {
+			isa = PBXGroup;
+			children = (
+				B603F74F2BE0D75400C025B4 /* if.h */,
+			);
+			path = net;
+			sourceTree = "<group>";
+		};
+		B603F7502BE0D75400C025B4 /* arpa */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7512BE0D75400C025B4 /* inet.h */,
+			);
+			path = arpa;
+			sourceTree = "<group>";
+		};
+		B603F7522BE0D75400C025B4 /* sys */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7532BE0D75400C025B4 /* socket.h */,
+			);
+			path = sys;
+			sourceTree = "<group>";
+		};
+		B603F7552BE0D75400C025B4 /* stdc */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7562BE0D75400C025B4 /* errno.h */,
+			);
+			path = stdc;
+			sourceTree = "<group>";
+		};
+		B603F7572BE0D75400C025B4 /* lwip */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7582BE0D75400C025B4 /* pbuf.h */,
+				B603F7592BE0D75400C025B4 /* tcp.h */,
+				B603F75A2BE0D75400C025B4 /* nd6.h */,
+				B603F75B2BE0D75400C025B4 /* err.h */,
+				B603F75C2BE0D75400C025B4 /* etharp.h */,
+				B603F75D2BE0D75400C025B4 /* igmp.h */,
+				B603F75E2BE0D75400C025B4 /* netif.h */,
+				B603F75F2BE0D75400C025B4 /* altcp_tcp.h */,
+				B603F7602BE0D75400C025B4 /* sio.h */,
+				B603F7612BE0D75400C025B4 /* debug.h */,
+				B603F7622BE0D75400C025B4 /* ethip6.h */,
+				B603F7632BE0D75400C025B4 /* tcpip.h */,
+				B603F7642BE0D75400C025B4 /* ip4.h */,
+				B603F7652BE0D75400C025B4 /* icmp.h */,
+				B603F7662BE0D75400C025B4 /* timeouts.h */,
+				B603F7672BE0D75400C025B4 /* altcp_tls.h */,
+				B603F7682BE0D75400C025B4 /* snmp.h */,
+				B603F7692BE0D75400C025B4 /* ip4_frag.h */,
+				B603F76A2BE0D75400C025B4 /* ip6_addr.h */,
+				B603F76B2BE0D75400C025B4 /* netifapi.h */,
+				B603F76C2BE0D75400C025B4 /* inet.h */,
+				B603F76D2BE0D75400C025B4 /* altcp.h */,
+				B603F76E2BE0D75400C025B4 /* ip6_frag.h */,
+				B603F76F2BE0D75400C025B4 /* ip4_addr.h */,
+				B603F7702BE0D75400C025B4 /* netbuf.h */,
+				B603F7712BE0D75400C025B4 /* tcpbase.h */,
+				B603F7722BE0D75400C025B4 /* api.h */,
+				B603F7732BE0D75400C025B4 /* dhcp.h */,
+				B603F7742BE0D75400C025B4 /* if_api.h */,
+				B603F7752BE0D75400C025B4 /* autoip.h */,
+				B603F7762BE0D75400C025B4 /* memp.h */,
+				B603F7772BE0D75400C025B4 /* prot */,
+				B603F78B2BE0D75500C025B4 /* sockets.h */,
+				B603F78C2BE0D75500C025B4 /* priv */,
+				B603F7972BE0D75500C025B4 /* ip_addr.h */,
+				B603F7982BE0D75500C025B4 /* opt.h */,
+				B603F7992BE0D75500C025B4 /* init.h.cmake.in */,
+				B603F79A2BE0D75500C025B4 /* acd.h */,
+				B603F79B2BE0D75500C025B4 /* inet_chksum.h */,
+				B603F79C2BE0D75500C025B4 /* raw.h */,
+				B603F79D2BE0D75500C025B4 /* ip6.h */,
+				B603F79E2BE0D75500C025B4 /* sys.h */,
+				B603F79F2BE0D75500C025B4 /* netdb.h */,
+				B603F7A02BE0D75500C025B4 /* errno.h */,
+				B603F7A12BE0D75500C025B4 /* def.h */,
+				B603F7A22BE0D75500C025B4 /* mem.h */,
+				B603F7A32BE0D75500C025B4 /* dns.h */,
+				B603F7A42BE0D75500C025B4 /* icmp6.h */,
+				B603F7A52BE0D75500C025B4 /* ip.h */,
+				B603F7A62BE0D75500C025B4 /* init.h */,
+				B603F7A72BE0D75500C025B4 /* dhcp6.h */,
+				B603F7A82BE0D75500C025B4 /* stats.h */,
+				B603F7A92BE0D75500C025B4 /* udp.h */,
+				B603F7AA2BE0D75500C025B4 /* ip6_zone.h */,
+				B603F7AB2BE0D75500C025B4 /* arch.h */,
+				B603F7AC2BE0D75500C025B4 /* mld6.h */,
+			);
+			path = lwip;
+			sourceTree = "<group>";
+		};
+		B603F7772BE0D75400C025B4 /* prot */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7782BE0D75400C025B4 /* tcp.h */,
+				B603F7792BE0D75400C025B4 /* nd6.h */,
+				B603F77A2BE0D75500C025B4 /* etharp.h */,
+				B603F77B2BE0D75500C025B4 /* igmp.h */,
+				B603F77C2BE0D75500C025B4 /* ip4.h */,
+				B603F77D2BE0D75500C025B4 /* icmp.h */,
+				B603F77E2BE0D75500C025B4 /* ethernet.h */,
+				B603F77F2BE0D75500C025B4 /* dhcp.h */,
+				B603F7802BE0D75500C025B4 /* autoip.h */,
+				B603F7812BE0D75500C025B4 /* acd.h */,
+				B603F7822BE0D75500C025B4 /* ip6.h */,
+				B603F7832BE0D75500C025B4 /* iana.h */,
+				B603F7842BE0D75500C025B4 /* dns.h */,
+				B603F7852BE0D75500C025B4 /* icmp6.h */,
+				B603F7862BE0D75500C025B4 /* ip.h */,
+				B603F7872BE0D75500C025B4 /* dhcp6.h */,
+				B603F7882BE0D75500C025B4 /* ieee.h */,
+				B603F7892BE0D75500C025B4 /* udp.h */,
+				B603F78A2BE0D75500C025B4 /* mld6.h */,
+			);
+			path = prot;
+			sourceTree = "<group>";
+		};
+		B603F78C2BE0D75500C025B4 /* priv */ = {
+			isa = PBXGroup;
+			children = (
+				B603F78D2BE0D75500C025B4 /* tcpip_priv.h */,
+				B603F78E2BE0D75500C025B4 /* nd6_priv.h */,
+				B603F78F2BE0D75500C025B4 /* mem_priv.h */,
+				B603F7902BE0D75500C025B4 /* api_msg.h */,
+				B603F7912BE0D75500C025B4 /* tcp_priv.h */,
+				B603F7922BE0D75500C025B4 /* raw_priv.h */,
+				B603F7932BE0D75500C025B4 /* memp_priv.h */,
+				B603F7942BE0D75500C025B4 /* altcp_priv.h */,
+				B603F7952BE0D75500C025B4 /* sockets_priv.h */,
+				B603F7962BE0D75500C025B4 /* memp_std.h */,
+			);
+			path = priv;
+			sourceTree = "<group>";
+		};
+		B603F7AD2BE0D75500C025B4 /* netif */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7AE2BE0D75500C025B4 /* etharp.h */,
+				B603F7AF2BE0D75500C025B4 /* lowpan6.h */,
+				B603F7B02BE0D75500C025B4 /* lowpan6_common.h */,
+				B603F7B12BE0D75500C025B4 /* lowpan6_opts.h */,
+				B603F7B22BE0D75500C025B4 /* ppp */,
+				B603F7D12BE0D75500C025B4 /* lowpan6_ble.h */,
+				B603F7D22BE0D75500C025B4 /* ethernet.h */,
+				B603F7D32BE0D75500C025B4 /* zepif.h */,
+				B603F7D42BE0D75500C025B4 /* slipif.h */,
+				B603F7D52BE0D75500C025B4 /* ieee802154.h */,
+				B603F7D62BE0D75500C025B4 /* bridgeif_opts.h */,
+				B603F7D72BE0D75500C025B4 /* bridgeif.h */,
+			);
+			path = netif;
+			sourceTree = "<group>";
+		};
+		B603F7B22BE0D75500C025B4 /* ppp */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7B32BE0D75500C025B4 /* ccp.h */,
+				B603F7B42BE0D75500C025B4 /* chap-md5.h */,
+				B603F7B52BE0D75500C025B4 /* magic.h */,
+				B603F7B62BE0D75500C025B4 /* ecp.h */,
+				B603F7B72BE0D75500C025B4 /* upap.h */,
+				B603F7B82BE0D75500C025B4 /* chap-new.h */,
+				B603F7B92BE0D75500C025B4 /* ipcp.h */,
+				B603F7BA2BE0D75500C025B4 /* ppp.h */,
+				B603F7BB2BE0D75500C025B4 /* fsm.h */,
+				B603F7BC2BE0D75500C025B4 /* polarssl */,
+				B603F7C22BE0D75500C025B4 /* pppdebug.h */,
+				B603F7C32BE0D75500C025B4 /* ppp_impl.h */,
+				B603F7C42BE0D75500C025B4 /* vj.h */,
+				B603F7C52BE0D75500C025B4 /* ppp_opts.h */,
+				B603F7C62BE0D75500C025B4 /* pppol2tp.h */,
+				B603F7C72BE0D75500C025B4 /* pppapi.h */,
+				B603F7C82BE0D75500C025B4 /* pppoe.h */,
+				B603F7C92BE0D75500C025B4 /* eui64.h */,
+				B603F7CA2BE0D75500C025B4 /* mppe.h */,
+				B603F7CB2BE0D75500C025B4 /* ipv6cp.h */,
+				B603F7CC2BE0D75500C025B4 /* lcp.h */,
+				B603F7CD2BE0D75500C025B4 /* pppos.h */,
+				B603F7CE2BE0D75500C025B4 /* eap.h */,
+				B603F7CF2BE0D75500C025B4 /* chap_ms.h */,
+				B603F7D02BE0D75500C025B4 /* pppcrypt.h */,
+			);
+			path = ppp;
+			sourceTree = "<group>";
+		};
+		B603F7BC2BE0D75500C025B4 /* polarssl */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7BD2BE0D75500C025B4 /* md5.h */,
+				B603F7BE2BE0D75500C025B4 /* arc4.h */,
+				B603F7BF2BE0D75500C025B4 /* md4.h */,
+				B603F7C02BE0D75500C025B4 /* des.h */,
+				B603F7C12BE0D75500C025B4 /* sha1.h */,
+			);
+			path = polarssl;
+			sourceTree = "<group>";
+		};
+		B603F7D82BE0D75500C025B4 /* core */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7D92BE0D75500C025B4 /* memp.c */,
+				B603F7DA2BE0D75500C025B4 /* sys.c */,
+				B603F7DB2BE0D75500C025B4 /* inet_chksum.c */,
+				B603F7DC2BE0D75500C025B4 /* raw.c */,
+				B603F7DD2BE0D75500C025B4 /* tcp_out.c */,
+				B603F7DE2BE0D75500C025B4 /* ip.c */,
+				B603F7DF2BE0D75500C025B4 /* dns.c */,
+				B603F7E02BE0D75500C025B4 /* init.c */,
+				B603F7E12BE0D75500C025B4 /* mem.c */,
+				B603F7E22BE0D75500C025B4 /* altcp_alloc.c */,
+				B603F7E32BE0D75500C025B4 /* def.c */,
+				B603F7E42BE0D75500C025B4 /* udp.c */,
+				B603F7E52BE0D75500C025B4 /* stats.c */,
+				B603F7E62BE0D75500C025B4 /* tcp_in.c */,
+				B603F7E72BE0D75500C025B4 /* ipv4 */,
+				B603F7F12BE0D75500C025B4 /* netif.c */,
+				B603F7F22BE0D75500C025B4 /* altcp_tcp.c */,
+				B603F7F32BE0D75500C025B4 /* tcp.c */,
+				B603F7F42BE0D75500C025B4 /* pbuf.c */,
+				B603F7F52BE0D75500C025B4 /* timeouts.c */,
+				B603F7F62BE0D75500C025B4 /* ipv6 */,
+				B603F8002BE0D75500C025B4 /* altcp.c */,
+			);
+			name = core;
+			path = "../../third-part/lwip/src/core";
+			sourceTree = "<group>";
+		};
+		B603F7E72BE0D75500C025B4 /* ipv4 */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7E82BE0D75500C025B4 /* autoip.c */,
+				B603F7E92BE0D75500C025B4 /* dhcp.c */,
+				B603F7EA2BE0D75500C025B4 /* acd.c */,
+				B603F7EB2BE0D75500C025B4 /* igmp.c */,
+				B603F7EC2BE0D75500C025B4 /* etharp.c */,
+				B603F7ED2BE0D75500C025B4 /* icmp.c */,
+				B603F7EE2BE0D75500C025B4 /* ip4.c */,
+				B603F7EF2BE0D75500C025B4 /* ip4_frag.c */,
+				B603F7F02BE0D75500C025B4 /* ip4_addr.c */,
+			);
+			path = ipv4;
+			sourceTree = "<group>";
+		};
+		B603F7F62BE0D75500C025B4 /* ipv6 */ = {
+			isa = PBXGroup;
+			children = (
+				B603F7F72BE0D75500C025B4 /* ip6.c */,
+				B603F7F82BE0D75500C025B4 /* icmp6.c */,
+				B603F7F92BE0D75500C025B4 /* mld6.c */,
+				B603F7FA2BE0D75500C025B4 /* dhcp6.c */,
+				B603F7FB2BE0D75500C025B4 /* ethip6.c */,
+				B603F7FC2BE0D75500C025B4 /* nd6.c */,
+				B603F7FD2BE0D75500C025B4 /* inet6.c */,
+				B603F7FE2BE0D75500C025B4 /* ip6_addr.c */,
+				B603F7FF2BE0D75500C025B4 /* ip6_frag.c */,
+			);
+			path = ipv6;
+			sourceTree = "<group>";
+		};
+		B603F85E2BE0E39300C025B4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B603F9122BE1144300C025B4 /* HevTaskSystem */ = {
+			isa = PBXGroup;
+			children = (
+				B603F95E2BE1149200C025B4 /* kern */,
+				B603F9272BE1149100C025B4 /* lib */,
+				B603F91A2BE1149100C025B4 /* mem */,
+			);
+			path = HevTaskSystem;
+			sourceTree = "<group>";
+		};
+		B603F91A2BE1149100C025B4 /* mem */ = {
+			isa = PBXGroup;
+			children = (
+				B603F91B2BE1149100C025B4 /* slice */,
+				B603F91E2BE1149100C025B4 /* simple */,
+				B603F9212BE1149100C025B4 /* api */,
+				B603F9242BE1149100C025B4 /* base */,
+			);
+			name = mem;
+			path = "../../third-part/hev-task-system/src/mem";
+			sourceTree = "<group>";
+		};
+		B603F91B2BE1149100C025B4 /* slice */ = {
+			isa = PBXGroup;
+			children = (
+				B603F91C2BE1149100C025B4 /* hev-memory-allocator-slice.h */,
+				B603F91D2BE1149100C025B4 /* hev-memory-allocator-slice.c */,
+			);
+			path = slice;
+			sourceTree = "<group>";
+		};
+		B603F91E2BE1149100C025B4 /* simple */ = {
+			isa = PBXGroup;
+			children = (
+				B603F91F2BE1149100C025B4 /* hev-memory-allocator-simple.c */,
+				B603F9202BE1149100C025B4 /* hev-memory-allocator-simple.h */,
+			);
+			path = simple;
+			sourceTree = "<group>";
+		};
+		B603F9212BE1149100C025B4 /* api */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9222BE1149100C025B4 /* hev-memory-allocator-api.c */,
+				B603F9232BE1149100C025B4 /* hev-memory-allocator-api.h */,
+			);
+			path = api;
+			sourceTree = "<group>";
+		};
+		B603F9242BE1149100C025B4 /* base */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9252BE1149100C025B4 /* hev-memory-allocator.c */,
+				B603F9262BE1149100C025B4 /* hev-memory-allocator.h */,
+			);
+			path = base;
+			sourceTree = "<group>";
+		};
+		B603F9272BE1149100C025B4 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9282BE1149100C025B4 /* misc */,
+				B603F92C2BE1149100C025B4 /* rbtree */,
+				B603F9312BE1149200C025B4 /* io */,
+				B603F9412BE1149200C025B4 /* object */,
+				B603F9462BE1149200C025B4 /* list */,
+				B603F9492BE1149200C025B4 /* dns */,
+			);
+			name = lib;
+			path = "../../third-part/hev-task-system/src/lib";
+			sourceTree = "<group>";
+		};
+		B603F9282BE1149100C025B4 /* misc */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9292BE1149100C025B4 /* hev-debugger.c */,
+				B603F92A2BE1149100C025B4 /* hev-compiler.h */,
+				B603F92B2BE1149100C025B4 /* hev-debugger.h */,
+			);
+			path = misc;
+			sourceTree = "<group>";
+		};
+		B603F92C2BE1149100C025B4 /* rbtree */ = {
+			isa = PBXGroup;
+			children = (
+				B603F92D2BE1149100C025B4 /* hev-rbtree-cached.c */,
+				B603F92E2BE1149100C025B4 /* hev-rbtree.c */,
+				B603F92F2BE1149100C025B4 /* hev-rbtree-cached.h */,
+				B603F9302BE1149200C025B4 /* hev-rbtree.h */,
+			);
+			path = rbtree;
+			sourceTree = "<group>";
+		};
+		B603F9312BE1149200C025B4 /* io */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9322BE1149200C025B4 /* pipe */,
+				B603F9352BE1149200C025B4 /* basic */,
+				B603F9382BE1149200C025B4 /* poll */,
+				B603F93B2BE1149200C025B4 /* socket */,
+				B603F93E2BE1149200C025B4 /* buffer */,
+			);
+			path = io;
+			sourceTree = "<group>";
+		};
+		B603F9322BE1149200C025B4 /* pipe */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9332BE1149200C025B4 /* hev-task-io-pipe.h */,
+				B603F9342BE1149200C025B4 /* hev-task-io-pipe.c */,
+			);
+			path = pipe;
+			sourceTree = "<group>";
+		};
+		B603F9352BE1149200C025B4 /* basic */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9362BE1149200C025B4 /* hev-task-io.h */,
+				B603F9372BE1149200C025B4 /* hev-task-io.c */,
+			);
+			path = basic;
+			sourceTree = "<group>";
+		};
+		B603F9382BE1149200C025B4 /* poll */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9392BE1149200C025B4 /* hev-task-io-poll.h */,
+				B603F93A2BE1149200C025B4 /* hev-task-io-poll.c */,
+			);
+			path = poll;
+			sourceTree = "<group>";
+		};
+		B603F93B2BE1149200C025B4 /* socket */ = {
+			isa = PBXGroup;
+			children = (
+				B603F93C2BE1149200C025B4 /* hev-task-io-socket.h */,
+				B603F93D2BE1149200C025B4 /* hev-task-io-socket.c */,
+			);
+			path = socket;
+			sourceTree = "<group>";
+		};
+		B603F93E2BE1149200C025B4 /* buffer */ = {
+			isa = PBXGroup;
+			children = (
+				B603F93F2BE1149200C025B4 /* hev-circular-buffer.h */,
+				B603F9402BE1149200C025B4 /* hev-circular-buffer.c */,
+			);
+			path = buffer;
+			sourceTree = "<group>";
+		};
+		B603F9412BE1149200C025B4 /* object */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9422BE1149200C025B4 /* hev-object.c */,
+				B603F9432BE1149200C025B4 /* hev-object-atomic.c */,
+				B603F9442BE1149200C025B4 /* hev-object-atomic.h */,
+				B603F9452BE1149200C025B4 /* hev-object.h */,
+			);
+			path = object;
+			sourceTree = "<group>";
+		};
+		B603F9462BE1149200C025B4 /* list */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9472BE1149200C025B4 /* hev-list.c */,
+				B603F9482BE1149200C025B4 /* hev-list.h */,
+			);
+			path = list;
+			sourceTree = "<group>";
+		};
+		B603F9492BE1149200C025B4 /* dns */ = {
+			isa = PBXGroup;
+			children = (
+				B603F94A2BE1149200C025B4 /* hev-task-dns.h */,
+				B603F94B2BE1149200C025B4 /* hev-task-dns-proxy.h */,
+				B603F94C2BE1149200C025B4 /* hev-task-dns.c */,
+				B603F94D2BE1149200C025B4 /* hev-task-dns-proxy.c */,
+			);
+			path = dns;
+			sourceTree = "<group>";
+		};
+		B603F95E2BE1149200C025B4 /* kern */ = {
+			isa = PBXGroup;
+			children = (
+				B603F95F2BE1149200C025B4 /* aide */,
+				B603F9622BE1149200C025B4 /* core */,
+				B603F9672BE1149200C025B4 /* io */,
+				B603F96E2BE1149200C025B4 /* time */,
+				B603F9752BE1149200C025B4 /* task */,
+				B603F9812BE1149200C025B4 /* itc */,
+				B603F9882BE1149200C025B4 /* sync */,
+			);
+			name = kern;
+			path = "../../third-part/hev-task-system/src/kern";
+			sourceTree = "<group>";
+		};
+		B603F95F2BE1149200C025B4 /* aide */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9602BE1149200C025B4 /* hev-task-aide.h */,
+				B603F9612BE1149200C025B4 /* hev-task-aide.c */,
+			);
+			path = aide;
+			sourceTree = "<group>";
+		};
+		B603F9622BE1149200C025B4 /* core */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9632BE1149200C025B4 /* hev-task-system-schedule.c */,
+				B603F9642BE1149200C025B4 /* hev-task-system-private.h */,
+				B603F9652BE1149200C025B4 /* hev-task-system.c */,
+				B603F9662BE1149200C025B4 /* hev-task-system.h */,
+			);
+			path = core;
+			sourceTree = "<group>";
+		};
+		B603F9672BE1149200C025B4 /* io */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9682BE1149200C025B4 /* hev-task-io-reactor-kqueue.h */,
+				B603F9692BE1149200C025B4 /* hev-task-io-reactor-epoll.c */,
+				B603F96A2BE1149200C025B4 /* hev-task-io-reactor.h */,
+				B603F96B2BE1149200C025B4 /* hev-task-io-reactor-kqueue.c */,
+				B603F96C2BE1149200C025B4 /* hev-task-io-reactor-epoll.h */,
+				B603F96D2BE1149200C025B4 /* hev-task-io-reactor.c */,
+			);
+			path = io;
+			sourceTree = "<group>";
+		};
+		B603F96E2BE1149200C025B4 /* time */ = {
+			isa = PBXGroup;
+			children = (
+				B603F96F2BE1149200C025B4 /* hev-task-timer-timerfd.h */,
+				B603F9702BE1149200C025B4 /* hev-task-timer-kevent.h */,
+				B603F9712BE1149200C025B4 /* hev-task-timer.c */,
+				B603F9722BE1149200C025B4 /* hev-task-timer-timerfd.c */,
+				B603F9732BE1149200C025B4 /* hev-task-timer-kevent.c */,
+				B603F9742BE1149200C025B4 /* hev-task-timer.h */,
+			);
+			path = time;
+			sourceTree = "<group>";
+		};
+		B603F9752BE1149200C025B4 /* task */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9762BE1149200C025B4 /* hev-task-stack-mmap.c */,
+				B603F9772BE1149200C025B4 /* hev-task.h */,
+				B603F9782BE1149200C025B4 /* hev-task-call.c */,
+				B603F9792BE1149200C025B4 /* hev-task-stack-heap.c */,
+				B603F97A2BE1149200C025B4 /* hev-task-execute.S */,
+				B603F97B2BE1149200C025B4 /* hev-task-executer.c */,
+				B603F97C2BE1149200C025B4 /* hev-task.c */,
+				B603F97D2BE1149200C025B4 /* hev-task-call.h */,
+				B603F97E2BE1149200C025B4 /* hev-task-stack.h */,
+				B603F97F2BE1149200C025B4 /* hev-task-private.h */,
+				B603F9802BE1149200C025B4 /* hev-task-executer.h */,
+			);
+			path = task;
+			sourceTree = "<group>";
+		};
+		B603F9812BE1149200C025B4 /* itc */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9822BE1149200C025B4 /* hev-task-channel.c */,
+				B603F9832BE1149200C025B4 /* hev-task-channel-private.h */,
+				B603F9842BE1149200C025B4 /* hev-task-channel-select.c */,
+				B603F9852BE1149200C025B4 /* hev-task-channel.h */,
+				B603F9862BE1149200C025B4 /* hev-task-channel-select-private.h */,
+				B603F9872BE1149200C025B4 /* hev-task-channel-select.h */,
+			);
+			path = itc;
+			sourceTree = "<group>";
+		};
+		B603F9882BE1149200C025B4 /* sync */ = {
+			isa = PBXGroup;
+			children = (
+				B603F9892BE1149200C025B4 /* hev-task-cond.h */,
+				B603F98A2BE1149200C025B4 /* hev-task-mutex.c */,
+				B603F98B2BE1149200C025B4 /* hev-task-cond.c */,
+				B603F98C2BE1149200C025B4 /* hev-task-mutex.h */,
+			);
+			path = sync;
+			sourceTree = "<group>";
+		};
+		B60F7EAA2BE0843C00DD1A96 = {
+			isa = PBXGroup;
+			children = (
+				B603F4632BE08D4600C025B4 /* src */,
+				B60F7EB62BE0843C00DD1A96 /* tun2socks */,
+				B603F6F62BE0D5E400C025B4 /* lwip */,
+				B603F9122BE1144300C025B4 /* HevTaskSystem */,
+				B69998F22BE1D68D0044BCC5 /* yaml */,
+				B60F7EB52BE0843C00DD1A96 /* Products */,
+				B603F85E2BE0E39300C025B4 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		B60F7EB52BE0843C00DD1A96 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B60F7EB42BE0843C00DD1A96 /* tun2socks.framework */,
+				B603F6F52BE0D5E400C025B4 /* liblwip.a */,
+				B603F9112BE1144200C025B4 /* libHevTaskSystem.a */,
+				B69998F12BE1D68D0044BCC5 /* libyaml.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B60F7EB62BE0843C00DD1A96 /* tun2socks */ = {
+			isa = PBXGroup;
+			children = (
+				B60F7EB72BE0843C00DD1A96 /* tun2socks.h */,
+			);
+			path = tun2socks;
+			sourceTree = "<group>";
+		};
+		B69998F22BE1D68D0044BCC5 /* yaml */ = {
+			isa = PBXGroup;
+			children = (
+				B69999002BE1D6CF0044BCC5 /* api.c */,
+				B69998FC2BE1D6CE0044BCC5 /* dumper.c */,
+				B69998FB2BE1D6CE0044BCC5 /* emitter.c */,
+				B69998FD2BE1D6CE0044BCC5 /* loader.c */,
+				B69998FE2BE1D6CE0044BCC5 /* parser.c */,
+				B69999032BE1D6CF0044BCC5 /* reader.c */,
+				B69998FF2BE1D6CF0044BCC5 /* scanner.c */,
+				B69998FA2BE1D6CE0044BCC5 /* writer.c */,
+				B69999012BE1D6CF0044BCC5 /* yaml_private.h */,
+				B69999022BE1D6CF0044BCC5 /* yaml.h */,
+			);
+			path = yaml;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		B60F7EAF2BE0843C00DD1A96 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B603F4FF2BE08D6900C025B4 /* hev-main.h in Headers */,
+				B603F4B62BE08D6800C025B4 /* hev-tunnel.h in Headers */,
+				B603F4EF2BE08D6900C025B4 /* hev-config-const.h in Headers */,
+				B603F4D32BE08D6800C025B4 /* hev-socks5-client.h in Headers */,
+				B603F4C42BE08D6800C025B4 /* hev-socks5-client.h in Headers */,
+				B603F4C02BE08D6800C025B4 /* hev-exec.h in Headers */,
+				B603F4D22BE08D6800C025B4 /* hev-socks5-user.h in Headers */,
+				B603F4EE2BE08D6900C025B4 /* hev-socks5-session-udp.h in Headers */,
+				B603F4DB2BE08D6800C025B4 /* hev-compiler.h in Headers */,
+				B603F4C92BE08D6800C025B4 /* hev-rbtree.h in Headers */,
+				B603F4BB2BE08D6800C025B4 /* hev-compiler.h in Headers */,
+				B603F4BE2BE08D6800C025B4 /* hev-logger.h in Headers */,
+				B603F4CE2BE08D6800C025B4 /* hev-socks5-authenticator.h in Headers */,
+				B603F4B82BE08D6800C025B4 /* hev-utils.h in Headers */,
+				B603F4D52BE08D6800C025B4 /* hev-socks5-tcp.h in Headers */,
+				B603F4EC2BE08D6800C025B4 /* hev-socks5-authenticator.h in Headers */,
+				B603F4E82BE08D6800C025B4 /* hev-socks5-udp.h in Headers */,
+				B603F4CC2BE08D6800C025B4 /* hev-socks5-client-udp.h in Headers */,
+				B603F4E72BE08D6800C025B4 /* hev-socks5-logger.h in Headers */,
+				B603F4F82BE08D6900C025B4 /* hev-tunnel-freebsd.h in Headers */,
+				B603F4C62BE08D6800C025B4 /* hev-socks5-tcp.h in Headers */,
+				B603F4E32BE08D6800C025B4 /* hev-socks5.h in Headers */,
+				B603F4F52BE08D6900C025B4 /* hev-jni.h in Headers */,
+				B603F4E92BE08D6800C025B4 /* hev-socks5-client-udp.h in Headers */,
+				B603F4F72BE08D6900C025B4 /* hev-socks5-tunnel.h in Headers */,
+				B60F7EB82BE0843C00DD1A96 /* tun2socks.h in Headers */,
+				B603F5002BE08D6900C025B4 /* hev-tunnel-linux.h in Headers */,
+				B603F4F12BE08D6900C025B4 /* hev-tunnel-macos.h in Headers */,
+				B603F4EB2BE08D6800C025B4 /* hev-socks5-misc.h in Headers */,
+				B603F4C72BE08D6800C025B4 /* hev-socks5-proto.h in Headers */,
+				B603F4CA2BE08D6800C025B4 /* hev-socks5-logger.h in Headers */,
+				B603F4F62BE08D6900C025B4 /* hev-config.h in Headers */,
+				B603F4EA2BE08D6800C025B4 /* hev-socks5-logger-priv.h in Headers */,
+				B603F4CF2BE08D6800C025B4 /* hev-socks5-server.h in Headers */,
+				B603F4D72BE08D6800C025B4 /* hev-socks5-proto.h in Headers */,
+				B603F4BF2BE08D6800C025B4 /* hev-list.h in Headers */,
+				B603F4C82BE08D6800C025B4 /* hev-socks5.h in Headers */,
+				B603F4FB2BE08D6900C025B4 /* hev-socks5-session.h in Headers */,
+				B603F4E62BE08D6800C025B4 /* hev-rbtree.h in Headers */,
+				B603F4ED2BE08D6900C025B4 /* hev-socks5-server.h in Headers */,
+				B603F4C52BE08D6800C025B4 /* hev-socks5-client-tcp.h in Headers */,
+				B603F4CB2BE08D6800C025B4 /* hev-socks5-udp.h in Headers */,
+				B603F4D42BE08D6800C025B4 /* hev-socks5-client-tcp.h in Headers */,
+				B603F4BC2BE08D6800C025B4 /* hev-ring-buffer.h in Headers */,
+				B603F4CD2BE08D6800C025B4 /* hev-socks5-misc.h in Headers */,
+				B603F4E22BE08D6800C025B4 /* hev-socks5-misc-priv.h in Headers */,
+				B603F4F42BE08D6900C025B4 /* hev-socks5-session-tcp.h in Headers */,
+				B603F4C32BE08D6800C025B4 /* hev-socks5-user.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		B603F6F42BE0D5E400C025B4 /* lwip */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B603F6FB2BE0D5E400C025B4 /* Build configuration list for PBXNativeTarget "lwip" */;
+			buildPhases = (
+				B603F6F12BE0D5E400C025B4 /* Sources */,
+				B603F6F22BE0D5E400C025B4 /* Frameworks */,
+				B603F6F32BE0D5E400C025B4 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = lwip;
+			productName = lwip;
+			productReference = B603F6F52BE0D5E400C025B4 /* liblwip.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		B603F9102BE1144200C025B4 /* HevTaskSystem */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B603F9172BE1144300C025B4 /* Build configuration list for PBXNativeTarget "HevTaskSystem" */;
+			buildPhases = (
+				B603F90D2BE1144200C025B4 /* Sources */,
+				B603F90E2BE1144200C025B4 /* Frameworks */,
+				B603F90F2BE1144200C025B4 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HevTaskSystem;
+			productName = HevTaskSystem;
+			productReference = B603F9112BE1144200C025B4 /* libHevTaskSystem.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		B60F7EB32BE0843C00DD1A96 /* tun2socks */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B60F7EBB2BE0843C00DD1A96 /* Build configuration list for PBXNativeTarget "tun2socks" */;
+			buildPhases = (
+				B60F7EAF2BE0843C00DD1A96 /* Headers */,
+				B60F7EB02BE0843C00DD1A96 /* Sources */,
+				B60F7EB12BE0843C00DD1A96 /* Frameworks */,
+				B60F7EB22BE0843C00DD1A96 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = tun2socks;
+			productName = tun2socks;
+			productReference = B60F7EB42BE0843C00DD1A96 /* tun2socks.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		B69998F02BE1D68D0044BCC5 /* yaml */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B69998F72BE1D68D0044BCC5 /* Build configuration list for PBXNativeTarget "yaml" */;
+			buildPhases = (
+				B69998ED2BE1D68D0044BCC5 /* Sources */,
+				B69998EE2BE1D68D0044BCC5 /* Frameworks */,
+				B69998EF2BE1D68D0044BCC5 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = yaml;
+			productName = yaml;
+			productReference = B69998F12BE1D68D0044BCC5 /* libyaml.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B60F7EAB2BE0843C00DD1A96 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1520;
+				TargetAttributes = {
+					B603F6F42BE0D5E400C025B4 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+					B603F9102BE1144200C025B4 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+					B60F7EB32BE0843C00DD1A96 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+					B69998F02BE1D68D0044BCC5 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+				};
+			};
+			buildConfigurationList = B60F7EAE2BE0843C00DD1A96 /* Build configuration list for PBXProject "tun2socks" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B60F7EAA2BE0843C00DD1A96;
+			productRefGroup = B60F7EB52BE0843C00DD1A96 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B60F7EB32BE0843C00DD1A96 /* tun2socks */,
+				B603F6F42BE0D5E400C025B4 /* lwip */,
+				B603F9102BE1144200C025B4 /* HevTaskSystem */,
+				B69998F02BE1D68D0044BCC5 /* yaml */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B60F7EB22BE0843C00DD1A96 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B603F4C22BE08D6800C025B4 /* License in Resources */,
+				B603F4D02BE08D6800C025B4 /* README.md in Resources */,
+				B603F4D12BE08D6800C025B4 /* .clang-format in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B603F6F12BE0D5E400C025B4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B603F8232BE0D75500C025B4 /* chap-md5.c in Sources */,
+				B603F8462BE0D75500C025B4 /* autoip.c in Sources */,
+				B603F85B2BE0D75500C025B4 /* ip6_addr.c in Sources */,
+				B603F83B2BE0D75500C025B4 /* raw.c in Sources */,
+				B603F8212BE0D75500C025B4 /* ccp.c in Sources */,
+				B603F83E2BE0D75500C025B4 /* dns.c in Sources */,
+				B603F80D2BE0D75500C025B4 /* slipif.c in Sources */,
+				B603F8482BE0D75500C025B4 /* acd.c in Sources */,
+				B603F8352BE0D75500C025B4 /* fifo.c in Sources */,
+				B603F8052BE0D75500C025B4 /* err.c in Sources */,
+				B603F8292BE0D75500C025B4 /* demand.c in Sources */,
+				B603F8122BE0D75500C025B4 /* mppe.c in Sources */,
+				B603F81C2BE0D75500C025B4 /* sha1.c in Sources */,
+				B603F8102BE0D75500C025B4 /* pppapi.c in Sources */,
+				B603F8262BE0D75500C025B4 /* ecp.c in Sources */,
+				B603F81D2BE0D75500C025B4 /* md5.c in Sources */,
+				B603F8062BE0D75500C025B4 /* netifapi.c in Sources */,
+				B603F82B2BE0D75500C025B4 /* ipcp.c in Sources */,
+				B603F84C2BE0D75500C025B4 /* ip4.c in Sources */,
+				B603F8282BE0D75500C025B4 /* fsm.c in Sources */,
+				B603F8452BE0D75500C025B4 /* tcp_in.c in Sources */,
+				B603F8502BE0D75500C025B4 /* altcp_tcp.c in Sources */,
+				B603F8322BE0D75500C025B4 /* list.c in Sources */,
+				B603F80F2BE0D75500C025B4 /* auth.c in Sources */,
+				B603F80E2BE0D75500C025B4 /* vj.c in Sources */,
+				B603F83C2BE0D75500C025B4 /* tcp_out.c in Sources */,
+				B603F84E2BE0D75500C025B4 /* ip4_addr.c in Sources */,
+				B603F84F2BE0D75500C025B4 /* netif.c in Sources */,
+				B603F84B2BE0D75500C025B4 /* icmp.c in Sources */,
+				B603F8252BE0D75500C025B4 /* upap.c in Sources */,
+				B603F81A2BE0D75500C025B4 /* md4.c in Sources */,
+				B603F82C2BE0D75500C025B4 /* bridgeif.c in Sources */,
+				B603F8342BE0D75500C025B4 /* sio.c in Sources */,
+				B603F8222BE0D75500C025B4 /* utils.c in Sources */,
+				B603F8312BE0D75500C025B4 /* perf.c in Sources */,
+				B603F8302BE0D75500C025B4 /* mem.c in Sources */,
+				B603F81F2BE0D75500C025B4 /* lcp.c in Sources */,
+				B603F8432BE0D75500C025B4 /* udp.c in Sources */,
+				B603F8512BE0D75500C025B4 /* tcp.c in Sources */,
+				B603F8442BE0D75500C025B4 /* stats.c in Sources */,
+				B603F8582BE0D75500C025B4 /* ethip6.c in Sources */,
+				B603F83D2BE0D75500C025B4 /* ip.c in Sources */,
+				B603F84D2BE0D75500C025B4 /* ip4_frag.c in Sources */,
+				B603F8142BE0D75500C025B4 /* multilink.c in Sources */,
+				B603F8562BE0D75500C025B4 /* mld6.c in Sources */,
+				B603F8112BE0D75500C025B4 /* pppol2tp.c in Sources */,
+				B603F8422BE0D75500C025B4 /* def.c in Sources */,
+				B603F83F2BE0D75500C025B4 /* init.c in Sources */,
+				B603F8572BE0D75500C025B4 /* dhcp6.c in Sources */,
+				B603F8242BE0D75500C025B4 /* chap-new.c in Sources */,
+				B603F8382BE0D75500C025B4 /* memp.c in Sources */,
+				B603F81B2BE0D75500C025B4 /* des.c in Sources */,
+				B603F8552BE0D75500C025B4 /* icmp6.c in Sources */,
+				B603F85A2BE0D75500C025B4 /* inet6.c in Sources */,
+				B603F8162BE0D75500C025B4 /* chap_ms.c in Sources */,
+				B603F8362BE0D75500C025B4 /* pcapif.c in Sources */,
+				B603F8202BE0D75500C025B4 /* ipv6cp.c in Sources */,
+				B603F80B2BE0D75500C025B4 /* ethernet.c in Sources */,
+				B603F8392BE0D75500C025B4 /* sys.c in Sources */,
+				B603F80A2BE0D75500C025B4 /* zepif.c in Sources */,
+				B603F8372BE0D75500C025B4 /* sys_arch.c in Sources */,
+				B603F8042BE0D75500C025B4 /* tcpip.c in Sources */,
+				B603F84A2BE0D75500C025B4 /* etharp.c in Sources */,
+				B603F82D2BE0D75500C025B4 /* lowpan6.c in Sources */,
+				B603F8032BE0D75500C025B4 /* netdb.c in Sources */,
+				B603F82A2BE0D75500C025B4 /* ppp.c in Sources */,
+				B603F8132BE0D75500C025B4 /* eui64.c in Sources */,
+				B603F85C2BE0D75500C025B4 /* ip6_frag.c in Sources */,
+				B603F82F2BE0D75500C025B4 /* bridgeif_fdb.c in Sources */,
+				B603F8012BE0D75500C025B4 /* sockets.c in Sources */,
+				B603F85D2BE0D75500C025B4 /* altcp.c in Sources */,
+				B603F82E2BE0D75500C025B4 /* lowpan6_common.c in Sources */,
+				B603F8472BE0D75500C025B4 /* dhcp.c in Sources */,
+				B603F8272BE0D75500C025B4 /* magic.c in Sources */,
+				B603F8402BE0D75500C025B4 /* mem.c in Sources */,
+				B603F8412BE0D75500C025B4 /* altcp_alloc.c in Sources */,
+				B603F8172BE0D75500C025B4 /* eap.c in Sources */,
+				B603F8022BE0D75500C025B4 /* if_api.c in Sources */,
+				B603F83A2BE0D75500C025B4 /* inet_chksum.c in Sources */,
+				B603F8152BE0D75500C025B4 /* pppoe.c in Sources */,
+				B603F8332BE0D75500C025B4 /* tapif.c in Sources */,
+				B603F81E2BE0D75500C025B4 /* arc4.c in Sources */,
+				B603F8182BE0D75500C025B4 /* pppcrypt.c in Sources */,
+				B603F8532BE0D75500C025B4 /* timeouts.c in Sources */,
+				B603F8592BE0D75500C025B4 /* nd6.c in Sources */,
+				B603F8192BE0D75500C025B4 /* pppos.c in Sources */,
+				B603F80C2BE0D75500C025B4 /* lowpan6_ble.c in Sources */,
+				B603F8542BE0D75500C025B4 /* ip6.c in Sources */,
+				B603F8522BE0D75500C025B4 /* pbuf.c in Sources */,
+				B603F8492BE0D75500C025B4 /* igmp.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B603F90D2BE1144200C025B4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B603F9A52BE1149300C025B4 /* hev-task-system.c in Sources */,
+				B603F9B12BE1149300C025B4 /* hev-task.c in Sources */,
+				B603F99D2BE1149300C025B4 /* hev-task-dns-proxy.c in Sources */,
+				B603F98E2BE1149300C025B4 /* hev-memory-allocator-simple.c in Sources */,
+				B603F9A42BE1149300C025B4 /* hev-task-system-schedule.c in Sources */,
+				B603F9AC2BE1149300C025B4 /* hev-task-stack-mmap.c in Sources */,
+				B603F9AA2BE1149300C025B4 /* hev-task-timer-timerfd.c in Sources */,
+				B603F99B2BE1149300C025B4 /* hev-list.c in Sources */,
+				B603F9A82BE1149300C025B4 /* hev-task-io-reactor.c in Sources */,
+				B603F9992BE1149300C025B4 /* hev-object.c in Sources */,
+				B603F9B42BE1149300C025B4 /* hev-task-mutex.c in Sources */,
+				B603F9B32BE1149300C025B4 /* hev-task-channel-select.c in Sources */,
+				B603F9A92BE1149300C025B4 /* hev-task-timer.c in Sources */,
+				B603F9922BE1149300C025B4 /* hev-rbtree-cached.c in Sources */,
+				B603F99C2BE1149300C025B4 /* hev-task-dns.c in Sources */,
+				B603F9912BE1149300C025B4 /* hev-debugger.c in Sources */,
+				B603F9AD2BE1149300C025B4 /* hev-task-call.c in Sources */,
+				B603F9B22BE1149300C025B4 /* hev-task-channel.c in Sources */,
+				B603F98F2BE1149300C025B4 /* hev-memory-allocator-api.c in Sources */,
+				B603F9932BE1149300C025B4 /* hev-rbtree.c in Sources */,
+				B603F9AB2BE1149300C025B4 /* hev-task-timer-kevent.c in Sources */,
+				B603F9A62BE1149300C025B4 /* hev-task-io-reactor-epoll.c in Sources */,
+				B603F9A32BE1149300C025B4 /* hev-task-aide.c in Sources */,
+				B603F9972BE1149300C025B4 /* hev-task-io-socket.c in Sources */,
+				B603F9AE2BE1149300C025B4 /* hev-task-stack-heap.c in Sources */,
+				B603F9902BE1149300C025B4 /* hev-memory-allocator.c in Sources */,
+				B603F9B02BE1149300C025B4 /* hev-task-executer.c in Sources */,
+				B603F9952BE1149300C025B4 /* hev-task-io.c in Sources */,
+				B603F9942BE1149300C025B4 /* hev-task-io-pipe.c in Sources */,
+				B603F98D2BE1149300C025B4 /* hev-memory-allocator-slice.c in Sources */,
+				B603F9A72BE1149300C025B4 /* hev-task-io-reactor-kqueue.c in Sources */,
+				B603F9B52BE1149300C025B4 /* hev-task-cond.c in Sources */,
+				B603F9982BE1149300C025B4 /* hev-circular-buffer.c in Sources */,
+				B603F9962BE1149300C025B4 /* hev-task-io-poll.c in Sources */,
+				B603F99A2BE1149300C025B4 /* hev-object-atomic.c in Sources */,
+				B603F9AF2BE1149300C025B4 /* hev-task-execute.S in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B60F7EB02BE0843C00DD1A96 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B603F4DD2BE08D6800C025B4 /* hev-socks5-server.c in Sources */,
+				B603F4E02BE08D6800C025B4 /* hev-socks5-client.c in Sources */,
+				B603F4FA2BE08D6900C025B4 /* hev-config.c in Sources */,
+				B603F4BD2BE08D6800C025B4 /* hev-utils.c in Sources */,
+				B603F4C12BE08D6800C025B4 /* hev-ring-buffer.c in Sources */,
+				B603F4D92BE08D6800C025B4 /* hev-socks5-udp.c in Sources */,
+				B603F4FC2BE08D6900C025B4 /* hev-tunnel-linux.c in Sources */,
+				B603F5012BE08D6900C025B4 /* hev-tunnel-freebsd.c in Sources */,
+				B603F4E12BE08D6800C025B4 /* hev-socks5-user.c in Sources */,
+				B603F4F02BE08D6900C025B4 /* hev-socks5-session.c in Sources */,
+				B603F4D82BE08D6800C025B4 /* hev-socks5-client-udp.c in Sources */,
+				B603F4DC2BE08D6800C025B4 /* hev-socks5-logger.c in Sources */,
+				B603F4BA2BE08D6800C025B4 /* hev-exec.c in Sources */,
+				B603F4E42BE08D6800C025B4 /* hev-socks5-tcp.c in Sources */,
+				B603F4F92BE08D6900C025B4 /* hev-jni.c in Sources */,
+				B603F4DF2BE08D6800C025B4 /* hev-socks5-misc.c in Sources */,
+				B603F4F32BE08D6900C025B4 /* hev-socks5-session-tcp.c in Sources */,
+				B603F4FD2BE08D6900C025B4 /* hev-main.c in Sources */,
+				B603F4F22BE08D6900C025B4 /* hev-socks5-tunnel.c in Sources */,
+				B603F4B92BE08D6800C025B4 /* hev-logger.c in Sources */,
+				B603F4E52BE08D6800C025B4 /* hev-socks5-client-tcp.c in Sources */,
+				B603F4B52BE08D6800C025B4 /* hev-tunnel-macos.c in Sources */,
+				B603F4D62BE08D6800C025B4 /* hev-socks5.c in Sources */,
+				B603F4FE2BE08D6900C025B4 /* hev-socks5-session-udp.c in Sources */,
+				B603F4DE2BE08D6800C025B4 /* hev-socks5-authenticator.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B69998ED2BE1D68D0044BCC5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B69999072BE1D6CF0044BCC5 /* loader.c in Sources */,
+				B69999052BE1D6CF0044BCC5 /* emitter.c in Sources */,
+				B69999062BE1D6CF0044BCC5 /* dumper.c in Sources */,
+				B69999082BE1D6CF0044BCC5 /* parser.c in Sources */,
+				B699990B2BE1D6CF0044BCC5 /* reader.c in Sources */,
+				B69999092BE1D6CF0044BCC5 /* scanner.c in Sources */,
+				B69999042BE1D6CF0044BCC5 /* writer.c in Sources */,
+				B699990A2BE1D6CF0044BCC5 /* api.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		B603F6FC2BE0D5E400C025B4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					LWIP_PROVIDE_ERRNO,
+					"LWIP_SOCKET=1",
+					"LWIP_DNS=1",
+					"$(inherited)",
+				);
+				HEADER_SEARCH_PATHS = (
+					"../third-part/lwip/include",
+					"../third-part/lwip/include/ports/unix",
+					./lwip,
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B603F6FD2BE0D5E400C025B4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					LWIP_PROVIDE_ERRNO,
+					"LWIP_SOCKET=1",
+					"LWIP_DNS=1",
+					"$(inherited)",
+				);
+				HEADER_SEARCH_PATHS = (
+					"../third-part/lwip/include",
+					"../third-part/lwip/include/ports/unix",
+					./lwip,
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B603F9182BE1144300C025B4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"ENABLE_MEMALLOC_SLICE=0",
+					"CONFIG_SCHED_CLOCK=CLOCK_NONE",
+					"CONFIG_MEMALLOC_SLICE_MAX_COUNT=1000",
+					"CONFIG_MEMALLOC_SLICE_MAX_SIZE=4096",
+					"CONFIG_MEMALLOC_SLICE_ALIGN=64",
+					"CONFIG_STACK_OVERFLOW_DETECTION=1",
+					"$(inherited)",
+				);
+				HEADER_SEARCH_PATHS = (
+					"../third-part/hev-task-system/include",
+					"../third-part/hev-task-system/src",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B603F9192BE1144300C025B4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"ENABLE_MEMALLOC_SLICE=0",
+					"CONFIG_SCHED_CLOCK=CLOCK_NONE",
+					"CONFIG_MEMALLOC_SLICE_MAX_COUNT=1000",
+					"CONFIG_MEMALLOC_SLICE_MAX_SIZE=4096",
+					"CONFIG_MEMALLOC_SLICE_ALIGN=64",
+					"CONFIG_STACK_OVERFLOW_DETECTION=1",
+					"$(inherited)",
+				);
+				HEADER_SEARCH_PATHS = (
+					"../third-part/hev-task-system/include",
+					"../third-part/hev-task-system/src",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B60F7EB92BE0843C00DD1A96 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-Wl,-Bsymbolic-functions";
+				SDKROOT = iphoneos;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		B60F7EBA2BE0843C00DD1A96 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = "-Wl,-Bsymbolic-functions";
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		B60F7EBC2BE0843C00DD1A96 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"COMMIT_ID=\\\"COMMIT_ID\\\"",
+					"CONFIG_SCHED_CLOCK=CLOCK_NONE",
+					"CONFIG_MEMALLOC_SLICE_MAX_COUNT=1000",
+					"CONFIG_MEMALLOC_SLICE_MAX_SIZE=4096",
+					"CONFIG_MEMALLOC_SLICE_ALIGN=64",
+					"CONFIG_STACK_OVERFLOW_DETECTION=1",
+					"$(inherited)",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					"../third-part/lwip/include",
+					"../third-part/lwip/include/ports/unix",
+					"../third-part/hev-task-system/include",
+					"../third-part/yaml/include",
+					../src/misc,
+					../src/core/include,
+					./tun2socks,
+				);
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				OTHER_LDFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = com.hev.tun2socks;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B60F7EBD2BE0843C00DD1A96 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"COMMIT_ID=\\\"COMMIT_ID\\\"",
+					"CONFIG_SCHED_CLOCK=CLOCK_NONE",
+					"CONFIG_MEMALLOC_SLICE_MAX_COUNT=1000",
+					"CONFIG_MEMALLOC_SLICE_MAX_SIZE=4096",
+					"CONFIG_MEMALLOC_SLICE_ALIGN=64",
+					"CONFIG_STACK_OVERFLOW_DETECTION=1",
+					"$(inherited)",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					"../third-part/lwip/include",
+					"../third-part/lwip/include/ports/unix",
+					"../third-part/hev-task-system/include",
+					"../third-part/yaml/include",
+					../src/misc,
+					../src/core/include,
+					./tun2socks,
+				);
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				OTHER_LDFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = com.hev.tun2socks;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B69998F82BE1D68D0044BCC5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"YAML_VERSION_STRING=\\\"1.0.0\\\"",
+					"YAML_VERSION_MAJOR=1",
+					"YAML_VERSION_MINOR=0",
+					"YAML_VERSION_PATCH=0",
+					"$(inherited)",
+				);
+				HEADER_SEARCH_PATHS = "../third-part/yaml/include";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B69998F92BE1D68D0044BCC5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"YAML_VERSION_STRING=\\\"1.0.0\\\"",
+					"YAML_VERSION_MAJOR=1",
+					"YAML_VERSION_MINOR=0",
+					"YAML_VERSION_PATCH=0",
+					"$(inherited)",
+				);
+				HEADER_SEARCH_PATHS = "../third-part/yaml/include";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B603F6FB2BE0D5E400C025B4 /* Build configuration list for PBXNativeTarget "lwip" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B603F6FC2BE0D5E400C025B4 /* Debug */,
+				B603F6FD2BE0D5E400C025B4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B603F9172BE1144300C025B4 /* Build configuration list for PBXNativeTarget "HevTaskSystem" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B603F9182BE1144300C025B4 /* Debug */,
+				B603F9192BE1144300C025B4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B60F7EAE2BE0843C00DD1A96 /* Build configuration list for PBXProject "tun2socks" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B60F7EB92BE0843C00DD1A96 /* Debug */,
+				B60F7EBA2BE0843C00DD1A96 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B60F7EBB2BE0843C00DD1A96 /* Build configuration list for PBXNativeTarget "tun2socks" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B60F7EBC2BE0843C00DD1A96 /* Debug */,
+				B60F7EBD2BE0843C00DD1A96 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B69998F72BE1D68D0044BCC5 /* Build configuration list for PBXNativeTarget "yaml" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B69998F82BE1D68D0044BCC5 /* Debug */,
+				B69998F92BE1D68D0044BCC5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B60F7EAB2BE0843C00DD1A96 /* Project object */;
+}
