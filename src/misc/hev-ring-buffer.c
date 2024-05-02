@@ -55,6 +55,10 @@ void
 hev_ring_buffer_read_release (HevRingBuffer *self, size_t size)
 {
     self->use_size -= size;
+    if (!self->use_size) {
+        self->rp = 0;
+        self->wp = 0;
+    }
 }
 
 int
