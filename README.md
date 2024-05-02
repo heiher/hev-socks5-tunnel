@@ -122,7 +122,7 @@ socks5:
 
 #misc:
    # task stack size (bytes)
-#  task-stack-size: 20480
+#  task-stack-size: 81920
    # connect timeout (ms)
 #  connect-timeout: 5000
    # read-write timeout (ms)

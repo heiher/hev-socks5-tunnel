@@ -200,7 +200,7 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
     if (!self->pcb)
         return;
 
-    self->buffer = hev_ring_buffer_new (tcp_sndbuf (self->pcb));
+    self->buffer = hev_ring_buffer_alloca (tcp_sndbuf (self->pcb));
     if (!self->buffer)
         return;
 
@@ -230,8 +230,6 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
         if (task_io_yielder (HEV_TASK_WAITIO, base) < 0)
             break;
     }
-
-    hev_ring_buffer_destroy (self->buffer);
 }
 
 static HevTask *

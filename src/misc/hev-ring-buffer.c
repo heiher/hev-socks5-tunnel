@@ -7,45 +7,8 @@
  ============================================================================
  */
 
-#include <hev-memory-allocator.h>
-
 #include "hev-compiler.h"
 #include "hev-ring-buffer.h"
-
-struct _HevRingBuffer
-{
-    size_t rp;
-    size_t wp;
-    size_t rda_size;
-    size_t use_size;
-    size_t max_size;
-
-    unsigned char data[0];
-};
-
-HevRingBuffer *
-hev_ring_buffer_new (size_t max_size)
-{
-    HevRingBuffer *self;
-
-    self = hev_malloc (sizeof (HevRingBuffer) + max_size);
-    if (!self)
-        return NULL;
-
-    self->rp = 0;
-    self->wp = 0;
-    self->rda_size = 0;
-    self->use_size = 0;
-    self->max_size = max_size;
-
-    return self;
-}
-
-void
-hev_ring_buffer_destroy (HevRingBuffer *self)
-{
-    hev_free (self);
-}
 
 size_t
 hev_ring_buffer_get_max_size (HevRingBuffer *self)

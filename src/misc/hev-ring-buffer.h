@@ -10,13 +10,39 @@
 #ifndef __HEV_RING_BUFFER_H__
 #define __HEV_RING_BUFFER_H__
 
+#include <stdlib.h>
 #include <sys/uio.h>
 #include <sys/types.h>
 
 typedef struct _HevRingBuffer HevRingBuffer;
 
-HevRingBuffer *hev_ring_buffer_new (size_t max_size);
-void hev_ring_buffer_destroy (HevRingBuffer *self);
+struct _HevRingBuffer
+{
+    size_t rp;
+    size_t wp;
+    size_t rda_size;
+    size_t use_size;
+    size_t max_size;
+
+    unsigned char data[0];
+};
+
+#define hev_ring_buffer_alloca(s)                     \
+    ({                                                \
+        HevRingBuffer *__self;                        \
+                                                      \
+        __self = alloca (sizeof (HevRingBuffer) + s); \
+        if (!__self)                                  \
+            NULL;                                     \
+                                                      \
+        __self->rp = 0;                               \
+        __self->wp = 0;                               \
+        __self->rda_size = 0;                         \
+        __self->use_size = 0;                         \
+        __self->max_size = s;                         \
+                                                      \
+        __self;                                       \
+    })
 
 size_t hev_ring_buffer_get_max_size (HevRingBuffer *self);
 size_t hev_ring_buffer_get_use_size (HevRingBuffer *self);
