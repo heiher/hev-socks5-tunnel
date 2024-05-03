@@ -202,7 +202,7 @@
 		B603F9B42BE1149300C025B4 /* hev-task-mutex.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F98A2BE1149200C025B4 /* hev-task-mutex.c */; };
 		B603F9B52BE1149300C025B4 /* hev-task-cond.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F98B2BE1149200C025B4 /* hev-task-cond.c */; };
 		B603F9B62BE1178B00C025B4 /* libHevTaskSystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B603F9112BE1144200C025B4 /* libHevTaskSystem.a */; };
-		B60F7EB82BE0843C00DD1A96 /* tun2socks.h in Headers */ = {isa = PBXBuildFile; fileRef = B60F7EB72BE0843C00DD1A96 /* tun2socks.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B60F7EB82BE0843C00DD1A96 /* HevSocks5Tunnel.h in Headers */ = {isa = PBXBuildFile; fileRef = B60F7EB72BE0843C00DD1A96 /* HevSocks5Tunnel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B67CEE232BE4C2990044CE23 /* perf.c in Sources */ = {isa = PBXBuildFile; fileRef = B67CEE112BE4C2990044CE23 /* perf.c */; };
 		B67CEE242BE4C2990044CE23 /* sys_arch.c in Sources */ = {isa = PBXBuildFile; fileRef = B67CEE122BE4C2990044CE23 /* sys_arch.c */; };
 		B67CEE252BE4C2990044CE23 /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = B67CEE1E2BE4C2990044CE23 /* list.c */; };
@@ -618,8 +618,8 @@
 		B603F98A2BE1149200C025B4 /* hev-task-mutex.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-mutex.c"; sourceTree = "<group>"; };
 		B603F98B2BE1149200C025B4 /* hev-task-cond.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "hev-task-cond.c"; sourceTree = "<group>"; };
 		B603F98C2BE1149200C025B4 /* hev-task-mutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-mutex.h"; sourceTree = "<group>"; };
-		B60F7EB42BE0843C00DD1A96 /* tun2socks.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = tun2socks.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		B60F7EB72BE0843C00DD1A96 /* tun2socks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tun2socks.h; sourceTree = "<group>"; };
+		B60F7EB42BE0843C00DD1A96 /* HevSocks5Tunnel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = HevSocks5Tunnel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B60F7EB72BE0843C00DD1A96 /* HevSocks5Tunnel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HevSocks5Tunnel.h; sourceTree = "<group>"; };
 		B67CEE112BE4C2990044CE23 /* perf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = perf.c; sourceTree = "<group>"; };
 		B67CEE122BE4C2990044CE23 /* sys_arch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sys_arch.c; sourceTree = "<group>"; };
 		B67CEE152BE4C2990044CE23 /* fifo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fifo.h; sourceTree = "<group>"; };
@@ -635,6 +635,7 @@
 		B67CEE202BE4C2990044CE23 /* sio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sio.c; sourceTree = "<group>"; };
 		B67CEE212BE4C2990044CE23 /* fifo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fifo.c; sourceTree = "<group>"; };
 		B67CEE222BE4C2990044CE23 /* pcapif.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pcapif.c; sourceTree = "<group>"; };
+		B6998C952BE796A300506F28 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B69998F12BE1D68D0044BCC5 /* libyaml.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libyaml.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B69998FA2BE1D6CE0044BCC5 /* writer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = writer.c; path = "../../third-part/yaml/src/writer.c"; sourceTree = "<group>"; };
 		B69998FB2BE1D6CE0044BCC5 /* emitter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = emitter.c; path = "../../third-part/yaml/src/emitter.c"; sourceTree = "<group>"; };
@@ -1499,8 +1500,9 @@
 		B60F7EAA2BE0843C00DD1A96 = {
 			isa = PBXGroup;
 			children = (
+				B6998C952BE796A300506F28 /* Info.plist */,
 				B603F4632BE08D4600C025B4 /* src */,
-				B60F7EB62BE0843C00DD1A96 /* tun2socks */,
+				B60F7EB62BE0843C00DD1A96 /* HevSocks5Tunnel */,
 				B603F6F62BE0D5E400C025B4 /* lwip */,
 				B603F9122BE1144300C025B4 /* HevTaskSystem */,
 				B69998F22BE1D68D0044BCC5 /* yaml */,
@@ -1512,7 +1514,7 @@
 		B60F7EB52BE0843C00DD1A96 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B60F7EB42BE0843C00DD1A96 /* tun2socks.framework */,
+				B60F7EB42BE0843C00DD1A96 /* HevSocks5Tunnel.framework */,
 				B603F6F52BE0D5E400C025B4 /* liblwip.a */,
 				B603F9112BE1144200C025B4 /* libHevTaskSystem.a */,
 				B69998F12BE1D68D0044BCC5 /* libyaml.a */,
@@ -1520,12 +1522,12 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B60F7EB62BE0843C00DD1A96 /* tun2socks */ = {
+		B60F7EB62BE0843C00DD1A96 /* HevSocks5Tunnel */ = {
 			isa = PBXGroup;
 			children = (
-				B60F7EB72BE0843C00DD1A96 /* tun2socks.h */,
+				B60F7EB72BE0843C00DD1A96 /* HevSocks5Tunnel.h */,
 			);
-			path = tun2socks;
+			path = HevSocks5Tunnel;
 			sourceTree = "<group>";
 		};
 		B67CEE102BE4C2990044CE23 /* lib */ = {
@@ -1621,7 +1623,7 @@
 				B603F4F52BE08D6900C025B4 /* hev-jni.h in Headers */,
 				B603F4E92BE08D6800C025B4 /* hev-socks5-client-udp.h in Headers */,
 				B603F4F72BE08D6900C025B4 /* hev-socks5-tunnel.h in Headers */,
-				B60F7EB82BE0843C00DD1A96 /* tun2socks.h in Headers */,
+				B60F7EB82BE0843C00DD1A96 /* HevSocks5Tunnel.h in Headers */,
 				B603F5002BE08D6900C025B4 /* hev-tunnel-linux.h in Headers */,
 				B603F4F12BE08D6900C025B4 /* hev-tunnel-macos.h in Headers */,
 				B603F4EB2BE08D6800C025B4 /* hev-socks5-misc.h in Headers */,
@@ -1684,9 +1686,9 @@
 			productReference = B603F9112BE1144200C025B4 /* libHevTaskSystem.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		B60F7EB32BE0843C00DD1A96 /* tun2socks */ = {
+		B60F7EB32BE0843C00DD1A96 /* HevSocks5Tunnel */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B60F7EBB2BE0843C00DD1A96 /* Build configuration list for PBXNativeTarget "tun2socks" */;
+			buildConfigurationList = B60F7EBB2BE0843C00DD1A96 /* Build configuration list for PBXNativeTarget "HevSocks5Tunnel" */;
 			buildPhases = (
 				B60F7EAF2BE0843C00DD1A96 /* Headers */,
 				B60F7EB02BE0843C00DD1A96 /* Sources */,
@@ -1697,9 +1699,9 @@
 			);
 			dependencies = (
 			);
-			name = tun2socks;
-			productName = tun2socks;
-			productReference = B60F7EB42BE0843C00DD1A96 /* tun2socks.framework */;
+			name = HevSocks5Tunnel;
+			productName = HevSocks5Tunnel;
+			productReference = B60F7EB42BE0843C00DD1A96 /* HevSocks5Tunnel.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		B69998F02BE1D68D0044BCC5 /* yaml */ = {
@@ -1742,7 +1744,7 @@
 					};
 				};
 			};
-			buildConfigurationList = B60F7EAE2BE0843C00DD1A96 /* Build configuration list for PBXProject "tun2socks" */;
+			buildConfigurationList = B60F7EAE2BE0843C00DD1A96 /* Build configuration list for PBXProject "HevSocks5Tunnel" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -1755,7 +1757,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B60F7EB32BE0843C00DD1A96 /* tun2socks */,
+				B60F7EB32BE0843C00DD1A96 /* HevSocks5Tunnel */,
 				B603F6F42BE0D5E400C025B4 /* lwip */,
 				B603F9102BE1144200C025B4 /* HevTaskSystem */,
 				B69998F02BE1D68D0044BCC5 /* yaml */,
@@ -1974,8 +1976,6 @@
 				DEVELOPMENT_TEAM = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					LWIP_PROVIDE_ERRNO,
-					"LWIP_SOCKET=1",
-					"LWIP_DNS=1",
 					"$(inherited)",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -1999,8 +1999,6 @@
 				DEVELOPMENT_TEAM = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					LWIP_PROVIDE_ERRNO,
-					"LWIP_SOCKET=1",
-					"LWIP_DNS=1",
 					"$(inherited)",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2217,7 +2215,7 @@
 					"CONFIG_STACK_OVERFLOW_DETECTION=1",
 					"$(inherited)",
 				);
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../third-part/lwip/include",
 					"$(SRCROOT)/../third-part/lwip/include/ports",
@@ -2225,8 +2223,9 @@
 					"$(SRCROOT)/../third-part/yaml/include",
 					"$(SRCROOT)/../src/misc",
 					"$(SRCROOT)/../src/core/include",
-					"$(SRCROOT)/tun2socks",
+					"$(SRCROOT)/HevSocks5Tunnel",
 				);
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2238,7 +2237,7 @@
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
 				OTHER_LDFLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = com.hev.tun2socks;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hev.HevSocks5Tunnel;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -2266,7 +2265,7 @@
 					"CONFIG_STACK_OVERFLOW_DETECTION=1",
 					"$(inherited)",
 				);
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../third-part/lwip/include",
 					"$(SRCROOT)/../third-part/lwip/include/ports",
@@ -2274,8 +2273,9 @@
 					"$(SRCROOT)/../third-part/yaml/include",
 					"$(SRCROOT)/../src/misc",
 					"$(SRCROOT)/../src/core/include",
-					"$(SRCROOT)/tun2socks",
+					"$(SRCROOT)/HevSocks5Tunnel",
 				);
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2287,7 +2287,7 @@
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
 				OTHER_LDFLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = com.hev.tun2socks;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hev.HevSocks5Tunnel;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -2360,7 +2360,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B60F7EAE2BE0843C00DD1A96 /* Build configuration list for PBXProject "tun2socks" */ = {
+		B60F7EAE2BE0843C00DD1A96 /* Build configuration list for PBXProject "HevSocks5Tunnel" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B60F7EB92BE0843C00DD1A96 /* Debug */,
@@ -2369,7 +2369,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B60F7EBB2BE0843C00DD1A96 /* Build configuration list for PBXNativeTarget "tun2socks" */ = {
+		B60F7EBB2BE0843C00DD1A96 /* Build configuration list for PBXNativeTarget "HevSocks5Tunnel" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B60F7EBC2BE0843C00DD1A96 /* Debug */,
