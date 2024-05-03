@@ -28,7 +28,7 @@ static HevConfigServer srv;
 
 static char log_file[1024];
 static char pid_file[1024];
-static int task_stack_size = 20480;
+static int task_stack_size = 81920;
 static int connect_timeout = 5000;
 static int read_write_timeout = 60000;
 static int limit_nofile = 65535;
