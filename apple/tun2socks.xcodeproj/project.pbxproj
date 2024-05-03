@@ -126,14 +126,6 @@
 		B603F82D2BE0D75500C025B4 /* lowpan6.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F72F2BE0D75400C025B4 /* lowpan6.c */; };
 		B603F82E2BE0D75500C025B4 /* lowpan6_common.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7302BE0D75400C025B4 /* lowpan6_common.c */; };
 		B603F82F2BE0D75500C025B4 /* bridgeif_fdb.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7312BE0D75400C025B4 /* bridgeif_fdb.c */; };
-		B603F8302BE0D75500C025B4 /* mem.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7352BE0D75400C025B4 /* mem.c */; };
-		B603F8312BE0D75500C025B4 /* perf.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7382BE0D75400C025B4 /* perf.c */; };
-		B603F8322BE0D75500C025B4 /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F73A2BE0D75400C025B4 /* list.c */; };
-		B603F8332BE0D75500C025B4 /* tapif.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F73B2BE0D75400C025B4 /* tapif.c */; };
-		B603F8342BE0D75500C025B4 /* sio.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F73C2BE0D75400C025B4 /* sio.c */; };
-		B603F8352BE0D75500C025B4 /* fifo.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F73D2BE0D75400C025B4 /* fifo.c */; };
-		B603F8362BE0D75500C025B4 /* pcapif.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F73E2BE0D75400C025B4 /* pcapif.c */; };
-		B603F8372BE0D75500C025B4 /* sys_arch.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F74A2BE0D75400C025B4 /* sys_arch.c */; };
 		B603F8382BE0D75500C025B4 /* memp.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7D92BE0D75500C025B4 /* memp.c */; };
 		B603F8392BE0D75500C025B4 /* sys.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7DA2BE0D75500C025B4 /* sys.c */; };
 		B603F83A2BE0D75500C025B4 /* inet_chksum.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F7DB2BE0D75500C025B4 /* inet_chksum.c */; };
@@ -211,6 +203,13 @@
 		B603F9B52BE1149300C025B4 /* hev-task-cond.c in Sources */ = {isa = PBXBuildFile; fileRef = B603F98B2BE1149200C025B4 /* hev-task-cond.c */; };
 		B603F9B62BE1178B00C025B4 /* libHevTaskSystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B603F9112BE1144200C025B4 /* libHevTaskSystem.a */; };
 		B60F7EB82BE0843C00DD1A96 /* tun2socks.h in Headers */ = {isa = PBXBuildFile; fileRef = B60F7EB72BE0843C00DD1A96 /* tun2socks.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B67CEE232BE4C2990044CE23 /* perf.c in Sources */ = {isa = PBXBuildFile; fileRef = B67CEE112BE4C2990044CE23 /* perf.c */; };
+		B67CEE242BE4C2990044CE23 /* sys_arch.c in Sources */ = {isa = PBXBuildFile; fileRef = B67CEE122BE4C2990044CE23 /* sys_arch.c */; };
+		B67CEE252BE4C2990044CE23 /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = B67CEE1E2BE4C2990044CE23 /* list.c */; };
+		B67CEE262BE4C2990044CE23 /* tapif.c in Sources */ = {isa = PBXBuildFile; fileRef = B67CEE1F2BE4C2990044CE23 /* tapif.c */; };
+		B67CEE272BE4C2990044CE23 /* sio.c in Sources */ = {isa = PBXBuildFile; fileRef = B67CEE202BE4C2990044CE23 /* sio.c */; };
+		B67CEE282BE4C2990044CE23 /* fifo.c in Sources */ = {isa = PBXBuildFile; fileRef = B67CEE212BE4C2990044CE23 /* fifo.c */; };
+		B67CEE292BE4C2990044CE23 /* pcapif.c in Sources */ = {isa = PBXBuildFile; fileRef = B67CEE222BE4C2990044CE23 /* pcapif.c */; };
 		B69999042BE1D6CF0044BCC5 /* writer.c in Sources */ = {isa = PBXBuildFile; fileRef = B69998FA2BE1D6CE0044BCC5 /* writer.c */; };
 		B69999052BE1D6CF0044BCC5 /* emitter.c in Sources */ = {isa = PBXBuildFile; fileRef = B69998FB2BE1D6CE0044BCC5 /* emitter.c */; };
 		B69999062BE1D6CF0044BCC5 /* dumper.c in Sources */ = {isa = PBXBuildFile; fileRef = B69998FC2BE1D6CE0044BCC5 /* dumper.c */; };
@@ -378,23 +377,6 @@
 		B603F72F2BE0D75400C025B4 /* lowpan6.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lowpan6.c; sourceTree = "<group>"; };
 		B603F7302BE0D75400C025B4 /* lowpan6_common.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lowpan6_common.c; sourceTree = "<group>"; };
 		B603F7312BE0D75400C025B4 /* bridgeif_fdb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bridgeif_fdb.c; sourceTree = "<group>"; };
-		B603F7352BE0D75400C025B4 /* mem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mem.c; sourceTree = "<group>"; };
-		B603F7362BE0D75400C025B4 /* lwipopts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lwipopts.h; sourceTree = "<group>"; };
-		B603F7382BE0D75400C025B4 /* perf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = perf.c; sourceTree = "<group>"; };
-		B603F73A2BE0D75400C025B4 /* list.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = list.c; sourceTree = "<group>"; };
-		B603F73B2BE0D75400C025B4 /* tapif.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tapif.c; sourceTree = "<group>"; };
-		B603F73C2BE0D75400C025B4 /* sio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sio.c; sourceTree = "<group>"; };
-		B603F73D2BE0D75400C025B4 /* fifo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fifo.c; sourceTree = "<group>"; };
-		B603F73E2BE0D75400C025B4 /* pcapif.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pcapif.c; sourceTree = "<group>"; };
-		B603F7412BE0D75400C025B4 /* fifo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fifo.h; sourceTree = "<group>"; };
-		B603F7422BE0D75400C025B4 /* sio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sio.h; sourceTree = "<group>"; };
-		B603F7432BE0D75400C025B4 /* pcapif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pcapif.h; sourceTree = "<group>"; };
-		B603F7442BE0D75400C025B4 /* list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = list.h; sourceTree = "<group>"; };
-		B603F7452BE0D75400C025B4 /* tapif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tapif.h; sourceTree = "<group>"; };
-		B603F7472BE0D75400C025B4 /* sys_arch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sys_arch.h; sourceTree = "<group>"; };
-		B603F7482BE0D75400C025B4 /* cc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc.h; sourceTree = "<group>"; };
-		B603F7492BE0D75400C025B4 /* perf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = perf.h; sourceTree = "<group>"; };
-		B603F74A2BE0D75400C025B4 /* sys_arch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sys_arch.c; sourceTree = "<group>"; };
 		B603F74F2BE0D75400C025B4 /* if.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = if.h; sourceTree = "<group>"; };
 		B603F7512BE0D75400C025B4 /* inet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inet.h; sourceTree = "<group>"; };
 		B603F7532BE0D75400C025B4 /* socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = socket.h; sourceTree = "<group>"; };
@@ -638,6 +620,21 @@
 		B603F98C2BE1149200C025B4 /* hev-task-mutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "hev-task-mutex.h"; sourceTree = "<group>"; };
 		B60F7EB42BE0843C00DD1A96 /* tun2socks.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = tun2socks.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B60F7EB72BE0843C00DD1A96 /* tun2socks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tun2socks.h; sourceTree = "<group>"; };
+		B67CEE112BE4C2990044CE23 /* perf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = perf.c; sourceTree = "<group>"; };
+		B67CEE122BE4C2990044CE23 /* sys_arch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sys_arch.c; sourceTree = "<group>"; };
+		B67CEE152BE4C2990044CE23 /* fifo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fifo.h; sourceTree = "<group>"; };
+		B67CEE162BE4C2990044CE23 /* sio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sio.h; sourceTree = "<group>"; };
+		B67CEE172BE4C2990044CE23 /* pcapif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pcapif.h; sourceTree = "<group>"; };
+		B67CEE182BE4C2990044CE23 /* list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = list.h; sourceTree = "<group>"; };
+		B67CEE192BE4C2990044CE23 /* tapif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tapif.h; sourceTree = "<group>"; };
+		B67CEE1A2BE4C2990044CE23 /* sys_arch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sys_arch.h; sourceTree = "<group>"; };
+		B67CEE1B2BE4C2990044CE23 /* cc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc.h; sourceTree = "<group>"; };
+		B67CEE1C2BE4C2990044CE23 /* perf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = perf.h; sourceTree = "<group>"; };
+		B67CEE1E2BE4C2990044CE23 /* list.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = list.c; sourceTree = "<group>"; };
+		B67CEE1F2BE4C2990044CE23 /* tapif.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tapif.c; sourceTree = "<group>"; };
+		B67CEE202BE4C2990044CE23 /* sio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sio.c; sourceTree = "<group>"; };
+		B67CEE212BE4C2990044CE23 /* fifo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fifo.c; sourceTree = "<group>"; };
+		B67CEE222BE4C2990044CE23 /* pcapif.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pcapif.c; sourceTree = "<group>"; };
 		B69998F12BE1D68D0044BCC5 /* libyaml.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libyaml.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B69998FA2BE1D6CE0044BCC5 /* writer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = writer.c; path = "../../third-part/yaml/src/writer.c"; sourceTree = "<group>"; };
 		B69998FB2BE1D6CE0044BCC5 /* emitter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = emitter.c; path = "../../third-part/yaml/src/emitter.c"; sourceTree = "<group>"; };
@@ -907,73 +904,11 @@
 		B603F7332BE0D75400C025B4 /* unix */ = {
 			isa = PBXGroup;
 			children = (
-				B603F7342BE0D75400C025B4 /* lib */,
-				B603F7372BE0D75400C025B4 /* port */,
+				B67CEE132BE4C2990044CE23 /* include */,
+				B67CEE102BE4C2990044CE23 /* lib */,
+				B67CEE1D2BE4C2990044CE23 /* netif */,
 			);
 			path = unix;
-			sourceTree = "<group>";
-		};
-		B603F7342BE0D75400C025B4 /* lib */ = {
-			isa = PBXGroup;
-			children = (
-				B603F7352BE0D75400C025B4 /* mem.c */,
-				B603F7362BE0D75400C025B4 /* lwipopts.h */,
-			);
-			path = lib;
-			sourceTree = "<group>";
-		};
-		B603F7372BE0D75400C025B4 /* port */ = {
-			isa = PBXGroup;
-			children = (
-				B603F7382BE0D75400C025B4 /* perf.c */,
-				B603F7392BE0D75400C025B4 /* netif */,
-				B603F73F2BE0D75400C025B4 /* include */,
-				B603F74A2BE0D75400C025B4 /* sys_arch.c */,
-			);
-			path = port;
-			sourceTree = "<group>";
-		};
-		B603F7392BE0D75400C025B4 /* netif */ = {
-			isa = PBXGroup;
-			children = (
-				B603F73A2BE0D75400C025B4 /* list.c */,
-				B603F73B2BE0D75400C025B4 /* tapif.c */,
-				B603F73C2BE0D75400C025B4 /* sio.c */,
-				B603F73D2BE0D75400C025B4 /* fifo.c */,
-				B603F73E2BE0D75400C025B4 /* pcapif.c */,
-			);
-			path = netif;
-			sourceTree = "<group>";
-		};
-		B603F73F2BE0D75400C025B4 /* include */ = {
-			isa = PBXGroup;
-			children = (
-				B603F7402BE0D75400C025B4 /* netif */,
-				B603F7462BE0D75400C025B4 /* arch */,
-			);
-			path = include;
-			sourceTree = "<group>";
-		};
-		B603F7402BE0D75400C025B4 /* netif */ = {
-			isa = PBXGroup;
-			children = (
-				B603F7412BE0D75400C025B4 /* fifo.h */,
-				B603F7422BE0D75400C025B4 /* sio.h */,
-				B603F7432BE0D75400C025B4 /* pcapif.h */,
-				B603F7442BE0D75400C025B4 /* list.h */,
-				B603F7452BE0D75400C025B4 /* tapif.h */,
-			);
-			path = netif;
-			sourceTree = "<group>";
-		};
-		B603F7462BE0D75400C025B4 /* arch */ = {
-			isa = PBXGroup;
-			children = (
-				B603F7472BE0D75400C025B4 /* sys_arch.h */,
-				B603F7482BE0D75400C025B4 /* cc.h */,
-				B603F7492BE0D75400C025B4 /* perf.h */,
-			);
-			path = arch;
 			sourceTree = "<group>";
 		};
 		B603F74B2BE0D75400C025B4 /* include */ = {
@@ -1593,6 +1528,50 @@
 			path = tun2socks;
 			sourceTree = "<group>";
 		};
+		B67CEE102BE4C2990044CE23 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				B67CEE112BE4C2990044CE23 /* perf.c */,
+				B67CEE122BE4C2990044CE23 /* sys_arch.c */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		B67CEE132BE4C2990044CE23 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				B67CEE142BE4C2990044CE23 /* netif */,
+				B67CEE1A2BE4C2990044CE23 /* sys_arch.h */,
+				B67CEE1B2BE4C2990044CE23 /* cc.h */,
+				B67CEE1C2BE4C2990044CE23 /* perf.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		B67CEE142BE4C2990044CE23 /* netif */ = {
+			isa = PBXGroup;
+			children = (
+				B67CEE152BE4C2990044CE23 /* fifo.h */,
+				B67CEE162BE4C2990044CE23 /* sio.h */,
+				B67CEE172BE4C2990044CE23 /* pcapif.h */,
+				B67CEE182BE4C2990044CE23 /* list.h */,
+				B67CEE192BE4C2990044CE23 /* tapif.h */,
+			);
+			path = netif;
+			sourceTree = "<group>";
+		};
+		B67CEE1D2BE4C2990044CE23 /* netif */ = {
+			isa = PBXGroup;
+			children = (
+				B67CEE1E2BE4C2990044CE23 /* list.c */,
+				B67CEE1F2BE4C2990044CE23 /* tapif.c */,
+				B67CEE202BE4C2990044CE23 /* sio.c */,
+				B67CEE212BE4C2990044CE23 /* fifo.c */,
+				B67CEE222BE4C2990044CE23 /* pcapif.c */,
+			);
+			path = netif;
+			sourceTree = "<group>";
+		};
 		B69998F22BE1D68D0044BCC5 /* yaml */ = {
 			isa = PBXGroup;
 			children = (
@@ -1802,15 +1781,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B67CEE262BE4C2990044CE23 /* tapif.c in Sources */,
 				B603F8232BE0D75500C025B4 /* chap-md5.c in Sources */,
 				B603F8462BE0D75500C025B4 /* autoip.c in Sources */,
 				B603F85B2BE0D75500C025B4 /* ip6_addr.c in Sources */,
+				B67CEE242BE4C2990044CE23 /* sys_arch.c in Sources */,
 				B603F83B2BE0D75500C025B4 /* raw.c in Sources */,
 				B603F8212BE0D75500C025B4 /* ccp.c in Sources */,
 				B603F83E2BE0D75500C025B4 /* dns.c in Sources */,
 				B603F80D2BE0D75500C025B4 /* slipif.c in Sources */,
 				B603F8482BE0D75500C025B4 /* acd.c in Sources */,
-				B603F8352BE0D75500C025B4 /* fifo.c in Sources */,
 				B603F8052BE0D75500C025B4 /* err.c in Sources */,
 				B603F8292BE0D75500C025B4 /* demand.c in Sources */,
 				B603F8122BE0D75500C025B4 /* mppe.c in Sources */,
@@ -1822,9 +1802,9 @@
 				B603F82B2BE0D75500C025B4 /* ipcp.c in Sources */,
 				B603F84C2BE0D75500C025B4 /* ip4.c in Sources */,
 				B603F8282BE0D75500C025B4 /* fsm.c in Sources */,
+				B67CEE252BE4C2990044CE23 /* list.c in Sources */,
 				B603F8452BE0D75500C025B4 /* tcp_in.c in Sources */,
 				B603F8502BE0D75500C025B4 /* altcp_tcp.c in Sources */,
-				B603F8322BE0D75500C025B4 /* list.c in Sources */,
 				B603F80F2BE0D75500C025B4 /* auth.c in Sources */,
 				B603F80E2BE0D75500C025B4 /* vj.c in Sources */,
 				B603F83C2BE0D75500C025B4 /* tcp_out.c in Sources */,
@@ -1834,11 +1814,9 @@
 				B603F8252BE0D75500C025B4 /* upap.c in Sources */,
 				B603F81A2BE0D75500C025B4 /* md4.c in Sources */,
 				B603F82C2BE0D75500C025B4 /* bridgeif.c in Sources */,
-				B603F8342BE0D75500C025B4 /* sio.c in Sources */,
 				B603F8222BE0D75500C025B4 /* utils.c in Sources */,
-				B603F8312BE0D75500C025B4 /* perf.c in Sources */,
-				B603F8302BE0D75500C025B4 /* mem.c in Sources */,
 				B603F81F2BE0D75500C025B4 /* lcp.c in Sources */,
+				B67CEE282BE4C2990044CE23 /* fifo.c in Sources */,
 				B603F8432BE0D75500C025B4 /* udp.c in Sources */,
 				B603F8512BE0D75500C025B4 /* tcp.c in Sources */,
 				B603F8442BE0D75500C025B4 /* stats.c in Sources */,
@@ -1857,12 +1835,11 @@
 				B603F8552BE0D75500C025B4 /* icmp6.c in Sources */,
 				B603F85A2BE0D75500C025B4 /* inet6.c in Sources */,
 				B603F8162BE0D75500C025B4 /* chap_ms.c in Sources */,
-				B603F8362BE0D75500C025B4 /* pcapif.c in Sources */,
 				B603F8202BE0D75500C025B4 /* ipv6cp.c in Sources */,
 				B603F80B2BE0D75500C025B4 /* ethernet.c in Sources */,
 				B603F8392BE0D75500C025B4 /* sys.c in Sources */,
 				B603F80A2BE0D75500C025B4 /* zepif.c in Sources */,
-				B603F8372BE0D75500C025B4 /* sys_arch.c in Sources */,
+				B67CEE272BE4C2990044CE23 /* sio.c in Sources */,
 				B603F8042BE0D75500C025B4 /* tcpip.c in Sources */,
 				B603F84A2BE0D75500C025B4 /* etharp.c in Sources */,
 				B603F82D2BE0D75500C025B4 /* lowpan6.c in Sources */,
@@ -1870,6 +1847,7 @@
 				B603F82A2BE0D75500C025B4 /* ppp.c in Sources */,
 				B603F8132BE0D75500C025B4 /* eui64.c in Sources */,
 				B603F85C2BE0D75500C025B4 /* ip6_frag.c in Sources */,
+				B67CEE292BE4C2990044CE23 /* pcapif.c in Sources */,
 				B603F82F2BE0D75500C025B4 /* bridgeif_fdb.c in Sources */,
 				B603F8012BE0D75500C025B4 /* sockets.c in Sources */,
 				B603F85D2BE0D75500C025B4 /* altcp.c in Sources */,
@@ -1882,9 +1860,9 @@
 				B603F8022BE0D75500C025B4 /* if_api.c in Sources */,
 				B603F83A2BE0D75500C025B4 /* inet_chksum.c in Sources */,
 				B603F8152BE0D75500C025B4 /* pppoe.c in Sources */,
-				B603F8332BE0D75500C025B4 /* tapif.c in Sources */,
 				B603F81E2BE0D75500C025B4 /* arc4.c in Sources */,
 				B603F8182BE0D75500C025B4 /* pppcrypt.c in Sources */,
+				B67CEE232BE4C2990044CE23 /* perf.c in Sources */,
 				B603F8532BE0D75500C025B4 /* timeouts.c in Sources */,
 				B603F8592BE0D75500C025B4 /* nd6.c in Sources */,
 				B603F8192BE0D75500C025B4 /* pppos.c in Sources */,
@@ -2001,9 +1979,9 @@
 					"$(inherited)",
 				);
 				HEADER_SEARCH_PATHS = (
-					"../third-part/lwip/include",
-					"../third-part/lwip/include/ports/unix",
-					./lwip,
+					"$(SRCROOT)/../third-part/lwip/include",
+					"$(SRCROOT)/../third-part/lwip/include/ports",
+					"$(SRCROOT)/lwip",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				OTHER_LDFLAGS = "-ObjC";
@@ -2026,9 +2004,9 @@
 					"$(inherited)",
 				);
 				HEADER_SEARCH_PATHS = (
-					"../third-part/lwip/include",
-					"../third-part/lwip/include/ports/unix",
-					./lwip,
+					"$(SRCROOT)/../third-part/lwip/include",
+					"$(SRCROOT)/../third-part/lwip/include/ports",
+					"$(SRCROOT)/lwip",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				OTHER_LDFLAGS = "-ObjC";
@@ -2054,8 +2032,8 @@
 					"$(inherited)",
 				);
 				HEADER_SEARCH_PATHS = (
-					"../third-part/hev-task-system/include",
-					"../third-part/hev-task-system/src",
+					"$(SRCROOT)/../third-part/hev-task-system/include",
+					"$(SRCROOT)/../third-part/hev-task-system/src",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				OTHER_LDFLAGS = "";
@@ -2081,8 +2059,8 @@
 					"$(inherited)",
 				);
 				HEADER_SEARCH_PATHS = (
-					"../third-part/hev-task-system/include",
-					"../third-part/hev-task-system/src",
+					"$(SRCROOT)/../third-part/hev-task-system/include",
+					"$(SRCROOT)/../third-part/hev-task-system/src",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				OTHER_LDFLAGS = "";
@@ -2241,13 +2219,13 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
-					"../third-part/lwip/include",
-					"../third-part/lwip/include/ports/unix",
-					"../third-part/hev-task-system/include",
-					"../third-part/yaml/include",
-					../src/misc,
-					../src/core/include,
-					./tun2socks,
+					"$(SRCROOT)/../third-part/lwip/include",
+					"$(SRCROOT)/../third-part/lwip/include/ports",
+					"$(SRCROOT)/../third-part/hev-task-system/include",
+					"$(SRCROOT)/../third-part/yaml/include",
+					"$(SRCROOT)/../src/misc",
+					"$(SRCROOT)/../src/core/include",
+					"$(SRCROOT)/tun2socks",
 				);
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -2290,13 +2268,13 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
-					"../third-part/lwip/include",
-					"../third-part/lwip/include/ports/unix",
-					"../third-part/hev-task-system/include",
-					"../third-part/yaml/include",
-					../src/misc,
-					../src/core/include,
-					./tun2socks,
+					"$(SRCROOT)/../third-part/lwip/include",
+					"$(SRCROOT)/../third-part/lwip/include/ports",
+					"$(SRCROOT)/../third-part/hev-task-system/include",
+					"$(SRCROOT)/../third-part/yaml/include",
+					"$(SRCROOT)/../src/misc",
+					"$(SRCROOT)/../src/core/include",
+					"$(SRCROOT)/tun2socks",
 				);
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -2330,7 +2308,7 @@
 					"YAML_VERSION_PATCH=0",
 					"$(inherited)",
 				);
-				HEADER_SEARCH_PATHS = "../third-part/yaml/include";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../third-part/yaml/include";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2352,7 +2330,7 @@
 					"YAML_VERSION_PATCH=0",
 					"$(inherited)",
 				);
-				HEADER_SEARCH_PATHS = "../third-part/yaml/include";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../third-part/yaml/include";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
