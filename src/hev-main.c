@@ -129,7 +129,7 @@ main (int argc, char *argv[])
 {
     int res;
 
-    if (argc < 2 || strcmp(argv[1], "--version") == 0) {
+    if (argc < 2 || strcmp (argv[1], "--version") == 0) {
         show_help (argv[0]);
         return -1;
     }
