@@ -1,5 +1,7 @@
 # HevSocks5Tunnel
 
+[![status](https://github.com/heiher/hev-socks5-tunnel/actions/workflows/build.yaml/badge.svg?branch=master&event=push)](https://github.com/heiher/hev-socks5-tunnel)
+
 A tunnel over Socks5 proxy (tun2socks) for Unix.
 
 ## Features

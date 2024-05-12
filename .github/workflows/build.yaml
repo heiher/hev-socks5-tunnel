@@ -1,0 +1,63 @@
+name: "Build"
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    name: Linux
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        include:
+          - name: arm64
+            tool: aarch64-unknown-linux-musl
+          - name: arm32
+            tool: arm-unknown-linux-musleabi
+          - name: arm32hf
+            tool: arm-unknown-linux-musleabihf
+          - name: loong64
+            tool: loongarch64-unknown-linux-musl
+          - name: mips64el
+            tool: mips64el-unknown-linux-musl
+          - name: mips64
+            tool: mips64-unknown-linux-musl
+          - name: mips32el
+            tool: mipsel-unknown-linux-musl
+          - name: mips32
+            tool: mips-unknown-linux-musl
+          - name: riscv32
+            tool: riscv32-unknown-linux-musl
+          - name: riscv64
+            tool: riscv64-unknown-linux-musl
+          - name: x86_32
+            tool: x86_64-multilib-linux-musl
+            env:
+              CFLAGS: "-m32"
+          - name: x86_64
+            tool: x86_64-multilib-linux-musl
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Build ${{ matrix.name }}
+        run: |
+          sudo mkdir -p /opt/x-tools
+          wget https://github.com/musl-cross/musl-cross/releases/download/20240317/${{ matrix.tool }}.tgz
+          sudo tar xf ${{ matrix.tool }}.tgz -C /opt/x-tools
+          make CROSS_PREFIX=/opt/x-tools/${{ matrix.tool }}/bin/${{ matrix.tool }}- CFLAGS=${{ matrix.env.CFLAGS }} ENABLE_STATIC=1 -j`nproc`
+  macos:
+    name: macOS
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Build
+        run: |
+          make
