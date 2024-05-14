@@ -1,6 +1,10 @@
-name: Release
+name: "Build"
 
 on:
+  push:
+    branches:
+      - '**'
+  pull_request:
   release:
     types:
       - published
@@ -9,6 +13,7 @@ jobs:
   source:
     name: Source
     runs-on: ubuntu-20.04
+    if: github.event_name == 'release'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -29,9 +34,8 @@ jobs:
           asset_path: hev-socks5-tunnel-${{ github.ref_name }}.tar.gz
           asset_name: hev-socks5-tunnel-${{ github.ref_name }}.tar.gz
           asset_content_type: application/octet-stream
-
-  build:
-    name: Build
+  linux:
+    name: Linux
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -64,7 +68,7 @@ jobs:
             tool: x86_64-multilib-linux-musl
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           submodules: true
@@ -75,6 +79,7 @@ jobs:
           sudo tar xf ${{ matrix.tool }}.tgz -C /opt/x-tools
           make CROSS_PREFIX=/opt/x-tools/${{ matrix.tool }}/bin/${{ matrix.tool }}- CFLAGS=${{ matrix.env.CFLAGS }} ENABLE_STATIC=1 -j`nproc`
       - name: Upload ${{ matrix.name }}
+        if: github.event_name == 'release'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -83,3 +88,16 @@ jobs:
           asset_path: bin/hev-socks5-tunnel
           asset_name: hev-socks5-tunnel-linux-${{ matrix.name }}
           asset_content_type: application/octet-stream
+  macos:
+    name: macOS
+    runs-on: macos-14
+    if: github.event_name != 'release'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Build
+        run: |
+          make
