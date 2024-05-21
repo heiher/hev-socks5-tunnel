@@ -2,7 +2,7 @@
  ============================================================================
  Name        : hev-config.c
  Author      : hev <r@hev.cc>
- Copyright   : Copyright (c) 2019 - 2023 hev
+ Copyright   : Copyright (c) 2019 - 2024 hev
  Description : Config
  ============================================================================
  */
@@ -13,6 +13,7 @@
 
 #include "hev-logger.h"
 #include "hev-config.h"
+#include "hev-config-const.h"
 
 static char tun_name[64];
 static unsigned int tun_mtu = 8500;
@@ -28,7 +29,7 @@ static HevConfigServer srv;
 
 static char log_file[1024];
 static char pid_file[1024];
-static int task_stack_size = 81920;
+static int task_stack_size = 0;
 static int connect_timeout = 5000;
 static int read_write_timeout = 60000;
 static int limit_nofile = 65535;
@@ -335,6 +336,9 @@ hev_config_parse_doc (yaml_document_t *doc)
         if (res < 0)
             return -1;
     }
+
+    if (task_stack_size < TASK_STACK_SIZE)
+        task_stack_size = TASK_STACK_SIZE;
 
     return 0;
 }
