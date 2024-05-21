@@ -236,7 +236,7 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
     }
 
     if (mark)
-        srv.mark = strtoul (mark, NULL, 16);
+        srv.mark = strtoul (mark, NULL, 0);
 
     return 0;
 }

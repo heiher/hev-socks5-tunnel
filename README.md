@@ -142,7 +142,7 @@ socks5:
 #### Linux
 
 ```bash
-# Set socks5.mark = 438
+# Set socks5.mark = 0x438
 bin/hev-socks5-tunnel conf/main.yml
 
 # Bypass upstream socks5 server
