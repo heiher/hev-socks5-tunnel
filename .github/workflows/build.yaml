@@ -54,8 +54,12 @@ jobs:
             tool: mips64-unknown-linux-musl
           - name: mips32el
             tool: mipsel-unknown-linux-musl
+          - name: mips32elsf
+            tool: mipsel-unknown-linux-muslsf
           - name: mips32
             tool: mips-unknown-linux-musl
+          - name: mips32sf
+            tool: mips-unknown-linux-muslsf
           - name: riscv32
             tool: riscv32-unknown-linux-musl
           - name: riscv64
@@ -75,7 +79,7 @@ jobs:
       - name: Build ${{ matrix.name }}
         run: |
           sudo mkdir -p /opt/x-tools
-          wget https://github.com/musl-cross/musl-cross/releases/download/20240317/${{ matrix.tool }}.tgz
+          wget https://github.com/musl-cross/musl-cross/releases/download/20240527/${{ matrix.tool }}.tgz
           sudo tar xf ${{ matrix.tool }}.tgz -C /opt/x-tools
           make CROSS_PREFIX=/opt/x-tools/${{ matrix.tool }}/bin/${{ matrix.tool }}- CFLAGS=${{ matrix.env.CFLAGS }} ENABLE_STATIC=1 -j`nproc`
       - name: Upload ${{ matrix.name }}
