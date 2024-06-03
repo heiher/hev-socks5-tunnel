@@ -48,6 +48,12 @@ jobs:
             tool: arm-unknown-linux-musleabihf
           - name: loong64
             tool: loongarch64-unknown-linux-musl
+          - name: m68k
+            tool: m68k-unknown-linux-musl
+          - name: microblazeel
+            tool: microblazeel-xilinx-linux-musl
+          - name: microblaze
+            tool: microblaze-xilinx-linux-musl
           - name: mips64el
             tool: mips64el-unknown-linux-musl
           - name: mips64
@@ -60,10 +66,22 @@ jobs:
             tool: mips-unknown-linux-musl
           - name: mips32sf
             tool: mips-unknown-linux-muslsf
+          - name: powerpc64
+            tool: powerpc64-unknown-linux-musl
+          - name: powerpc
+            tool: powerpc-unknown-linux-musl
           - name: riscv32
             tool: riscv32-unknown-linux-musl
           - name: riscv64
             tool: riscv64-unknown-linux-musl
+          - name: s390x
+            tool: s390x-ibm-linux-musl
+          - name: sh
+            tool: sh-multilib-linux-musl
+          - name: sheb
+            tool: sh-multilib-linux-musl
+            env:
+              CFLAGS: "-mb"
           - name: x86_32
             tool: x86_64-multilib-linux-musl
             env:
@@ -79,7 +97,7 @@ jobs:
       - name: Build ${{ matrix.name }}
         run: |
           sudo mkdir -p /opt/x-tools
-          wget https://github.com/musl-cross/musl-cross/releases/download/20240527/${{ matrix.tool }}.tgz
+          wget https://github.com/musl-cross/musl-cross/releases/download/20240603/${{ matrix.tool }}.tgz
           sudo tar xf ${{ matrix.tool }}.tgz -C /opt/x-tools
           make CROSS_PREFIX=/opt/x-tools/${{ matrix.tool }}/bin/${{ matrix.tool }}- CFLAGS=${{ matrix.env.CFLAGS }} ENABLE_STATIC=1 -j`nproc`
       - name: Upload ${{ matrix.name }}
