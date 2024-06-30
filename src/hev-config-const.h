@@ -16,6 +16,6 @@
 
 static const int UDP_BUF_SIZE = 1500;
 static const int UDP_POOL_SIZE = 512;
-static const int TASK_STACK_SIZE = 81920;
+static const int TASK_STACK_SIZE = 86016;
 
 #endif /* __HEV_CONFIG_CONST_H__ */
