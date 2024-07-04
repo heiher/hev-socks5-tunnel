@@ -10,8 +10,12 @@ SOCKS5_UDP_MODE="${SOCKS5_UDP_MODE:-udp}"
 TABLE="${TABLE:-20}"
 MARK="${MARK:-438}"
 
+LOG_LEVEL="${LOG_LEVEL:-warn}"
+
 config_file() {
   cat > /hs5t.yml << EOF
+misc:
+  log-level: '${LOG_LEVEL}'
 tunnel:
   name: '${TUN}'
   mtu: ${MTU}
