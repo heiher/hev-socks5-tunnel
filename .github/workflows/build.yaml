@@ -134,7 +134,7 @@ jobs:
         uses: docker/metadata-action@v5
         id: docker_meta
         with:
-          images: ghcr.io/${{ github.repository_owner }}/${{ github.repository }}
+          images: ghcr.io/${{ github.repository }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
