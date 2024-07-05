@@ -169,6 +169,53 @@ sudo route change -inet default -interface utun99
 sudo route change -inet6 default -interface utun99
 ```
 
+#### Docker Compose
+
+```yaml
+version: "3.9"
+
+services:
+  client:
+    image: alpine:latest # just for network testing
+    tty: true # you can test network in terminal
+    depends_on:
+      - tun
+    network_mode: "service:tun"
+
+  tun:
+    image: ghcr.io/heiher/hev-socks5-tunnel:latest # `latest` for the latest published version; `nightly` for the latest source build; `vX.Y.Z` for the specific version 
+    cap_add:
+      - NET_ADMIN # needed
+    devices:
+      - /dev/net/tun:/dev/net/tun # needed
+    environment:
+      TUN: tun0 # optional, tun interface name, default `tun0`
+      MTU: 8500 # optional, MTU is MTU, default `8500`
+      IPV4: 198.18.0.1 # optional, tun interface ip, default `198.18.0.1`
+      TABLE: 20 # optional, ip route table id, default `20`
+      MARK: 438 # optional, ip route rule mark, hex format, default `438`
+      SOCKS5_ADDR: a.b.c.d # socks5 proxy server address
+      SOCKS5_PORT: 1080 # socks5 proxy server port
+      SOCKS5_USERNAME: user # optional, socks5 proxy username, only set when need to auth
+      SOCKS5_PASSWORD: pass # optional, socks5 proxy password, only set when need to auth
+      SOCKS5_UDP_MODE: udp # optional, UDP relay mode, default `udp`, other option `tcp`
+      IPV4_INCLUDED_ROUTES: 0.0.0.0/0 # optional, demo means proxy all traffic. for multiple network segments, join with `,` or `\n`
+      IPV4_EXCLUDED_ROUTES: a.b.c.d # optional, demo means exclude traffic from the proxy itself. for multiple network segments, join with `,` or `\n`
+      LOG_LEVEL: warn # optional, default `warn`, other option `debug`/`info`/`error`
+    dns:
+      - 8.8.8.8
+```
+
+You can also set the route rules with multiple network segments like:
+
+```yaml
+    environment:
+      IPV4_INCLUDED_ROUTES: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+      IPV4_EXCLUDED_ROUTES: |-
+        a.b.c.d/24
+        a.b.c.f/24
+```
+
 ## API
 
 ```c
