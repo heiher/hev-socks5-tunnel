@@ -179,7 +179,8 @@ services:
     image: alpine:latest # just for network testing
     tty: true # you can test network in terminal
     depends_on:
-      - tun
+      tun:
+        condition: service_healthy
     network_mode: "service:tun"
 
   tun:

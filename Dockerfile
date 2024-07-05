@@ -27,6 +27,8 @@ ENV TUN=tun0 \
     IPV4_INCLUDED_ROUTES=0.0.0.0/0 \
     IPV4_EXCLUDED_ROUTES=172.17.0.0/16
 
+HEALTHCHECK --start-period=5s --interval=5s --timeout=2s --retries=3 CMD ["test", "-f", "/success"]
+
 COPY --chmod=755 docker/entrypoint.sh /entrypoint.sh
 COPY --from=builder /src/bin/hev-socks5-tunnel /usr/bin/hev-socks5-tunnel
 
