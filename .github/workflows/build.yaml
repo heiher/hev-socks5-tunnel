@@ -109,7 +109,7 @@ jobs:
         run: |
           make
   docker:
-    name: Docker
+    name: Build Docker Image
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -174,6 +174,7 @@ jobs:
           retention-days: 1
 
   docker-merge:
+    name: Merge Docker Image Tags
     runs-on: ubuntu-22.04
     if: github.event_name != 'pull_request'
     needs:
