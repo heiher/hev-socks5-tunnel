@@ -58,6 +58,7 @@ config_route() {
 run() {
   config_file
   config_route
+  echo "echo 1 > /success" >> /route.sh
   hev-socks5-tunnel /hs5t.yml
 }
 
