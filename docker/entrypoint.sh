@@ -17,6 +17,7 @@ tunnel:
   mtu: ${MTU}
   ipv4: '${IPV4}'
   ipv6: '${IPV6}'
+  post-up-script: '/route.sh'
 socks5:
   port: ${SOCKS5_PORT}
   address: '${SOCKS5_ADDR}'
@@ -34,25 +35,26 @@ EOF
 }
 
 config_route() {
-  ip route add default dev ${TUN} table ${TABLE}
+  echo "#!/bin/sh" > /route.sh
+  chmod +x /route.sh
+
+  echo "ip route add default dev ${TUN} table ${TABLE}" >> /route.sh
 
   for addr in $(echo ${IPV4_INCLUDED_ROUTES} | tr ',' '\n'); do
-    ip rule add to ${addr} table ${TABLE}
+    echo "ip rule add to ${addr} table ${TABLE}" >> /route.sh
   done
 
   for addr in $(echo ${IPV4_EXCLUDED_ROUTES} | tr ',' '\n'); do
-    ip rule add to ${addr} table main
+    echo "ip rule add to ${addr} table main" >> /route.sh
   done
 
-  ip rule add fwmark 0x${MARK} table main pref 1
+  echo "ip rule add fwmark 0x${MARK} table main pref 1" >> /route.sh
 }
 
 run() {
   config_file
-  hev-socks5-tunnel /hs5t.yml &
-  PID=$!
   config_route
-  wait ${PID}
+  hev-socks5-tunnel /hs5t.yml
 }
 
 run || exit 1
