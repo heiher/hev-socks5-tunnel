@@ -21,11 +21,17 @@ RUN apk add --update --no-cache \
 ENV TUN=tun0 \
     MTU=8500 \
     IPV4=198.18.0.1 \
+    IPV6='' \
+    TABLE=20 \
+    MARK=438 \
     SOCKS5_ADDR=172.17.0.1 \
     SOCKS5_PORT=1080 \
+    SOCKS5_USERNAME='' \
+    SOCKS5_PASSWORD='' \
     SOCKS5_UDP_MODE=udp \
     IPV4_INCLUDED_ROUTES=0.0.0.0/0 \
-    IPV4_EXCLUDED_ROUTES=172.17.0.0/16
+    IPV4_EXCLUDED_ROUTES='' \
+    LOG_LEVEL=warn
 
 HEALTHCHECK --start-period=5s --interval=5s --timeout=2s --retries=3 CMD ["test", "-f", "/success"]
 
