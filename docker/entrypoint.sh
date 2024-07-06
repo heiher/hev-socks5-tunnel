@@ -59,7 +59,7 @@ config_route() {
     echo "ip rule add to ${addr} table main" >> /route.sh
   done
 
-  echo "ip rule add fwmark 0x${MARK} table main pref 1" >> /route.sh
+  echo "ip rule add fwmark ${MARK} table main pref 1" >> /route.sh
 }
 
 run() {
