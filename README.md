@@ -142,12 +142,12 @@ socks5:
 #### Linux
 
 ```bash
-# Set socks5.mark = 0x438
+# Set socks5.mark = 438
 bin/hev-socks5-tunnel conf/main.yml
 
 # Bypass upstream socks5 server
-sudo ip rule add fwmark 0x438 lookup main pref 10
-sudo ip -6 rule add fwmark 0x438 lookup main pref 10
+sudo ip rule add fwmark 438 lookup main pref 10
+sudo ip -6 rule add fwmark 438 lookup main pref 10
 
 # Route others
 sudo ip route add default dev tun0 table 20
@@ -194,7 +194,7 @@ services:
       MTU: 8500 # optional, MTU is MTU, default `8500`
       IPV4: 198.18.0.1 # optional, tun interface ip, default `198.18.0.1`
       TABLE: 20 # optional, ip route table id, default `20`
-      MARK: 438 # optional, ip route rule mark, hex format, default `438`
+      MARK: 438 # optional, ip route rule mark, dec or hex format, default `438`
       SOCKS5_ADDR: a.b.c.d # socks5 proxy server address
       SOCKS5_PORT: 1080 # socks5 proxy server port
       SOCKS5_USERNAME: user # optional, socks5 proxy username, only set when need to auth
