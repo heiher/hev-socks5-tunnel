@@ -55,6 +55,8 @@ config_route() {
     echo "ip rule add to ${addr} table ${TABLE}" >> /route.sh
   done
 
+  echo "ip rule add to $(ip -o -f inet address show eth0 | awk '/scope global/ {print $4}') table main" >> /route.sh
+
   for addr in $(echo ${IPV4_EXCLUDED_ROUTES} | tr ',' '\n'); do
     echo "ip rule add to ${addr} table main" >> /route.sh
   done
