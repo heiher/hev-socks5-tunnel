@@ -9,9 +9,6 @@ on:
     types:
       - published
 
-permissions:
-  contents: read
-
 jobs:
   source:
     name: Source
