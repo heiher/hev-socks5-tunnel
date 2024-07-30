@@ -53,5 +53,7 @@ hev_exec_run (const char *script_path, const char *tun_name, int wait)
 }
 #else
 void
-hev_exec_run (const char *script_path, const char *tun_name, int wait) {}
+hev_exec_run (const char *script_path, const char *tun_name, int wait)
+{
+}
 #endif
