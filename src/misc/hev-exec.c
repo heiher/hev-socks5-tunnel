@@ -12,10 +12,17 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
+#if defined(__APPLE__)
+#include <Availability.h>
+#include <AvailabilityMacros.h>
+#include <TargetConditionals.h>
+#endif
+
 #include "hev-logger.h"
 
 #include "hev-exec.h"
 
+#ifndef TARGET_OS_TV
 static void
 signal_handler (int signum)
 {
@@ -44,3 +51,7 @@ hev_exec_run (const char *script_path, const char *tun_name, int wait)
     LOG_E ("exec %s %s", script_path, tun_name);
     exit (-1);
 }
+#else
+void
+hev_exec_run (const char *script_path, const char *tun_name, int wait) {}
+#endif
