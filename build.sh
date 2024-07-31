@@ -42,7 +42,7 @@ rm -rf $XCFRAMEWORK_DIR
 rm -rf HevSocks5Tunnel.xcframework
 mkdir $XCFRAMEWORK_DIR
 
-buildStatic iphoneos arm64 -mios-version-min=15.0
+buildStatic iphoneos arm64 -miphoneos-version-min=15.0
 buildStatic iphonesimulator x86_64 -miphonesimulator-version-min=15.0
 buildStatic iphonesimulator arm64 -miphonesimulator-version-min=15.0
 mergeStatic iphonesimulator x86_64 arm64
