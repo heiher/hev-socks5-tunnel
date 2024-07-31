@@ -102,9 +102,13 @@ jobs:
         with:
           fetch-depth: 1
           submodules: true
-      - name: Build
+      - name: Build native
         run: |
           make
+          make clean
+      - name: Build cross
+        run: |
+          ./build.sh
   docker:
     name: Build Docker Image
     runs-on: ubuntu-22.04
