@@ -309,6 +309,7 @@ void hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
 * **pronebird** - https://github.com/pronebird
 * **SaeedDev94** - https://github.com/SaeedDev94
 * **WankkoRee** - https://github.com/WankkoRee
+* **yiguous** - https://github.com/yiguous
 
 ## License
 
