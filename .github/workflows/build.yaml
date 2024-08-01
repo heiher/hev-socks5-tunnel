@@ -1,0 +1,223 @@
+name: "Build"
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+  release:
+    types:
+      - published
+
+jobs:
+  source:
+    name: Source
+    runs-on: ubuntu-20.04
+    if: github.event_name == 'release'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Gen Source
+        run: |
+          mkdir -p hev-socks5-tunnel-${{ github.ref_name }}
+          git ls-files --recurse-submodules | tar c -O -T- | tar x -C hev-socks5-tunnel-${{ github.ref_name }}
+          tar caf hev-socks5-tunnel-${{ github.ref_name }}.tar.gz hev-socks5-tunnel-${{ github.ref_name }}
+      - name: Upload source
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: hev-socks5-tunnel-${{ github.ref_name }}.tar.gz
+          asset_name: hev-socks5-tunnel-${{ github.ref_name }}.tar.gz
+          asset_content_type: application/octet-stream
+  linux:
+    name: Linux
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        include:
+          - name: arm64
+            tool: aarch64-unknown-linux-musl
+          - name: arm32
+            tool: arm-unknown-linux-musleabi
+          - name: arm32hf
+            tool: arm-unknown-linux-musleabihf
+          - name: loong64
+            tool: loongarch64-unknown-linux-musl
+          - name: mips64el
+            tool: mips64el-unknown-linux-musl
+          - name: mips64
+            tool: mips64-unknown-linux-musl
+          - name: mips32el
+            tool: mipsel-unknown-linux-musl
+          - name: mips32elsf
+            tool: mipsel-unknown-linux-muslsf
+          - name: mips32
+            tool: mips-unknown-linux-musl
+          - name: mips32sf
+            tool: mips-unknown-linux-muslsf
+          - name: riscv32
+            tool: riscv32-unknown-linux-musl
+          - name: riscv64
+            tool: riscv64-unknown-linux-musl
+          - name: x86_32
+            tool: x86_64-multilib-linux-musl
+            env:
+              CFLAGS: "-m32"
+          - name: x86_64
+            tool: x86_64-multilib-linux-musl
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Build ${{ matrix.name }}
+        run: |
+          sudo mkdir -p /opt/x-tools
+          wget https://github.com/musl-cross/musl-cross/releases/download/20240527/${{ matrix.tool }}.tgz
+          sudo tar xf ${{ matrix.tool }}.tgz -C /opt/x-tools
+          make CROSS_PREFIX=/opt/x-tools/${{ matrix.tool }}/bin/${{ matrix.tool }}- CFLAGS=${{ matrix.env.CFLAGS }} ENABLE_STATIC=1 -j`nproc`
+      - name: Upload ${{ matrix.name }}
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: bin/hev-socks5-tunnel
+          asset_name: hev-socks5-tunnel-linux-${{ matrix.name }}
+          asset_content_type: application/octet-stream
+  macos:
+    name: macOS
+    runs-on: macos-14
+    if: github.event_name != 'release'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Build native
+        run: |
+          make
+          make clean
+      - name: Build cross
+        run: |
+          ./build.sh
+  docker:
+    name: Build Docker Image
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/386
+          - linux/arm64/v8
+          - linux/arm/v7
+          - linux/arm/v6
+          - linux/riscv64
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Prepare QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Prepare Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Prepare Repo Name
+        id: repo
+        run: |
+          echo "repository=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
+      - name: Prepare Digest
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+      - name: Login GitHub Packages Docker Image Repository
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push Docker Image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: ${{ matrix.platform }}
+          provenance: false
+          outputs: type=image,name=ghcr.io/${{ steps.repo.outputs.repository }},push-by-digest=true,name-canonical=true,push=${{ github.event_name != 'pull_request' }}
+          cache-from: type=gha,scope=${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
+      - name: Export Digest
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+      - name: Upload Digest
+        uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  docker-merge:
+    name: Merge Docker Image Tags
+    runs-on: ubuntu-22.04
+    if: github.event_name != 'pull_request'
+    needs:
+      - docker
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Download Digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+      - name: Prepare Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Prepare Repo Name
+        id: repo
+        run: |
+          echo "repository=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
+      - name: Login GitHub Packages Docker Image Repository
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Format Docker Image Meta
+        uses: docker/metadata-action@v5
+        id: docker_meta
+        with:
+          images: ghcr.io/${{ steps.repo.outputs.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=nightly,enable={{is_default_branch}}
+      - name: Create Manifest List and Push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf 'ghcr.io/${{ steps.repo.outputs.repository }}@sha256:%s ' *)
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ghcr.io/${{ steps.repo.outputs.repository }}:${{ steps.docker_meta.outputs.version }}

@@ -13,6 +13,12 @@
 #include <sys/socket.h>
 #include <sys/resource.h>
 
+#if defined(__APPLE__)
+#include <Availability.h>
+#include <AvailabilityMacros.h>
+#include <TargetConditionals.h>
+#endif
+
 #include "hev-logger.h"
 
 #include "hev-utils.h"
@@ -30,9 +36,11 @@ run_as_daemon (const char *pid_file)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#ifndef TARGET_OS_TV
     if (daemon (0, 0)) {
         /* ignore return value */
     }
+#endif
 #pragma GCC diagnostic pop
 
     fprintf (fp, "%u\n", getpid ());

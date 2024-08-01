@@ -3,23 +3,35 @@
 TUN="${TUN:-tun0}"
 MTU="${MTU:-8500}"
 IPV4="${IPV4:-198.18.0.1}"
-SOCKS5_ADDR="${SOCKS5_ADDR:-192.168.0.1}"
-SOCKS5_PORT="${SOCKS5_PORT:-1080}"
-SOCKS5_UDP_MODE="${SOCKS5_UDP_MODE:-udp}"
+IPV6="${IPV6:-}"
 
 TABLE="${TABLE:-20}"
 MARK="${MARK:-438}"
 
+SOCKS5_ADDR="${SOCKS5_ADDR:-172.17.0.1}"
+SOCKS5_PORT="${SOCKS5_PORT:-1080}"
+SOCKS5_USERNAME="${SOCKS5_USERNAME:-}"
+SOCKS5_PASSWORD="${SOCKS5_PASSWORD:-}"
+SOCKS5_UDP_MODE="${SOCKS5_UDP_MODE:-udp}"
+
+IPV4_INCLUDED_ROUTES="${IPV4_INCLUDED_ROUTES:-0.0.0.0/0}"
+IPV4_EXCLUDED_ROUTES="${IPV4_EXCLUDED_ROUTES:-}"
+
+LOG_LEVEL="${LOG_LEVEL:-warn}"
+
 config_file() {
   cat > /hs5t.yml << EOF
+misc:
+  log-level: '${LOG_LEVEL}'
 tunnel:
   name: '${TUN}'
   mtu: ${MTU}
   ipv4: '${IPV4}'
   ipv6: '${IPV6}'
+  post-up-script: '/route.sh'
 socks5:
-  port: ${SOCKS5_PORT}
   address: '${SOCKS5_ADDR}'
+  port: ${SOCKS5_PORT}
   udp: '${SOCKS5_UDP_MODE}'
   mark: ${MARK}
 EOF
@@ -34,25 +46,29 @@ EOF
 }
 
 config_route() {
-  ip route add default dev ${TUN} table ${TABLE}
+  echo "#!/bin/sh" > /route.sh
+  chmod +x /route.sh
+
+  echo "ip route add default dev ${TUN} table ${TABLE}" >> /route.sh
 
   for addr in $(echo ${IPV4_INCLUDED_ROUTES} | tr ',' '\n'); do
-    ip rule add to ${addr} table ${TABLE}
+    echo "ip rule add to ${addr} table ${TABLE}" >> /route.sh
   done
+
+  echo "ip rule add to $(ip -o -f inet address show eth0 | awk '/scope global/ {print $4}') table main" >> /route.sh
 
   for addr in $(echo ${IPV4_EXCLUDED_ROUTES} | tr ',' '\n'); do
-    ip rule add to ${addr} table main
+    echo "ip rule add to ${addr} table main" >> /route.sh
   done
 
-  ip rule add fwmark 0x${MARK} table main pref 1
+  echo "ip rule add fwmark ${MARK} table main pref 1" >> /route.sh
 }
 
 run() {
   config_file
-  hev-socks5-tunnel /hs5t.yml &
-  PID=$!
   config_route
-  wait ${PID}
+  echo "echo 1 > /success" >> /route.sh
+  hev-socks5-tunnel /hs5t.yml
 }
 
 run || exit 1

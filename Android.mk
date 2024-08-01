@@ -36,8 +36,8 @@ LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/src/misc \
 	$(LOCAL_PATH)/src/core/include \
 	$(LOCAL_PATH)/third-part/yaml/include \
-	$(LOCAL_PATH)/third-part/lwip/include \
-	$(LOCAL_PATH)/third-part/lwip/include/ports/unix \
+	$(LOCAL_PATH)/third-part/lwip/src/include \
+	$(LOCAL_PATH)/third-part/lwip/src/ports/include \
 	$(LOCAL_PATH)/third-part/hev-task-system/include
 LOCAL_CFLAGS += -DFD_SET_DEFINED -DSOCKLEN_T_DEFINED $(VERSION_CFLAGS)
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)

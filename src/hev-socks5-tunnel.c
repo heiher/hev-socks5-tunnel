@@ -57,12 +57,6 @@ static HevTask *task_lwip_io;
 static HevTask *task_lwip_timer;
 static HevList session_set;
 
-static void
-sigint_handler (int signum)
-{
-    hev_socks5_tunnel_stop ();
-}
-
 static int
 task_io_yielder (HevTaskYieldType type, void *data)
 {
@@ -509,13 +503,6 @@ lwip_timer_task_fini (void)
     }
 }
 
-static void
-signal_init (void)
-{
-    signal (SIGPIPE, SIG_IGN);
-    signal (SIGINT, sigint_handler);
-}
-
 int
 hev_socks5_tunnel_init (int tun_fd)
 {
@@ -543,7 +530,7 @@ hev_socks5_tunnel_init (int tun_fd)
     if (res < 0)
         goto exit;
 
-    signal_init ();
+    signal (SIGPIPE, SIG_IGN);
 
     hev_task_mutex_init (&mutex);
 
