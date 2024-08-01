@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 XCFRAMEWORK_DIR="./apple_xcframework"
 
 # buildStatic iphoneos -mios-version-min=15.0 arm64
