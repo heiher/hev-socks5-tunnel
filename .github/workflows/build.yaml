@@ -22,8 +22,10 @@ jobs:
           submodules: true
       - name: Gen Source
         run: |
+          REV_ID=$(git rev-parse --short HEAD)
           mkdir -p hev-socks5-tunnel-${{ github.ref_name }}
           git ls-files --recurse-submodules | tar c -O -T- | tar x -C hev-socks5-tunnel-${{ github.ref_name }}
+          echo ${REV_ID} > hev-socks5-tunnel-${{ github.ref_name }}/.rev-id
           tar caf hev-socks5-tunnel-${{ github.ref_name }}.tar.gz hev-socks5-tunnel-${{ github.ref_name }}
       - name: Upload source
         uses: actions/upload-release-asset@v1
