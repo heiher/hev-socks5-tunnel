@@ -104,8 +104,10 @@ native_start_service (JNIEnv *env, jobject thiz, jstring config_path, jint fd)
     ThreadData *tdata;
 
     pthread_mutex_lock (&mutex);
-    if (work_thread)
+    if (work_thread) {
+        pthread_mutex_unlock (&mutex);
         return;
+    }
 
     tdata = malloc (sizeof (ThreadData));
     tdata->fd = fd;
@@ -122,8 +124,10 @@ static void
 native_stop_service (JNIEnv *env, jobject thiz)
 {
     pthread_mutex_lock (&mutex);
-    if (!work_thread)
+    if (!work_thread) {
+        pthread_mutex_unlock (&mutex);
         return;
+    }
 
     hev_socks5_tunnel_quit ();
     pthread_join (work_thread, NULL);
