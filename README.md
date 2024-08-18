@@ -303,6 +303,7 @@ void hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
 ## Contributors
 
 * **arror** - https://github.com/arror
+* **dovecoteescapee** - https://github.com/dovecoteescapee
 * **EbrahimTahernejad** - https://github.com/EbrahimTahernejad
 * **heiby** - https://github.com/heiby
 * **hev** - https://hev.cc
