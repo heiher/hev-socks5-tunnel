@@ -1,4 +1,4 @@
-FROM alpine:latest AS builder
+FROM alpine:3.20.3 AS builder
 
 RUN apk add --update --no-cache \
     make \
@@ -12,8 +12,8 @@ COPY . /src
 
 RUN make
 
-FROM alpine:latest
-LABEL org.opencontainers.image.source="https://github.com/heiher/hev-socks5-tunnel"
+FROM alpine:3.20.3
+LABEL org.opencontainers.image.source="https://github.com/sablev/hev-socks5-tunnel"
 
 RUN apk add --update --no-cache \
     iproute2

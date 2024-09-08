@@ -1,21 +1,18 @@
 #!/bin/sh
 
 TUN="${TUN:-tun0}"
-MTU="${MTU:-8500}"
+MTU="${MTU:-9000}"
 IPV4="${IPV4:-198.18.0.1}"
+IPV4GW=$(ip -o -f inet route show default | awk '/dev eth0/ {print $3}')
 IPV6="${IPV6:-}"
 
-TABLE="${TABLE:-20}"
-MARK="${MARK:-438}"
+MARK="${MARK:-0}"
 
 SOCKS5_ADDR="${SOCKS5_ADDR:-172.17.0.1}"
 SOCKS5_PORT="${SOCKS5_PORT:-1080}"
 SOCKS5_USERNAME="${SOCKS5_USERNAME:-}"
 SOCKS5_PASSWORD="${SOCKS5_PASSWORD:-}"
 SOCKS5_UDP_MODE="${SOCKS5_UDP_MODE:-udp}"
-
-IPV4_INCLUDED_ROUTES="${IPV4_INCLUDED_ROUTES:-0.0.0.0/0}"
-IPV4_EXCLUDED_ROUTES="${IPV4_EXCLUDED_ROUTES:-}"
 
 LOG_LEVEL="${LOG_LEVEL:-warn}"
 
@@ -49,19 +46,40 @@ config_route() {
   echo "#!/bin/sh" > /route.sh
   chmod +x /route.sh
 
-  echo "ip route add default dev ${TUN} table ${TABLE}" >> /route.sh
-
   for addr in $(echo ${IPV4_INCLUDED_ROUTES} | tr ',' '\n'); do
-    echo "ip rule add to ${addr} table ${TABLE}" >> /route.sh
+    if [ ${addr} = "0.0.0.0/0" ]
+    then
+      echo "ip route del default" >> /route.sh
+      echo "ip route add default via ${IPV4} dev ${TUN}" >> /route.sh
+    else
+      echo "ip route add ${addr} via ${IPV4} dev ${TUN}" >> /route.sh
+    fi
   done
 
-  echo "ip rule add to $(ip -o -f inet address show eth0 | awk '/scope global/ {print $4}') table main" >> /route.sh
+  echo "ip route add ${SOCKS5_ADDR} via ${IPV4GW} dev eth0" >> /route.sh
 
   for addr in $(echo ${IPV4_EXCLUDED_ROUTES} | tr ',' '\n'); do
-    echo "ip rule add to ${addr} table main" >> /route.sh
+    echo "ip route add ${addr} via ${IPV4GW} dev eth0" >> /route.sh
   done
 
-  echo "ip rule add fwmark ${MARK} table main pref 1" >> /route.sh
+  if [ ${IPV6} != "" ]
+  then
+    sysctl -w net.ipv6.conf.all.forwarding=1
+
+    for v6addr in $(echo ${IPV6_INCLUDED_ROUTES} | tr ',' '\n'); do
+      if [ ${v6addr} = "::/0" ]
+      then
+        echo "ip -6 route del default" >> /route.sh
+        echo "ip -6 route add default dev ${TUN}" >> /route.sh
+      else
+        echo "ip route add ${v6addr} dev ${TUN}" >> /route.sh
+      fi
+    done
+
+    for v6addr in $(echo ${IPV6_EXCLUDED_ROUTES} | tr ',' '\n'); do
+      echo "ip route add ${v6addr} dev eth0" >> /route.sh
+    done
+  fi
 }
 
 run() {
