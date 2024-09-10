@@ -22,7 +22,12 @@
 
 #include "hev-exec.h"
 
-#ifndef TARGET_OS_TV
+#if TARGET_OS_TV
+void
+hev_exec_run (const char *script_path, const char *tun_name, int wait)
+{
+}
+#else
 static void
 signal_handler (int signum)
 {
@@ -50,10 +55,5 @@ hev_exec_run (const char *script_path, const char *tun_name, int wait)
 
     LOG_E ("exec %s %s", script_path, tun_name);
     exit (-1);
-}
-#else
-void
-hev_exec_run (const char *script_path, const char *tun_name, int wait)
-{
 }
 #endif

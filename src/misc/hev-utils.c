@@ -36,7 +36,7 @@ run_as_daemon (const char *pid_file)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#ifndef TARGET_OS_TV
+#if !(TARGET_OS_TV)
     if (daemon (0, 0)) {
         /* ignore return value */
     }
