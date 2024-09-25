@@ -48,6 +48,10 @@ jobs:
             tool: arm-unknown-linux-musleabi
           - name: arm32hf
             tool: arm-unknown-linux-musleabihf
+          - name: arm32v7
+            tool: armv7-unknown-linux-musleabi
+          - name: arm32v7hf
+            tool: armv7-unknown-linux-musleabihf
           - name: loong64
             tool: loongarch64-unknown-linux-musl
           - name: m68k
@@ -99,7 +103,7 @@ jobs:
       - name: Build ${{ matrix.name }}
         run: |
           sudo mkdir -p /opt/x-tools
-          wget https://github.com/musl-cross/musl-cross/releases/download/20240903/${{ matrix.tool }}.tgz
+          wget https://github.com/musl-cross/musl-cross/releases/download/20240923/${{ matrix.tool }}.tgz
           sudo tar xf ${{ matrix.tool }}.tgz -C /opt/x-tools
           make CROSS_PREFIX=/opt/x-tools/${{ matrix.tool }}/bin/${{ matrix.tool }}- CFLAGS=${{ matrix.env.CFLAGS }} ENABLE_STATIC=1 -j`nproc`
       - name: Upload ${{ matrix.name }}
