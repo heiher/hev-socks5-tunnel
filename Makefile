@@ -53,6 +53,12 @@ CLEANMSG="\e[1;34mCLEAN\e[0m %s\n"
 INSTMSG="\e[1;34mINST\e[0m  %s -> %s\n"
 UNINSMSG="\e[1;34mUNINS\e[0m %s\n"
 
+ENABLE_DEBUG :=
+ifeq ($(ENABLE_DEBUG),1)
+	CCFLAGS+=-g -O0 -DENABLE_DEBUG
+	STRIP=true
+endif
+
 ENABLE_STATIC :=
 ifeq ($(ENABLE_STATIC),1)
 	CCFLAGS+=-static
