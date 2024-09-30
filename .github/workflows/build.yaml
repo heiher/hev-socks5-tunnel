@@ -151,6 +151,25 @@ jobs:
       - name: Build
         run: |
           ./android-ndk-r27b/ndk-build
+  llvm:
+    name: LLVM
+    runs-on: ubuntu-22.04
+    if: github.event_name != 'release'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Prepare
+        run: |
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo add-apt-repository -y 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy main'
+          sudo apt install -y clang
+      - name: Build
+        run: |
+          make CC=clang ENABLE_STATIC=1 -j`nproc`
+
   docker:
     name: Build Docker Image
     runs-on: ubuntu-22.04
