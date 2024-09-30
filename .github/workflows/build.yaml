@@ -12,7 +12,7 @@ on:
 jobs:
   source:
     name: Source
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     if: github.event_name == 'release'
     steps:
       - name: Checkout
@@ -38,7 +38,7 @@ jobs:
           asset_content_type: application/octet-stream
   linux:
     name: Linux
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         include:
