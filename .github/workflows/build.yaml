@@ -132,7 +132,7 @@ jobs:
           make clean
       - name: Build cross
         run: |
-          ./build.sh
+          ./build-apple.sh
   android:
     name: Android
     runs-on: ubuntu-22.04

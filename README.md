@@ -49,13 +49,13 @@ git clone --recursive https://github.com/heiher/hev-socks5-tunnel jni
 ndk-build
 ```
 
-### iOS and MacOS
+### iOS and macOS
 
 ```bash
 git clone --recursive https://github.com/heiher/hev-socks5-tunnel
 cd hev-socks5-tunnel
 # will generate HevSocks5Tunnel.xcframework
-./build.sh
+./build-apple.sh
 ```
 
 ### Library
