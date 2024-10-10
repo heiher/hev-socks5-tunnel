@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <arpa/inet.h>
+#include <lwip/tcp.h>
 #include <yaml.h>
 
 #include "hev-logger.h"
@@ -29,7 +30,8 @@ static HevConfigServer srv;
 
 static char log_file[1024];
 static char pid_file[1024];
-static int task_stack_size = 0;
+static int task_stack_size = 86016;
+static int tcp_buffer_size = 65536;
 static int connect_timeout = 5000;
 static int read_write_timeout = 60000;
 static int limit_nofile = 65535;
@@ -283,6 +285,8 @@ hev_config_parse_misc (yaml_document_t *doc, yaml_node_t *base)
 
         if (0 == strcmp (key, "task-stack-size"))
             task_stack_size = strtoul (value, NULL, 10);
+        else if (0 == strcmp (key, "tcp-buffer-size"))
+            tcp_buffer_size = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "connect-timeout"))
             connect_timeout = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "read-write-timeout"))
@@ -305,6 +309,7 @@ hev_config_parse_doc (yaml_document_t *doc)
 {
     yaml_node_t *root;
     yaml_node_pair_t *pair;
+    int min_task_stack_size;
 
     root = yaml_document_get_root_node (doc);
     if (!root || YAML_MAPPING_NODE != root->type)
@@ -337,8 +342,12 @@ hev_config_parse_doc (yaml_document_t *doc)
             return -1;
     }
 
-    if (task_stack_size < TASK_STACK_SIZE)
-        task_stack_size = TASK_STACK_SIZE;
+    if (tcp_buffer_size > TCP_SND_BUF)
+        tcp_buffer_size = TCP_SND_BUF;
+
+    min_task_stack_size = TASK_STACK_SIZE + tcp_buffer_size;
+    if (task_stack_size < min_task_stack_size)
+        task_stack_size = min_task_stack_size;
 
     return 0;
 }
@@ -475,6 +484,12 @@ int
 hev_config_get_misc_task_stack_size (void)
 {
     return task_stack_size;
+}
+
+int
+hev_config_get_misc_tcp_buffer_size (void)
+{
+    return tcp_buffer_size;
 }
 
 int

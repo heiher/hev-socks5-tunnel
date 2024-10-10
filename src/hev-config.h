@@ -41,6 +41,7 @@ const char *hev_config_get_tunnel_pre_down_script (void);
 HevConfigServer *hev_config_get_socks5_server (void);
 
 int hev_config_get_misc_task_stack_size (void);
+int hev_config_get_misc_tcp_buffer_size (void);
 int hev_config_get_misc_connect_timeout (void);
 int hev_config_get_misc_read_write_timeout (void);
 int hev_config_get_misc_limit_nofile (void);

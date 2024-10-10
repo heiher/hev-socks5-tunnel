@@ -192,6 +192,7 @@ static void
 hev_socks5_session_tcp_splice (HevSocks5Session *base)
 {
     HevSocks5SessionTCP *self = HEV_SOCKS5_SESSION_TCP (base);
+    int tcp_buffer_size;
     int res_f = 1;
     int res_b = 1;
 
@@ -200,7 +201,8 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
     if (!self->pcb)
         return;
 
-    self->buffer = hev_ring_buffer_alloca (tcp_sndbuf (self->pcb));
+    tcp_buffer_size = hev_config_get_misc_tcp_buffer_size ();
+    self->buffer = hev_ring_buffer_alloca (tcp_buffer_size);
     if (!self->buffer)
         return;
 
