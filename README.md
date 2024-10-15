@@ -159,6 +159,19 @@ sudo route change -inet default -interface utun99
 sudo route change -inet6 default -interface utun99
 ```
 
+#### Low memory usage
+
+On low-memory systems like iOS, reducing the size of the TCP buffer
+and task stack can help prevent out-of-memory issues.
+
+```yaml
+misc:
+  # task stack size (bytes)
+  task-stack-size: 24576 # 20480 + tcp-buffer-size
+  # tcp buffer size (bytes)
+  tcp-buffer-size: 4096
+```
+
 #### Docker Compose
 
 ```yaml
