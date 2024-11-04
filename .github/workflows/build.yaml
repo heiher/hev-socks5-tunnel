@@ -52,6 +52,10 @@ jobs:
             tool: armv7-unknown-linux-musleabi
           - name: arm32v7hf
             tool: armv7-unknown-linux-musleabihf
+          - name: i586
+            tool: i586-unknown-linux-musl
+          - name: i686
+            tool: i686-unknown-linux-musl
           - name: loong64
             tool: loongarch64-unknown-linux-musl
           - name: m68k
@@ -88,12 +92,8 @@ jobs:
             tool: sh-multilib-linux-musl
             env:
               CFLAGS: "-mb"
-          - name: x86_32
-            tool: x86_64-multilib-linux-musl
-            env:
-              CFLAGS: "-m32"
           - name: x86_64
-            tool: x86_64-multilib-linux-musl
+            tool: x86_64-unknown-linux-musl
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -103,8 +103,8 @@ jobs:
       - name: Build ${{ matrix.name }}
         run: |
           sudo mkdir -p /opt/x-tools
-          wget https://github.com/musl-cross/musl-cross/releases/download/20240923/${{ matrix.tool }}.tgz
-          sudo tar xf ${{ matrix.tool }}.tgz -C /opt/x-tools
+          wget https://github.com/musl-cross/musl-cross/releases/download/20241103/${{ matrix.tool }}.tar.xz
+          sudo tar xf ${{ matrix.tool }}.tar.xz -C /opt/x-tools
           make CROSS_PREFIX=/opt/x-tools/${{ matrix.tool }}/bin/${{ matrix.tool }}- CFLAGS=${{ matrix.env.CFLAGS }} ENABLE_STATIC=1 -j`nproc`
       - name: Upload ${{ matrix.name }}
         if: github.event_name == 'release'
