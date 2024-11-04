@@ -8,15 +8,15 @@ on:
   release:
     types:
       - published
+  workflow_dispatch:
 
 jobs:
   source:
     name: Source
     runs-on: ubuntu-22.04
-    if: github.event_name == 'release'
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           submodules: true
@@ -26,16 +26,15 @@ jobs:
           mkdir -p hev-socks5-tunnel-${{ github.ref_name }}
           git ls-files --recurse-submodules | tar c -O -T- | tar x -C hev-socks5-tunnel-${{ github.ref_name }}
           echo ${REV_ID} > hev-socks5-tunnel-${{ github.ref_name }}/.rev-id
-          tar caf hev-socks5-tunnel-${{ github.ref_name }}.tar.gz hev-socks5-tunnel-${{ github.ref_name }}
+          tar cJf hev-socks5-tunnel-${{ github.ref_name }}.tar.xz hev-socks5-tunnel-${{ github.ref_name }}
       - name: Upload source
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: hev-socks5-tunnel-${{ github.ref_name }}.tar.gz
-          asset_name: hev-socks5-tunnel-${{ github.ref_name }}.tar.gz
-          asset_content_type: application/octet-stream
+          name: hev-socks5-tunnel-${{ github.ref_name }}.tar.xz
+          path: hev-socks5-tunnel-${{ github.ref_name }}.tar.xz
+          if-no-files-found: error
+          retention-days: 1
+
   linux:
     name: Linux
     runs-on: ubuntu-22.04
@@ -106,16 +105,41 @@ jobs:
           wget https://github.com/musl-cross/musl-cross/releases/download/20241103/${{ matrix.tool }}.tar.xz
           sudo tar xf ${{ matrix.tool }}.tar.xz -C /opt/x-tools
           make CROSS_PREFIX=/opt/x-tools/${{ matrix.tool }}/bin/${{ matrix.tool }}- CFLAGS=${{ matrix.env.CFLAGS }} ENABLE_STATIC=1 -j`nproc`
+          cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-${{ matrix.name }}
       - name: Upload ${{ matrix.name }}
-        if: github.event_name == 'release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: bin/hev-socks5-tunnel
-          asset_name: hev-socks5-tunnel-linux-${{ matrix.name }}
-          asset_content_type: application/octet-stream
+          name: hev-socks5-tunnel-linux-${{ matrix.name }}
+          path: hev-socks5-tunnel-linux-${{ matrix.name }}
+          if-no-files-found: error
+          retention-days: 1
+
+  release:
+    name: Release
+    runs-on: ubuntu-22.04
+    needs:
+      - source
+      - linux
+    if: github.event_name == 'release'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release
+          pattern: "hev-*"
+          merge-multiple: true
+      - name: Upload artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for i in release/hev-*; do
+            gh release upload ${{ github.event.release.tag_name }} $i
+          done
+
   macos:
     name: macOS
     runs-on: macos-14
@@ -133,6 +157,7 @@ jobs:
       - name: Build cross
         run: |
           ./build-apple.sh
+
   android:
     name: Android
     runs-on: ubuntu-22.04
@@ -151,6 +176,7 @@ jobs:
       - name: Build
         run: |
           ./android-ndk-r27b/ndk-build
+
   llvm:
     name: LLVM
     runs-on: ubuntu-22.04
