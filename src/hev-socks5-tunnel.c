@@ -150,7 +150,7 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
     task = hev_task_new (stack_size);
     if (!task) {
         hev_object_unref (HEV_OBJECT (tcp));
-        return ERR_ABRT;
+        return ERR_MEM;
     }
 
     hev_socks5_session_set_task (HEV_SOCKS5_SESSION (tcp), task);
