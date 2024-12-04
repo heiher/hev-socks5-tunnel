@@ -18,8 +18,15 @@
 #define HEV_SOCKS5_SESSION_UDP_CLASS(p) ((HevSocks5SessionUDPClass *)p)
 #define HEV_SOCKS5_SESSION_UDP_TYPE (hev_socks5_session_udp_class ())
 
+typedef enum _HevSocks5SessionUDPAlive HevSocks5SessionUDPAlive;
 typedef struct _HevSocks5SessionUDP HevSocks5SessionUDP;
 typedef struct _HevSocks5SessionUDPClass HevSocks5SessionUDPClass;
+
+enum _HevSocks5SessionUDPAlive
+{
+    HEV_SOCKS5_SESSION_UDP_ALIVE_F = (1 << 0),
+    HEV_SOCKS5_SESSION_UDP_ALIVE_B = (1 << 1),
+};
 
 struct _HevSocks5SessionUDP
 {
@@ -27,6 +34,7 @@ struct _HevSocks5SessionUDP
 
     HevSocks5SessionData data;
 
+    HevSocks5SessionUDPAlive alive;
     HevList frame_list;
     struct udp_pcb *pcb;
     HevTaskMutex *mutex;
