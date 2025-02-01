@@ -8,7 +8,7 @@ on:
 
 jobs:
   checker:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -17,7 +17,7 @@ jobs:
       - name: Prepare
         run: |
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo add-apt-repository -y 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy main'
+          sudo add-apt-repository -y 'deb http://apt.llvm.org/noble/ llvm-toolchain-noble main'
           sudo apt install -y clang-format
       - name: Format
         run: |
