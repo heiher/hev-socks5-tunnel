@@ -3,7 +3,7 @@ name: "Check code formatting"
 on:
   push:
     branches:
-      - '**'
+      - master
   pull_request:
 
 jobs:
