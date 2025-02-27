@@ -14,6 +14,8 @@ jobs:
   source:
     name: Source
     runs-on: ubuntu-22.04
+    env:
+      BRANCH_NAME: ${{ github.base_ref || github.ref_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,15 +25,15 @@ jobs:
       - name: Gen Source
         run: |
           REV_ID=$(git rev-parse --short HEAD)
-          mkdir -p hev-socks5-tunnel-${{ github.ref_name }}
-          git ls-files --recurse-submodules | tar c -O -T- | tar x -C hev-socks5-tunnel-${{ github.ref_name }}
-          echo ${REV_ID} > hev-socks5-tunnel-${{ github.ref_name }}/.rev-id
-          tar cJf hev-socks5-tunnel-${{ github.ref_name }}.tar.xz hev-socks5-tunnel-${{ github.ref_name }}
+          mkdir -p hev-socks5-tunnel-${{ env.BRANCH_NAME }}
+          git ls-files --recurse-submodules | tar c -O -T- | tar x -C hev-socks5-tunnel-${{ env.BRANCH_NAME }}
+          echo ${REV_ID} > hev-socks5-tunnel-${{ env.BRANCH_NAME }}/.rev-id
+          tar cJf hev-socks5-tunnel-${{ env.BRANCH_NAME }}.tar.xz hev-socks5-tunnel-${{ env.BRANCH_NAME }}
       - name: Upload source
         uses: actions/upload-artifact@v4
         with:
-          name: hev-socks5-tunnel-${{ github.ref_name }}.tar.xz
-          path: hev-socks5-tunnel-${{ github.ref_name }}.tar.xz
+          name: hev-socks5-tunnel-${{ env.BRANCH_NAME }}.tar.xz
+          path: hev-socks5-tunnel-${{ env.BRANCH_NAME }}.tar.xz
           if-no-files-found: error
           retention-days: 1
 
