@@ -116,69 +116,12 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  macos:
-    name: macOS
-    runs-on: macos-14
-    strategy:
-      matrix:
-        include:
-          - name: arm64
-            flags: -arch arm64 -mmacosx-version-min=11.0
-          - name: x86_64
-            flags: -arch x86_64 -mmacosx-version-min=10.6
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          submodules: true
-      - name: Build ${{ matrix.name }}
-        run: |
-          make CC=clang CFLAGS="${{ matrix.flags }}" LFLAGS="${{ matrix.flags }}" -j $(sysctl -n hw.logicalcpu)
-          cp bin/hev-socks5-tunnel hev-socks5-tunnel-darwin-${{ matrix.name }}
-      - name: Upload ${{ matrix.name }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: hev-socks5-tunnel-darwin-${{ matrix.name }}
-          path: hev-socks5-tunnel-darwin-${{ matrix.name }}
-          if-no-files-found: error
-          retention-days: 1
-
-  freebsd:
-    name: FreeBSD
-    runs-on: ubuntu-22.04
-    if: github.event_name != 'release'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          submodules: true
-      - name: Build
-        uses: vmactions/freebsd-vm@v1
-        with:
-          usesh: true
-          prepare: |
-            pkg install -y gmake gcc
-          run: |
-            gmake
-            cp bin/hev-socks5-tunnel hev-socks5-tunnel-freebsd-x86_64
-      - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: hev-socks5-tunnel-freebsd-x86_64
-          path: hev-socks5-tunnel-freebsd-x86_64
-          if-no-files-found: error
-          retention-days: 1
-
   release:
     name: Release
     runs-on: ubuntu-22.04
     needs:
       - source
       - linux
-      - macos
-      - freebsd
     if: github.event_name == 'release'
     steps:
       - name: Checkout
@@ -199,8 +142,8 @@ jobs:
             gh release upload ${{ github.event.release.tag_name }} $i
           done
 
-  apple:
-    name: Apple
+  macos:
+    name: macOS
     runs-on: macos-14
     if: github.event_name != 'release'
     steps:
@@ -209,9 +152,62 @@ jobs:
         with:
           fetch-depth: 1
           submodules: true
-      - name: Build
+      - name: Build native
+        run: |
+          make
+          make clean
+      - name: Build cross
         run: |
           ./build-apple.sh
+
+  freebsd:
+    name: FreeBSD
+    runs-on: ubuntu-22.04
+    if: github.event_name != 'release'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Build native
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          prepare: |
+            pkg install -y gmake gcc microsocks curl
+
+          run: |
+            gmake
+            echo "tunnel:
+              name: tun_3000
+              mtu: 9000
+              pv4: 198.18.0.1
+              ipv6: 'fc00::1'
+            socks5:
+              port: 1080
+              address: 127.0.0.1
+              udp: 'udp'
+            misc:
+              log-file: stderr
+              log-level: debug" > config.yaml
+            cat config.yaml
+            microsocks &
+            MICROSOCS_PID=$!
+            curl -i --socks5-hostname 127.0.0.1:1080 http://1.1.1.1
+            ifconfig tun3000 create name tun_3000
+            ./bin/hev-socks5-tunnel ./config.yaml &
+            TUNNEL_PID=$!
+            tcpdump -i tun_3000 -nv &
+            TCPDUMP_PID=$!
+            route add -net 1.1.1.1/32 -interface tun_3000
+            sleep 1
+            curl -i http://1.1.1.1
+            CURL_EXIT_CODE=$?
+            kill $TUNNEL_PID
+            kill $MICROSOCS_PID
+            kill $TCPDUMP_PID
+            exit $CURL_EXIT_CODE
 
   android:
     name: Android
