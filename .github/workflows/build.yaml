@@ -116,12 +116,69 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  macos:
+    name: macOS
+    runs-on: macos-14
+    strategy:
+      matrix:
+        include:
+          - name: arm64
+            flags: -arch arm64 -mmacosx-version-min=11.0
+          - name: x86_64
+            flags: -arch x86_64 -mmacosx-version-min=10.6
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Build ${{ matrix.name }}
+        run: |
+          make CC=clang CFLAGS="${{ matrix.flags }}" LFLAGS="${{ matrix.flags }}" -j $(sysctl -n hw.logicalcpu)
+          cp bin/hev-socks5-tunnel hev-socks5-tunnel-darwin-${{ matrix.name }}
+      - name: Upload ${{ matrix.name }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: hev-socks5-tunnel-darwin-${{ matrix.name }}
+          path: hev-socks5-tunnel-darwin-${{ matrix.name }}
+          if-no-files-found: error
+          retention-days: 1
+
+  freebsd:
+    name: FreeBSD
+    runs-on: ubuntu-22.04
+    if: github.event_name != 'release'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Build
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          prepare: |
+            pkg install -y gmake gcc
+          run: |
+            gmake
+            cp bin/hev-socks5-tunnel hev-socks5-tunnel-freebsd-x86_64
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: hev-socks5-tunnel-freebsd-x86_64
+          path: hev-socks5-tunnel-freebsd-x86_64
+          if-no-files-found: error
+          retention-days: 1
+
   release:
     name: Release
     runs-on: ubuntu-22.04
     needs:
       - source
       - linux
+      - macos
+      - freebsd
     if: github.event_name == 'release'
     steps:
       - name: Checkout
@@ -142,8 +199,8 @@ jobs:
             gh release upload ${{ github.event.release.tag_name }} $i
           done
 
-  macos:
-    name: macOS
+  apple:
+    name: Apple
     runs-on: macos-14
     if: github.event_name != 'release'
     steps:
@@ -152,33 +209,9 @@ jobs:
         with:
           fetch-depth: 1
           submodules: true
-      - name: Build native
-        run: |
-          make
-          make clean
-      - name: Build cross
+      - name: Build
         run: |
           ./build-apple.sh
-
-  freebsd:
-    name: FreeBSD
-    runs-on: ubuntu-22.04
-    if: github.event_name != 'release'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          submodules: true
-      - name: Build native
-        uses: vmactions/freebsd-vm@v1
-        with:
-          usesh: true
-          prepare: |
-            pkg install -y gmake gcc
-
-          run: |
-            gmake
 
   android:
     name: Android
