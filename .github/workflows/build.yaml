@@ -154,6 +154,43 @@ jobs:
         with:
           fetch-depth: 1
           submodules: true
+      - name: VM Test
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          prepare: |
+            pkg install -y gmake gcc microsocks curl
+          run: |
+            gmake
+            echo "tunnel:
+              name: tun_3000
+              mtu: 9000
+              pv4: 198.18.0.1
+              ipv6: 'fc00::1'
+            socks5:
+              port: 1080
+              address: 127.0.0.1
+              udp: 'udp'
+            misc:
+              log-file: stderr
+              log-level: debug" > config.yaml
+            cat config.yaml
+            microsocks &
+            MICROSOCS_PID=$!
+            curl -i --socks5-hostname 127.0.0.1:1080 http://1.1.1.1
+            ifconfig tun3000 create name tun_3000
+            ./bin/hev-socks5-tunnel ./config.yaml &
+            TUNNEL_PID=$!
+            tcpdump -i tun_3000 -nv &
+            TCPDUMP_PID=$!
+            sleep 1
+            curl --interface tun_3000 -i http://1.1.1.1
+            CURL_EXIT_CODE=$?
+            kill $TUNNEL_PID
+            kill $MICROSOCS_PID
+            kill $TCPDUMP_PID
+            exit $CURL_EXIT_CODE
+
       - name: Build
         uses: vmactions/freebsd-vm@v1
         with:
