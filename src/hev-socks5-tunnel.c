@@ -200,6 +200,8 @@ event_task_entry (void *data)
 
     LOG_D ("socks5 tunnel event task run");
 
+    hev_task_add_fd (task_event, event_fds[0], POLLIN);
+
     hev_task_io_read (event_fds[0], &val, sizeof (val), NULL, NULL);
 
     run = 0;
@@ -213,6 +215,8 @@ event_task_entry (void *data)
         sd = container_of (node, HevSocks5SessionData, node);
         hev_socks5_session_terminate (sd->self);
     }
+
+    hev_task_del_fd (task_event, event_fds[0]);
 }
 
 static void
@@ -221,6 +225,8 @@ lwip_io_task_entry (void *data)
     const unsigned int mtu = hev_config_get_tunnel_mtu ();
 
     LOG_D ("socks5 tunnel lwip task run");
+
+    hev_task_add_fd (task_lwip_io, tun_fd, POLLIN);
 
     for (; run;) {
         struct pbuf *buf;
@@ -425,12 +431,6 @@ event_task_init (void)
         return -1;
     }
 
-    res = hev_task_add_fd (task_event, event_fds[0], POLLIN);
-    if (res < 0) {
-        LOG_E ("socks5 tunnel add eventfd");
-        return -1;
-    }
-
     return 0;
 }
 
@@ -455,20 +455,12 @@ event_task_fini (void)
 static int
 lwip_io_task_init (void)
 {
-    int res;
-
     task_lwip_io = hev_task_new (-1);
     if (!task_lwip_io) {
         LOG_E ("socks5 tunnel task lwip");
         return -1;
     }
     hev_task_set_priority (task_lwip_io, HEV_TASK_PRIORITY_REALTIME);
-
-    res = hev_task_add_fd (task_lwip_io, tun_fd, POLLIN | POLLOUT);
-    if (res < 0) {
-        LOG_E ("socks5 tunnel add tunfd");
-        return -1;
-    }
 
     return 0;
 }
