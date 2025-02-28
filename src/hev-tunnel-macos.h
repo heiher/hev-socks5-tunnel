@@ -40,8 +40,7 @@ hev_tunnel_readv (int fd, struct iovec *iov, int iovcnt,
 }
 
 static inline ssize_t
-hev_tunnel_write (int fd, void *buf, size_t count, HevTaskIOYielder yielder,
-                  void *yielder_data)
+hev_tunnel_write (int fd, void *buf, size_t count)
 {
     struct iovec iov[2];
     uint8_t *iph = buf;
@@ -57,12 +56,11 @@ hev_tunnel_write (int fd, void *buf, size_t count, HevTaskIOYielder yielder,
     iov[1].iov_base = buf;
     iov[1].iov_len = count;
 
-    return hev_task_io_writev (fd, iov, 2, yielder, yielder_data);
+    return writev (fd, iov, 2);
 }
 
 static inline ssize_t
-hev_tunnel_writev (int fd, struct iovec *iov, int iovcnt,
-                   HevTaskIOYielder yielder, void *yielder_data)
+hev_tunnel_writev (int fd, struct iovec *iov, int iovcnt)
 {
     uint32_t type;
     int i;
@@ -83,7 +81,7 @@ hev_tunnel_writev (int fd, struct iovec *iov, int iovcnt,
         }
     }
 
-    return hev_task_io_writev (fd, iov, iovcnt, yielder, yielder_data);
+    return writev (fd, iov, iovcnt);
 }
 
 #endif /* __HEV_TUNNEL_MACOS_H__ */

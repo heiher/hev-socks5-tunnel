@@ -80,13 +80,14 @@ netif_output_handler (struct netif *netif, struct pbuf *p)
             i++;
         }
 
-        s = hev_tunnel_writev (tun_fd, iov, i, task_io_yielder, NULL);
+        s = hev_tunnel_writev (tun_fd, iov, i);
     } else {
-        s = hev_tunnel_write (tun_fd, p->payload, p->len, task_io_yielder,
-                              NULL);
+        s = hev_tunnel_write (tun_fd, p->payload, p->len);
     }
 
     if (s <= 0) {
+        if (errno == EAGAIN)
+            return ERR_WOULDBLOCK;
         LOG_W ("socks5 tunnel write");
         return ERR_IF;
     }
