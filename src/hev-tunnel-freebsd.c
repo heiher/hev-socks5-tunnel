@@ -44,21 +44,15 @@ hev_tunnel_open (const char *name, int multi_queue)
         return fd;
     }
 
-    fd = hev_task_io_open ("/dev/tun", O_RDWR);
-    if (fd < 0)
-        goto exit;
-
-    res = ioctl (fd, TUNGIFNAME, (void *)&ifr);
+    strncpy (ifr.ifr_name, name, IFNAMSIZ - 1);
+    res = ioctl (fd, SIOCIFCREATE, (void *)&ifr);
     if (res < 0)
-        goto exit_close;
+        return -1;
 
+    fd = hev_task_io_open ("/dev/tun", O_RDWR);
     memcpy (tun_name, ifr.ifr_name, IFNAMSIZ);
-    return fd;
 
-exit_close:
-    close (fd);
-exit:
-    return res;
+    return fd;
 }
 
 void
