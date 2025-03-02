@@ -147,7 +147,6 @@ jobs:
   freebsd:
     name: FreeBSD
     runs-on: ubuntu-22.04
-    if: github.event_name != 'release'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
