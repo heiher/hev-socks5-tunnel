@@ -141,8 +141,10 @@ hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self)
     if (res <= 0) {
         if (res < -1) {
             self->alive &= ~HEV_SOCKS5_SESSION_UDP_ALIVE_B;
-            if (self->alive && hev_socks5_get_timeout (HEV_SOCKS5 (self)))
+            if (self->alive && hev_socks5_get_timeout (HEV_SOCKS5 (self))) {
+                pbuf_free (buf);
                 return 0;
+            }
         }
         if (HEV_SOCKS5 (self)->type == HEV_SOCKS5_TYPE_UDP_IN_TCP)
             hev_socks5_set_timeout (HEV_SOCKS5 (self), 0);
