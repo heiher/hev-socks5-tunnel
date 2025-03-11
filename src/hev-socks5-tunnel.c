@@ -205,8 +205,8 @@ event_task_entry (void *data)
     hev_task_io_read (event_fds[0], &val, sizeof (val), NULL, NULL);
 
     run = 0;
-    hev_task_wakeup (task_lwip_io);
-    hev_task_wakeup (task_lwip_timer);
+    hev_task_join (task_lwip_io);
+    hev_task_join (task_lwip_timer);
 
     node = hev_list_first (&session_set);
     for (; node; node = hev_list_node_next (node)) {
