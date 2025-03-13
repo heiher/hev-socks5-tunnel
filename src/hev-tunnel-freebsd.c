@@ -63,7 +63,7 @@ hev_tunnel_open (const char *name, int multi_queue)
         goto fail_close;
 
 succ:
-    memcpy (tun_name, name, IFNAMSIZ);
+    strncpy (tun_name, name, IFNAMSIZ - 1);
     return tfd;
 
 fail_close:
