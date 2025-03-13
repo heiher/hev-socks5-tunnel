@@ -33,26 +33,43 @@ int
 hev_tunnel_open (const char *name, int multi_queue)
 {
     struct ifreq ifr;
-    char path[256];
-    int res = -1;
-    int fd;
+    char buf[256];
+    int res;
+    int sfd;
+    int tfd;
 
-    snprintf (path, sizeof (path), "/dev/%s", name);
-    fd = hev_task_io_open (path, O_RDWR);
-    if (fd >= 0) {
-        memcpy (tun_name, name, IFNAMSIZ);
-        return fd;
-    }
+    snprintf (buf, sizeof (buf), "/dev/%s", name);
+    tfd = hev_task_io_open (buf, O_RDWR);
+    if (tfd >= 0)
+        goto succ;
 
-    strncpy (ifr.ifr_name, name, IFNAMSIZ - 1);
-    res = ioctl (fd, SIOCIFCREATE, (void *)&ifr);
+    tfd = hev_task_io_open ("/dev/tun", O_RDWR);
+    if (tfd < 0)
+        goto fail;
+
+    res = ioctl (tfd, TUNGIFNAME, (void *)&ifr);
     if (res < 0)
-        return -1;
+        goto fail_close;
 
-    fd = hev_task_io_open (path, O_RDWR);
-    memcpy (tun_name, ifr.ifr_name, IFNAMSIZ);
+    sfd = socket (AF_INET, SOCK_DGRAM, 0);
+    if (sfd < 0)
+        goto fail_close;
 
-    return fd;
+    strncpy (buf, name, sizeof (buf) - 1);
+    ifr.ifr_data = buf;
+    res = ioctl (sfd, SIOCSIFNAME, (void *)&ifr);
+    close (sfd);
+    if (res < 0)
+        goto fail_close;
+
+succ:
+    memcpy (tun_name, name, IFNAMSIZ);
+    return tfd;
+
+fail_close:
+    close (tfd);
+fail:
+    return -1;
 }
 
 void
