@@ -49,7 +49,7 @@ hev_tunnel_open (const char *name, int multi_queue)
     if (res < 0)
         return -1;
 
-    fd = hev_task_io_open ("/dev/tun", O_RDWR);
+    fd = hev_task_io_open (path, O_RDWR);
     memcpy (tun_name, ifr.ifr_name, IFNAMSIZ);
 
     return fd;
