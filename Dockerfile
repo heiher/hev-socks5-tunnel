@@ -31,7 +31,8 @@ ENV TUN=tun0 \
     SOCKS5_UDP_MODE=udp \
     IPV4_INCLUDED_ROUTES=0.0.0.0/0 \
     IPV4_EXCLUDED_ROUTES='' \
-    LOG_LEVEL=warn
+    LOG_LEVEL=warn \
+    BYPASS_PBR=0
 
 HEALTHCHECK --start-period=5s --interval=5s --timeout=2s --retries=3 CMD ["test", "-f", "/success"]
 
