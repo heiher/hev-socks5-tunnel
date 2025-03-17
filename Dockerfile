@@ -29,10 +29,10 @@ ENV TUN=tun0 \
     SOCKS5_USERNAME='' \
     SOCKS5_PASSWORD='' \
     SOCKS5_UDP_MODE=udp \
+    CONFIG_ROUTES=1 \
     IPV4_INCLUDED_ROUTES=0.0.0.0/0 \
     IPV4_EXCLUDED_ROUTES='' \
-    LOG_LEVEL=warn \
-    BYPASS_PBR=0
+    LOG_LEVEL=warn
 
 HEALTHCHECK --start-period=5s --interval=5s --timeout=2s --retries=3 CMD ["test", "-f", "/success"]
 

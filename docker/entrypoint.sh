@@ -8,9 +8,9 @@ IPV6="${IPV6:-}"
 TABLE="${TABLE:-20}"
 MARK="${MARK:-438}"
 
-BYPASS_PBR="${BYPASS_PBR:-0}"
+CONFIG_ROUTES="${CONFIG_ROUTES:-1}"
 
-if [ "${BYPASS_PBR}" == "1" ]; then
+if [ "${CONFIG_ROUTES}" == "0" ]; then
   MARK="0"
 fi
 
@@ -55,7 +55,7 @@ config_route() {
   echo "#!/bin/sh" > /route.sh
   chmod +x /route.sh
 
-  if [ "${BYPASS_PBR}" == "1" ]; then
+  if [ "${CONFIG_ROUTES}" == "0" ]; then
     return
   fi
 
