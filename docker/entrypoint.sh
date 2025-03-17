@@ -5,8 +5,14 @@ MTU="${MTU:-8500}"
 IPV4="${IPV4:-198.18.0.1}"
 IPV6="${IPV6:-}"
 
+CONFIG_ROUTES="${CONFIG_ROUTES:-1}"
+
 TABLE="${TABLE:-20}"
-MARK="${MARK:-438}"
+if [ "${CONFIG_ROUTES}" == "0" ]; then
+  MARK="${MARK:-0}"
+else
+  MARK="${MARK:-438}"
+fi
 
 SOCKS5_ADDR="${SOCKS5_ADDR:-172.17.0.1}"
 SOCKS5_PORT="${SOCKS5_PORT:-1080}"
@@ -48,6 +54,10 @@ EOF
 config_route() {
   echo "#!/bin/sh" > /route.sh
   chmod +x /route.sh
+
+  if [ "${CONFIG_ROUTES}" == "0" ]; then
+    return
+  fi
 
   echo "ip route add default dev ${TUN} table ${TABLE}" >> /route.sh
 
