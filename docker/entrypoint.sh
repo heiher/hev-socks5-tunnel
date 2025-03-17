@@ -8,6 +8,12 @@ IPV6="${IPV6:-}"
 TABLE="${TABLE:-20}"
 MARK="${MARK:-438}"
 
+BYPASS_PBR="${BYPASS_PBR:-0}"
+
+if [ "${BYPASS_PBR}" == "1" ]; then
+  MARK="0"
+fi
+
 SOCKS5_ADDR="${SOCKS5_ADDR:-172.17.0.1}"
 SOCKS5_PORT="${SOCKS5_PORT:-1080}"
 SOCKS5_USERNAME="${SOCKS5_USERNAME:-}"
@@ -48,6 +54,10 @@ EOF
 config_route() {
   echo "#!/bin/sh" > /route.sh
   chmod +x /route.sh
+
+  if [ "${BYPASS_PBR}" == "1" ]; then
+    return
+  fi
 
   echo "ip route add default dev ${TUN} table ${TABLE}" >> /route.sh
 
