@@ -5,13 +5,13 @@ MTU="${MTU:-8500}"
 IPV4="${IPV4:-198.18.0.1}"
 IPV6="${IPV6:-}"
 
-TABLE="${TABLE:-20}"
-MARK="${MARK:-438}"
-
 CONFIG_ROUTES="${CONFIG_ROUTES:-1}"
 
+TABLE="${TABLE:-20}"
 if [ "${CONFIG_ROUTES}" == "0" ]; then
-  MARK="0"
+  MARK="${MARK:-0}"
+else
+  MARK="${MARK:-438}"
 fi
 
 SOCKS5_ADDR="${SOCKS5_ADDR:-172.17.0.1}"
