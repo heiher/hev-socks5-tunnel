@@ -206,6 +206,7 @@ services:
       IPV4_INCLUDED_ROUTES: 0.0.0.0/0 # optional, demo means proxy all traffic. for multiple network segments, join with `,` or `\n`
       IPV4_EXCLUDED_ROUTES: a.b.c.d # optional, demo means exclude traffic from the proxy itself. for multiple network segments, join with `,` or `\n`
       LOG_LEVEL: warn # optional, default `warn`, other option `debug`/`info`/`error`
+      BYPASS_PBR: 0 # optional, set 1 to ignore TABLE, MARK, IPV4_INCLUDED_ROUTES and IPV4_EXCLUDED_ROUTES
     dns:
       - 8.8.8.8
 ```
