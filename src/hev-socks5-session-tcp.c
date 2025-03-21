@@ -262,16 +262,14 @@ int
 hev_socks5_session_tcp_construct (HevSocks5SessionTCP *self,
                                   struct tcp_pcb *pcb, HevTaskMutex *mutex)
 {
-    struct sockaddr_in6 addr6;
-    struct sockaddr *addr;
+    HevSocks5Addr addr;
     int res;
 
-    addr = (struct sockaddr *)&addr6;
-    res = lwip_to_sock_addr (&pcb->local_ip, pcb->local_port, addr);
+    res = hev_socks5_addr_from_lwip (&addr, &pcb->local_ip, pcb->local_port);
     if (res < 0)
         return -1;
 
-    res = hev_socks5_client_tcp_construct_ip (&self->base, addr);
+    res = hev_socks5_client_tcp_construct (&self->base, &addr);
     if (res < 0)
         return -1;
 

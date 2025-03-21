@@ -19,6 +19,8 @@
 #include <TargetConditionals.h>
 #endif
 
+#include <hev-socks5-misc.h>
+
 #include "hev-logger.h"
 
 #include "hev-utils.h"
@@ -70,47 +72,36 @@ set_sock_mark (int fd, unsigned int mark)
 }
 
 int
-lwip_to_sock_addr (const ip_addr_t *ip, u16_t port, struct sockaddr *addr)
+hev_socks5_addr_from_lwip (HevSocks5Addr *addr, const ip_addr_t *ip, u16_t port)
 {
-    if (ip->type == IPADDR_TYPE_V4) {
-        struct sockaddr_in *adp;
-
-        adp = (struct sockaddr_in *)addr;
-        adp->sin_family = AF_INET;
-        adp->sin_port = htons (port);
-        memcpy (&adp->sin_addr, ip, 4);
-    } else if (ip->type == IPADDR_TYPE_V6) {
-        struct sockaddr_in6 *adp;
-
-        adp = (struct sockaddr_in6 *)addr;
-        adp->sin6_family = AF_INET6;
-        adp->sin6_port = htons (port);
-        memcpy (&adp->sin6_addr, ip, 16);
+    switch (ip->type) {
+    case IPADDR_TYPE_V4:
+        hev_socks5_addr_from_ipv4 (addr, ip, htons (port));
+        return 0;
+    case IPADDR_TYPE_V6:
+        hev_socks5_addr_from_ipv6 (addr, ip, htons (port));
+        return 0;
+    default:
+        return -1;
     }
-
-    return 0;
 }
 
 int
-sock_to_lwip_addr (const struct sockaddr *addr, ip_addr_t *ip, u16_t *port)
+hev_socks5_addr_into_lwip (const HevSocks5Addr *addr, ip_addr_t *ip,
+                           u16_t *port)
 {
-    if (addr->sa_family == AF_INET) {
-        struct sockaddr_in *adp;
-
-        adp = (struct sockaddr_in *)addr;
+    switch (addr->atype) {
+    case HEV_SOCKS5_ADDR_TYPE_IPV4:
+        memcpy (ip, addr->ipv4.addr, 4);
+        *port = ntohs (addr->ipv4.port);
         ip->type = IPADDR_TYPE_V4;
-        *port = ntohs (adp->sin_port);
-        memcpy (ip, &adp->sin_addr, 4);
-    } else if (addr->sa_family == AF_INET6) {
-        struct sockaddr_in6 *adp;
-
-        adp = (struct sockaddr_in6 *)addr;
+        return 0;
+    case HEV_SOCKS5_ADDR_TYPE_IPV6:
+        memcpy (ip, addr->ipv6.addr, 16);
+        *port = ntohs (addr->ipv6.port);
         ip->type = IPADDR_TYPE_V6;
-        *port = ntohs (adp->sin6_port);
-        memcpy (ip, &adp->sin6_addr, 16);
-    } else {
+        return 0;
+    default:
         return -1;
     }
-
-    return 0;
 }
