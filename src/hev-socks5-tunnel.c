@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <string.h>
+#include <sys/ioctl.h>
 
 #include <lwip/tcp.h>
 #include <lwip/udp.h>
@@ -304,6 +305,14 @@ tunnel_init (int extern_tun_fd)
     unsigned int mtu;
 
     if (extern_tun_fd >= 0) {
+        int nonblock = 1;
+
+        res = ioctl (extern_tun_fd, FIONBIO, (char *)&nonblock);
+        if (res < 0) {
+            LOG_E ("socks5 tunnel non-blocking");
+            return -1;
+        }
+
         tun_fd = extern_tun_fd;
         return 0;
     }
