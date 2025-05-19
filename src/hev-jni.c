@@ -42,6 +42,7 @@ struct _ThreadData
     int fd;
 };
 
+static int is_working;
 static JavaVM *java_vm;
 static pthread_t work_thread;
 static pthread_mutex_t mutex;
@@ -105,12 +106,12 @@ native_start_service (JNIEnv *env, jobject thiz, jstring config_path, jint fd)
 {
     const jbyte *bytes;
     ThreadData *tdata;
+    int res;
 
     pthread_mutex_lock (&mutex);
-    if (work_thread) {
-        pthread_mutex_unlock (&mutex);
-        return;
-    }
+
+    if (is_working)
+        goto exit;
 
     tdata = malloc (sizeof (ThreadData));
     tdata->fd = fd;
@@ -119,7 +120,15 @@ native_start_service (JNIEnv *env, jobject thiz, jstring config_path, jint fd)
     tdata->path = strdup ((const char *)bytes);
     (*env)->ReleaseStringUTFChars (env, config_path, (const char *)bytes);
 
-    pthread_create (&work_thread, NULL, thread_handler, tdata);
+    res = pthread_create (&work_thread, NULL, thread_handler, tdata);
+    if (res < 0) {
+        free (tdata->path);
+        free (tdata);
+        goto exit;
+    }
+
+    is_working = 1;
+exit:
     pthread_mutex_unlock (&mutex);
 }
 
@@ -127,14 +136,15 @@ static void
 native_stop_service (JNIEnv *env, jobject thiz)
 {
     pthread_mutex_lock (&mutex);
-    if (!work_thread) {
-        pthread_mutex_unlock (&mutex);
-        return;
-    }
+
+    if (!is_working)
+        goto exit;
 
     hev_socks5_tunnel_quit ();
     pthread_join (work_thread, NULL);
-    work_thread = 0;
+
+    is_working = 0;
+exit:
     pthread_mutex_unlock (&mutex);
 }
 
