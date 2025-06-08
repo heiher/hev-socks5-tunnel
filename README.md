@@ -8,7 +8,7 @@ A tunnel over Socks5 proxy (tun2socks) for Unix.
 
 * IPv4/IPv6. (dual stack)
 * Redirect TCP connections.
-* Redirect UDP packets. (Fullcone NAT, UDP in UDP/TCP)
+* Redirect UDP packets. (Fullcone NAT, UDP-in-UDP and UDP-in-TCP [^1])
 * Linux/Android/FreeBSD/macOS/iOS/WSL2.
 
 ## Benchmarks
@@ -322,3 +322,5 @@ void hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
 ## License
 
 MIT
+
+[^1]: See [protocol specification](https://github.com/heiher/hev-socks5-core/tree/master?tab=readme-ov-file#udp-in-tcp). The [hev-socks5-server](https://github.com/heiher/hev-socks5-server) supports UDP relay over TCP.
