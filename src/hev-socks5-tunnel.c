@@ -592,13 +592,19 @@ void
 hev_socks5_tunnel_stop (void)
 {
     int res;
+    int fd;
 
     LOG_D ("socks5 tunnel stop");
 
-    if (event_fds[1] == -1)
-        return;
+    for (;;) {
+        fd = READ_ONCE (event_fds[1]);
+        if (fd >= 0)
+            break;
+        /* Wait for async initialization */
+        usleep (100 * 1000);
+    }
 
-    res = write (event_fds[1], &res, 1);
+    res = write (fd, &res, 1);
     assert (res > 0 && "socks5 tunnel write event");
 }
 
