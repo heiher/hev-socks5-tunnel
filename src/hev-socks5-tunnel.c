@@ -8,6 +8,7 @@
  */
 
 #include <errno.h>
+#include <assert.h>
 #include <signal.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -22,7 +23,6 @@
 
 #include <hev-task.h>
 #include <hev-task-io.h>
-#include <hev-task-io-pipe.h>
 #include <hev-task-mutex.h>
 #include <hev-task-system.h>
 #include <hev-memory-allocator.h>
@@ -426,11 +426,18 @@ gateway_fini (void)
 static int
 event_task_init (void)
 {
+    int nonblock = 1;
     int res;
 
-    res = hev_task_io_pipe_pipe (event_fds);
+    res = pipe (event_fds);
     if (res < 0) {
         LOG_E ("socks5 tunnel pipe");
+        return -1;
+    }
+
+    res = ioctl (event_fds[0], FIONBIO, (char *)&nonblock);
+    if (res < 0) {
+        LOG_E ("socks5 tunnel pipe nonblock");
         return -1;
     }
 
@@ -583,16 +590,15 @@ hev_socks5_tunnel_run (void)
 void
 hev_socks5_tunnel_stop (void)
 {
-    int val;
+    int res;
 
     LOG_D ("socks5 tunnel stop");
 
     if (event_fds[1] == -1)
         return;
 
-    val = write (event_fds[1], &val, sizeof (val));
-    if (val < 0)
-        LOG_E ("socks5 tunnel write event");
+    res = write (event_fds[1], &res, 1);
+    assert (res > 0 && "socks5 tunnel write event");
 }
 
 void
