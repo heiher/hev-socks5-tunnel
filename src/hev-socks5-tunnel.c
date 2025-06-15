@@ -377,6 +377,7 @@ tunnel_fini (void)
         hev_exec_run (script_path, hev_tunnel_get_name (), 1);
 
     hev_tunnel_close (tun_fd);
+    tun_fd_local = 0;
     tun_fd = -1;
 }
 
