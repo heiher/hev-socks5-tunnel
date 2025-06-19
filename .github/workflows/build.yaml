@@ -87,12 +87,8 @@ jobs:
             tool: riscv64-unknown-linux-musl
           - name: s390x
             tool: s390x-ibm-linux-musl
-          - name: sh
-            tool: sh-multilib-linux-musl
-          - name: sheb
-            tool: sh-multilib-linux-musl
-            env:
-              CFLAGS: "-mb"
+          - name: sh4
+            tool: sh4-multilib-linux-musl
           - name: x86_64
             tool: x86_64-unknown-linux-musl
     steps:
@@ -104,7 +100,7 @@ jobs:
       - name: Build ${{ matrix.name }}
         run: |
           sudo mkdir -p /opt/x-tools
-          wget https://github.com/cross-tools/musl-cross/releases/download/20250501/${{ matrix.tool }}.tar.xz
+          wget https://github.com/cross-tools/musl-cross/releases/download/20250520/${{ matrix.tool }}.tar.xz
           sudo tar xf ${{ matrix.tool }}.tar.xz -C /opt/x-tools
           make CROSS_PREFIX=/opt/x-tools/${{ matrix.tool }}/bin/${{ matrix.tool }}- CFLAGS=${{ matrix.env.CFLAGS }} ENABLE_STATIC=1 -j`nproc`
           cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-${{ matrix.name }}
