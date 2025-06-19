@@ -144,6 +144,9 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
     if (err != ERR_OK)
         return err;
 
+    if (!run)
+        return ERR_RST;
+
     tcp = hev_socks5_session_tcp_new (pcb, &mutex);
     if (!tcp)
         return ERR_MEM;
@@ -172,6 +175,11 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
     HevListNode *node;
     int stack_size;
     HevTask *task;
+
+    if (!run) {
+        udp_remove (pcb);
+        return;
+    }
 
     udp = hev_socks5_session_udp_new (pcb, &mutex);
     if (!udp) {
@@ -206,9 +214,6 @@ event_task_entry (void *data)
     hev_task_io_read (event_fds[0], &val, sizeof (val), NULL, NULL);
 
     run = 0;
-    hev_task_join (task_lwip_io);
-    hev_task_join (task_lwip_timer);
-
     node = hev_list_first (&session_set);
     for (; node; node = hev_list_node_next (node)) {
         HevSocks5SessionData *sd;
@@ -217,6 +222,8 @@ event_task_entry (void *data)
         hev_socks5_session_terminate (sd->self);
     }
 
+    hev_task_join (task_lwip_io);
+    hev_task_join (task_lwip_timer);
     hev_task_del_fd (task_event, event_fds[0]);
 }
 
@@ -271,14 +278,7 @@ lwip_timer_task_entry (void *data)
 
     LOG_D ("socks5 tunnel timer task run");
 
-    for (i = 1;; i++) {
-        if (hev_list_first (&session_set))
-            hev_task_sleep (TCP_TMR_INTERVAL);
-        else
-            hev_task_yield (HEV_TASK_WAITIO);
-        if (!run)
-            break;
-
+    for (i = 1; run; i++) {
         hev_task_mutex_lock (&mutex);
         tcp_tmr ();
 
@@ -294,6 +294,11 @@ lwip_timer_task_entry (void *data)
 #endif
         }
         hev_task_mutex_unlock (&mutex);
+
+        if (hev_list_first (&session_set))
+            hev_task_sleep (TCP_TMR_INTERVAL);
+        else
+            hev_task_yield (HEV_TASK_WAITIO);
     }
 }
 
