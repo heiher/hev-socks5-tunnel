@@ -33,33 +33,40 @@ tcp_splice_f (HevSocks5SessionTCP *self)
 {
     struct iovec iov[64];
     struct pbuf *p;
-    ssize_t s;
-    int i;
+    int iovc = 0;
+    int res = 1;
 
-    if (!self->queue)
-        return 0;
-
-    for (p = self->queue, i = 0; p && (i < 64); p = p->next, i++) {
-        iov[i].iov_base = p->payload;
-        iov[i].iov_len = p->len;
+    if (self->queue) {
+        for (p = self->queue; p && (iovc < 64); p = p->next, iovc++) {
+            iov[iovc].iov_base = p->payload;
+            iov[iovc].iov_len = p->len;
+        }
+    } else if (self->pcb_eof) {
+        res = -1;
+    } else {
+        res = 0;
     }
 
-    s = writev (HEV_SOCKS5 (self)->fd, iov, i);
-    if (0 >= s) {
-        if ((0 > s) && (EAGAIN == errno))
-            return 0;
-        return -1;
+    if (iovc) {
+        ssize_t s = writev (HEV_SOCKS5 (self)->fd, iov, iovc);
+        if (0 >= s) {
+            if ((0 > s) && (EAGAIN == errno))
+                res = 0;
+            else
+                res = -1;
+        } else {
+            hev_task_mutex_lock (self->mutex);
+            self->queue = pbuf_free_header (self->queue, s);
+            if (self->pcb)
+                tcp_recved (self->pcb, s);
+            hev_task_mutex_unlock (self->mutex);
+            res = 1;
+        }
+    } else if (res < 0) {
+        shutdown (HEV_SOCKS5 (self)->fd, SHUT_WR);
     }
 
-    hev_task_mutex_lock (self->mutex);
-    self->queue = pbuf_free_header (self->queue, s);
-    if (self->pcb)
-        tcp_recved (self->pcb, s);
-    hev_task_mutex_unlock (self->mutex);
-    if (!self->queue)
-        return 0;
-
-    return 1;
+    return res;
 }
 
 static int
@@ -67,39 +74,45 @@ tcp_splice_b (HevSocks5SessionTCP *self)
 {
     struct iovec iov[2];
     err_t err = ERR_OK;
-    int iovlen;
-    ssize_t s;
+    int res = 1, iovc;
 
-    iovlen = hev_ring_buffer_writing (self->buffer, iov);
-    if (iovlen <= 0)
-        return 0;
-
-    s = readv (HEV_SOCKS5 (self)->fd, iov, iovlen);
-    if (0 >= s) {
-        if ((0 > s) && (EAGAIN == errno))
-            return 0;
-        iovlen = hev_ring_buffer_reading (self->buffer, iov);
-        if (iovlen <= 0)
-            return -1;
+    iovc = hev_ring_buffer_writing (self->buffer, iov);
+    if (iovc) {
+        ssize_t s = readv (HEV_SOCKS5 (self)->fd, iov, iovc);
+        if (0 >= s) {
+            if ((0 > s) && (EAGAIN == errno))
+                res = 0;
+            else
+                res = -1;
+        } else {
+            hev_ring_buffer_write_finish (self->buffer, s);
+        }
     }
-    hev_ring_buffer_write_finish (self->buffer, s);
 
     hev_task_mutex_lock (self->mutex);
     if (self->pcb) {
-        int i;
-        iovlen = hev_ring_buffer_reading (self->buffer, iov);
-        for (i = 0, s = 0; i < iovlen; i++) {
-            err |= tcp_write (self->pcb, iov[i].iov_base, iov[i].iov_len, 0);
-            s += iov[i].iov_len;
+        iovc = hev_ring_buffer_reading (self->buffer, iov);
+        if (iovc) {
+            ssize_t s = 0;
+            int i;
+            for (i = 0; i < iovc; i++) {
+                void *ptr = iov[i].iov_base;
+                size_t len = iov[i].iov_len;
+                err |= tcp_write (self->pcb, ptr, len, 0);
+                s += len;
+            }
+            hev_ring_buffer_read_finish (self->buffer, s);
+            err |= tcp_output (self->pcb);
+            res = 1;
+        } else if (res < 0) {
+            tcp_shutdown (self->pcb, 0, 1);
         }
-        hev_ring_buffer_read_finish (self->buffer, s);
-        err |= tcp_output (self->pcb);
     }
     hev_task_mutex_unlock (self->mutex);
     if (!self->pcb || (err != ERR_OK))
-        return -1;
+        res = -1;
 
-    return 1;
+    return res;
 }
 
 static err_t
@@ -107,17 +120,16 @@ tcp_recv_handler (void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
 {
     HevSocks5SessionTCP *self = arg;
 
-    if (!p) {
-        hev_socks5_session_terminate (HEV_SOCKS5_SESSION (self));
-        return ERR_OK;
-    }
-
-    if (!self->queue) {
-        self->queue = p;
+    if (p) {
+        if (!self->queue) {
+            self->queue = p;
+        } else {
+            if (self->queue->tot_len > TCP_WND_MAX (pcb))
+                return ERR_WOULDBLOCK;
+            pbuf_cat (self->queue, p);
+        }
     } else {
-        if (self->queue->tot_len > TCP_WND_MAX (pcb))
-            return ERR_WOULDBLOCK;
-        pbuf_cat (self->queue, p);
+        self->pcb_eof = 1;
     }
 
     hev_task_wakeup (self->data.task);
