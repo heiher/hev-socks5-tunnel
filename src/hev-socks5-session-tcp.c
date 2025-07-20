@@ -216,7 +216,7 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
 
         if (res_f > 0 || res_b > 0)
             type = HEV_TASK_YIELD;
-        else if ((res_f | res_b) == 0)
+        else if ((res_f & res_b) == 0)
             type = HEV_TASK_WAITIO;
         else
             break;
