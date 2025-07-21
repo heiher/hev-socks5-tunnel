@@ -23,10 +23,10 @@
 
 /* clang-format off */
 #ifndef PKGNAME
-#define PKGNAME hev/htproxy
+#define PKGNAME PKGNAME_FROM_MK
 #endif
 #ifndef CLSNAME
-#define CLSNAME TProxyService
+#define CLSNAME CLSNAME_FROM_MK
 #endif
 /* clang-format on */
 

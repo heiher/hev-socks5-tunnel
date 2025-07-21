@@ -30,7 +30,10 @@ SRCDIR := $(LOCAL_PATH)/src
 
 include $(CLEAR_VARS)
 include $(LOCAL_PATH)/build.mk
-LOCAL_MODULE    := hev-socks5-tunnel
+MODULE_NAME := hev-socks5-tunnel
+PKGNAME := hev/htproxy
+CLSNAME := TProxyService
+LOCAL_MODULE    := $(MODULE_NAME)
 LOCAL_SRC_FILES := $(patsubst $(SRCDIR)/%,src/%,$(SRCFILES))
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/src/misc \
@@ -39,7 +42,8 @@ LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/third-part/lwip/src/include \
 	$(LOCAL_PATH)/third-part/lwip/src/ports/include \
 	$(LOCAL_PATH)/third-part/hev-task-system/include
-LOCAL_CFLAGS += -DFD_SET_DEFINED -DSOCKLEN_T_DEFINED $(VERSION_CFLAGS)
+LOCAL_CFLAGS += -DFD_SET_DEFINED -DSOCKLEN_T_DEFINED $(VERSION_CFLAGS) \
+    -DPKGNAME_FROM_MK=\"$(PKGNAME)\" -DCLSNAME_FROM_MK=\"$(CLSNAME)\" -DMODULE_NAME_FROM_MK=\"$(MODULE_NAME)\"
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
 LOCAL_CFLAGS += -mfpu=neon
 endif
