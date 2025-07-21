@@ -308,6 +308,7 @@ void hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
 
 * **arror** - https://github.com/arror
 * **bazuchan** - https://github.com/bazuchan
+* **codewithtamim** - https://github.com/codewithtamim
 * **dovecoteescapee** - https://github.com/dovecoteescapee
 * **ebrahimtahernejad** - https://github.com/ebrahimtahernejad
 * **heiby** - https://github.com/heiby
@@ -316,8 +317,8 @@ void hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
 * **saeeddev94** - https://github.com/saeeddev94
 * **sskaje** - https://github.com/sskaje
 * **wankkoree** - https://github.com/wankkoree
-* **yiguous** - https://github.com/yiguous
 * **xz-dev** - https://github.com/xz-dev
+* **yiguous** - https://github.com/yiguous
 
 ## License
 
