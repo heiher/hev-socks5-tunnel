@@ -49,7 +49,7 @@ git clone --recursive https://github.com/heiher/hev-socks5-tunnel jni
 ndk-build
 ```
 
-> Important
+> [!IMPORTANT]
 > If you change the Java package or class name for the Android Service, you must also update the corresponding macros inside [`src/hev-jni.c`](src/hev-jni.c).
 ```c
   #define PKGNAME "hev/htproxy" // your package name, com.yourapp.service -> com/yourapp/service
