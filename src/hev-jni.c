@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <android/log.h>
 
 #include "hev-main.h"
 
@@ -23,10 +24,10 @@
 
 /* clang-format off */
 #ifndef PKGNAME
-#define PKGNAME PKGNAME_FROM_MK
+#define PKGNAME "hev/htproxy"
 #endif
 #ifndef CLSNAME
-#define CLSNAME CLSNAME_FROM_MK
+#define CLSNAME "TProxyService"
 #endif
 /* clang-format on */
 
@@ -77,7 +78,11 @@ JNI_OnLoad (JavaVM *vm, void *reserved)
         return 0;
     }
 
-    klass = (*env)->FindClass (env, STR (PKGNAME) "/" STR (CLSNAME));
+    klass = (*env)->FindClass (env, PKGNAME "/" CLSNAME);
+    if (!klass) {
+        __android_log_print(ANDROID_LOG_ERROR, "hev-jni", "ERROR: Could not find Java class %s/%s. If you changed the package or class name in your Android project, update PKGNAME and CLSNAME in src/hev-jni.c to match.", PKGNAME, CLSNAME);
+        return 0;
+    }
     (*env)->RegisterNatives (env, klass, native_methods,
                              N_ELEMENTS (native_methods));
     (*env)->DeleteLocalRef (env, klass);
