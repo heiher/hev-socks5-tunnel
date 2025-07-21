@@ -44,4 +44,5 @@ ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
 LOCAL_CFLAGS += -mfpu=neon
 endif
 LOCAL_STATIC_LIBRARIES := yaml lwip hev-task-system
+LOCAL_LDFLAGS += -Wl,-z,max-page-size=16384
 include $(BUILD_SHARED_LIBRARY)
