@@ -25,22 +25,6 @@
 
 #include "hev-main.h"
 
-#define WEAK __attribute__ ((weak))
-
-static void
-show_help (const char *self_path)
-{
-    printf ("%s CONFIG_PATH\n", self_path);
-    printf ("Version: %u.%u.%u %s\n", MAJOR_VERSION, MINOR_VERSION,
-            MICRO_VERSION, COMMIT_ID);
-}
-
-static void
-sigint_handler (int signum)
-{
-    hev_socks5_tunnel_stop ();
-}
-
 static int
 hev_socks5_tunnel_main_inner (int tun_fd)
 {
@@ -124,7 +108,22 @@ hev_socks5_tunnel_quit (void)
     hev_socks5_tunnel_stop ();
 }
 
-WEAK int
+#ifndef ENABLE_LIBRARY
+static void
+show_help (const char *self_path)
+{
+    printf ("%s CONFIG_PATH\n", self_path);
+    printf ("Version: %u.%u.%u %s\n", MAJOR_VERSION, MINOR_VERSION,
+            MICRO_VERSION, COMMIT_ID);
+}
+
+static void
+sigint_handler (int signum)
+{
+    hev_socks5_tunnel_stop ();
+}
+
+int
 main (int argc, char *argv[])
 {
     int res;
@@ -142,3 +141,4 @@ main (int argc, char *argv[])
 
     return 0;
 }
+#endif /* ENABLE_LIBRARY */
