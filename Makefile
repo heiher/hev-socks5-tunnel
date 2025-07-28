@@ -11,6 +11,7 @@ CCFLAGS=-O3 -pipe -Wall -Werror $(CFLAGS) \
 		-I$(SRCDIR)/misc \
 		-I$(SRCDIR)/core/include  \
 		-I$(THIRDPARTDIR)/yaml/include \
+		-I$(THIRDPARTDIR)/wintun/include \
 		-I$(THIRDPARTDIR)/lwip/src/include \
 		-I$(THIRDPARTDIR)/lwip/src/ports/include \
 		-I$(THIRDPARTDIR)/hev-task-system/include
