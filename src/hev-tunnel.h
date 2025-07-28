@@ -26,6 +26,10 @@
 #include "hev-tunnel-macos.h"
 #endif /* __APPLE__ || __MACH__ */
 
+#if defined(__MSYS__)
+#include "hev-tunnel-windows.h"
+#endif /* __MSYS__ */
+
 int hev_tunnel_open (const char *name, int multi_queue);
 void hev_tunnel_close (int fd);
 
@@ -35,5 +39,8 @@ const char *hev_tunnel_get_name (void);
 
 int hev_tunnel_set_ipv4 (const char *addr, unsigned int prefix);
 int hev_tunnel_set_ipv6 (const char *addr, unsigned int prefix);
+
+int hev_tunnel_add_task (int fd, HevTask *task);
+void hev_tunnel_del_task (int fd, HevTask *task);
 
 #endif /* __HEV_TUNNEL_H__ */

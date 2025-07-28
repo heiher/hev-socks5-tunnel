@@ -234,7 +234,7 @@ lwip_io_task_entry (void *data)
 
     LOG_D ("socks5 tunnel lwip task run");
 
-    hev_task_add_fd (task_lwip_io, tun_fd, POLLIN);
+    hev_tunnel_add_task (tun_fd, task_lwip_io);
 
     for (; run;) {
         struct pbuf *buf;
@@ -268,7 +268,7 @@ lwip_io_task_entry (void *data)
         hev_task_mutex_unlock (&mutex);
     }
 
-    hev_task_del_fd (task_lwip_io, tun_fd);
+    hev_tunnel_del_task (tun_fd, task_lwip_io);
 }
 
 static void
