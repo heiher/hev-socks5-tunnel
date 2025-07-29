@@ -2,14 +2,14 @@
 
 [![status](https://github.com/heiher/hev-socks5-tunnel/actions/workflows/build.yaml/badge.svg?branch=master&event=push)](https://github.com/heiher/hev-socks5-tunnel)
 
-A tunnel over Socks5 proxy (tun2socks) for Unix.
+A simple, lightweight tunnel over Socks5 proxy (tun2socks).
 
 ## Features
 
 * IPv4/IPv6. (dual stack)
 * Redirect TCP connections.
 * Redirect UDP packets. (Fullcone NAT, UDP-in-UDP and UDP-in-TCP [^1])
-* Linux/Android/FreeBSD/macOS/iOS/WSL2.
+* Linux/Android/FreeBSD/macOS/iOS/Windows.
 
 ## Benchmarks
 
@@ -56,6 +56,14 @@ git clone --recursive https://github.com/heiher/hev-socks5-tunnel
 cd hev-socks5-tunnel
 # will generate HevSocks5Tunnel.xcframework
 ./build-apple.sh
+```
+
+### Windows (MSYS2)
+```bash
+export MSYS=winsymlinks:native
+git clone --recursive https://github.com/heiher/hev-socks5-tunnel
+cd hev-socks5-tunnel
+make
 ```
 
 ### Library
