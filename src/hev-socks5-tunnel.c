@@ -363,7 +363,8 @@ tunnel_init (int extern_tun_fd)
 
     script_path = hev_config_get_tunnel_post_up_script ();
     if (script_path)
-        hev_exec_run (script_path, hev_tunnel_get_name (), 0);
+        hev_exec_run (script_path, hev_tunnel_get_name (),
+                      hev_tunnel_get_index (), 0);
 
     tun_fd_local = 1;
     return 0;
@@ -379,7 +380,8 @@ tunnel_fini (void)
 
     script_path = hev_config_get_tunnel_pre_down_script ();
     if (script_path)
-        hev_exec_run (script_path, hev_tunnel_get_name (), 1);
+        hev_exec_run (script_path, hev_tunnel_get_name (),
+                      hev_tunnel_get_index (), 1);
 
     hev_tunnel_close (tun_fd);
     tun_fd_local = 0;

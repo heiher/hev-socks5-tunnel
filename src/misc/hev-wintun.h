@@ -22,6 +22,7 @@ void hev_wintun_close (HevWinTun *self);
 HevWinTunAdapter *hev_wintun_adapter_create (const char *name);
 void hev_wintun_adapter_close (HevWinTunAdapter *adapter);
 
+int hev_wintun_adapter_get_index (HevWinTunAdapter *adapter);
 int hev_wintun_adapter_set_mtu (HevWinTunAdapter *adapter, int mtu);
 int hev_wintun_adapter_set_ipv4 (HevWinTunAdapter *adapter, char addr[4],
                                  unsigned int prefix);

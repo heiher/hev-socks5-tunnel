@@ -144,12 +144,6 @@ exit:
     return res;
 }
 
-const char *
-hev_tunnel_get_name (void)
-{
-    return tun_name;
-}
-
 int
 hev_tunnel_set_ipv4 (const char *addr, unsigned int prefix)
 {
@@ -231,6 +225,23 @@ exit:
 #else
     return 0;
 #endif
+}
+
+const char *
+hev_tunnel_get_name (void)
+{
+    return tun_name;
+}
+
+const char *
+hev_tunnel_get_index (void)
+{
+    static char tun_index[16];
+    unsigned int index;
+
+    index = if_nametoindex (tun_name);
+    snprintf (tun_index, sizeof (tun_index) - 1, "%d", index);
+    return tun_index;
 }
 
 int

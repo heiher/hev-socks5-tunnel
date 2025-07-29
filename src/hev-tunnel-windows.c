@@ -9,6 +9,7 @@
 
 #if defined(__MSYS__)
 
+#include <stdio.h>
 #include <string.h>
 #include <arpa/inet.h>
 
@@ -75,12 +76,6 @@ hev_tunnel_set_state (int state)
     return 0;
 }
 
-const char *
-hev_tunnel_get_name (void)
-{
-    return tun_name;
-}
-
 int
 hev_tunnel_set_ipv4 (const char *addr, unsigned int prefix)
 {
@@ -105,6 +100,26 @@ hev_tunnel_set_ipv6 (const char *addr, unsigned int prefix)
         return -1;
 
     return hev_wintun_adapter_set_ipv6 (adapter, ipv6, prefix);
+}
+
+const char *
+hev_tunnel_get_name (void)
+{
+    return tun_name;
+}
+
+const char *
+hev_tunnel_get_index (void)
+{
+    static char tun_index[16];
+    int index;
+
+    index = hev_wintun_adapter_get_index (adapter);
+    if (index < 0)
+        return NULL;
+
+    snprintf (tun_index, sizeof (tun_index) - 1, "%d", index);
+    return tun_index;
 }
 
 int

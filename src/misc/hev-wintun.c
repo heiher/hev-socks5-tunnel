@@ -80,6 +80,20 @@ hev_wintun_adapter_close (HevWinTunAdapter *adapter)
 }
 
 int
+hev_wintun_adapter_get_index (HevWinTunAdapter *adapter)
+{
+    NET_LUID Luid;
+    NET_IFINDEX index;
+
+    WintunGetAdapterLUID (adapter, &Luid);
+
+    if (ConvertInterfaceLuidToIndex (&Luid, &index) != NO_ERROR)
+        return -1;
+
+    return index;
+}
+
+int
 hev_wintun_adapter_set_mtu (HevWinTunAdapter *adapter, int mtu)
 {
     NET_LUID Luid;

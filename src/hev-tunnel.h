@@ -35,10 +35,12 @@ void hev_tunnel_close (int fd);
 
 int hev_tunnel_set_mtu (int mtu);
 int hev_tunnel_set_state (int state);
-const char *hev_tunnel_get_name (void);
 
 int hev_tunnel_set_ipv4 (const char *addr, unsigned int prefix);
 int hev_tunnel_set_ipv6 (const char *addr, unsigned int prefix);
+
+const char *hev_tunnel_get_name (void);
+const char *hev_tunnel_get_index (void);
 
 int hev_tunnel_add_task (int fd, HevTask *task);
 void hev_tunnel_del_task (int fd, HevTask *task);

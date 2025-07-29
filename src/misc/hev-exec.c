@@ -24,7 +24,8 @@
 
 #if TARGET_OS_TV
 void
-hev_exec_run (const char *script_path, const char *tun_name, int wait)
+hev_exec_run (const char *script_path, const char *tun_name,
+              const char *tun_index, int wait)
 {
 }
 #else
@@ -35,7 +36,8 @@ signal_handler (int signum)
 }
 
 void
-hev_exec_run (const char *script_path, const char *tun_name, int wait)
+hev_exec_run (const char *script_path, const char *tun_name,
+              const char *tun_index, int wait)
 {
     pid_t pid;
 
@@ -51,9 +53,9 @@ hev_exec_run (const char *script_path, const char *tun_name, int wait)
         return;
     }
 
-    execl (script_path, script_path, tun_name, NULL);
+    execl (script_path, script_path, tun_name, tun_index, NULL);
 
-    LOG_E ("exec %s %s", script_path, tun_name);
+    LOG_E ("exec %s %s %s", script_path, tun_name, tun_index);
     exit (-1);
 }
 #endif
