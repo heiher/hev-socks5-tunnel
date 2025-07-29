@@ -116,9 +116,7 @@ hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self)
     uint16_t port;
     int res;
 
-    hev_task_mutex_lock (self->mutex);
     buf = pbuf_alloc (PBUF_TRANSPORT, UDP_BUF_SIZE, PBUF_RAM);
-    hev_task_mutex_unlock (self->mutex);
     if (!buf) {
         LOG_D ("%p socks5 session udp fwd b buf", self);
         return -1;
