@@ -166,6 +166,49 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MSYS
+          location: D:\msys2
+          update: true
+          install: >-
+            gcc
+            git
+            make
+            wget
+            zip
+      - name: Build
+        shell: msys2 {0}
+        run: |
+          export MSYS=winsymlinks:native
+          git clone --depth=1 --recursive file://`pwd` work; cd work
+          make -j`nproc`
+          mkdir hev-socks5-tunnel
+          cp bin/hev-socks5-tunnel* hev-socks5-tunnel
+          cp third-part/wintun/bin/wintun.dll hev-socks5-tunnel
+          wget -P hev-socks5-tunnel https://github.com/heiher/msys2/releases/latest/download/msys-2.0.dll
+          zip -r ../hev-socks5-tunnel-win64.zip hev-socks5-tunnel
+      - name: Upload ${{ matrix.name }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: hev-socks5-tunnel-win64.zip
+          path: hev-socks5-tunnel-win64.zip
+          if-no-files-found: error
+          retention-days: 1
+
   release:
     name: Release
     runs-on: ubuntu-latest
@@ -174,6 +217,7 @@ jobs:
       - linux
       - macos
       - freebsd
+      - windows
     if: github.event_name == 'release'
     steps:
       - name: Checkout
