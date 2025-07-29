@@ -2,7 +2,7 @@
  ============================================================================
  Name        : hev-tunnel-macos.h
  Author      : hev <r@hev.cc>
- Copyright   : Copyright (c) 2023 hev
+ Copyright   : Copyright (c) 2023 - 2025 hev
  Description : Tunnel on MacOS
  ============================================================================
  */
@@ -12,76 +12,65 @@
 
 #include <sys/socket.h>
 
-static inline ssize_t
-hev_tunnel_read (int fd, void *buf, size_t count, HevTaskIOYielder yielder,
-                 void *yielder_data)
+static inline struct pbuf *
+hev_tunnel_read (int fd, int mtu, HevTaskIOYielder yielder, void *yielder_data)
 {
     struct iovec iov[2];
+    struct pbuf *buf;
     uint32_t type;
+    ssize_t s;
+
+    buf = pbuf_alloc (PBUF_RAW, mtu, PBUF_RAM);
+    if (!buf)
+        return NULL;
 
     iov[0].iov_base = &type;
     iov[0].iov_len = sizeof (type);
-    iov[1].iov_base = buf;
-    iov[1].iov_len = count;
+    iov[1].iov_base = buf->payload;
+    iov[1].iov_len = buf->len;
 
-    return hev_task_io_readv (fd, iov, 2, yielder, yielder_data);
+    s = hev_task_io_readv (fd, iov, 2, yielder, yielder_data);
+    if (s <= sizeof (type)) {
+        pbuf_free (buf);
+        return NULL;
+    }
+
+    buf->tot_len = s - sizeof (type);
+    buf->len = s - sizeof (type);
+
+    return buf;
 }
 
 static inline ssize_t
-hev_tunnel_readv (int fd, struct iovec *iov, int iovcnt,
-                  HevTaskIOYielder yielder, void *yielder_data)
+hev_tunnel_write (int fd, struct pbuf *buf)
 {
-    uint32_t type;
-
-    iov[0].iov_base = &type;
-    iov[0].iov_len = sizeof (type);
-
-    return hev_task_io_readv (fd, iov, iovcnt, yielder, yielder_data);
-}
-
-static inline ssize_t
-hev_tunnel_write (int fd, void *buf, size_t count)
-{
-    struct iovec iov[2];
-    uint8_t *iph = buf;
-    uint32_t type;
-
-    if (((iph[0] >> 4) & 0xF) == 4)
-        type = htonl (AF_INET);
-    else
-        type = htonl (AF_INET6);
-
-    iov[0].iov_base = &type;
-    iov[0].iov_len = sizeof (type);
-    iov[1].iov_base = buf;
-    iov[1].iov_len = count;
-
-    return writev (fd, iov, 2);
-}
-
-static inline ssize_t
-hev_tunnel_writev (int fd, struct iovec *iov, int iovcnt)
-{
-    uint32_t type;
+    struct iovec iov[512];
+    struct pbuf *p = buf;
+    uint32_t type = 0;
+    ssize_t res;
     int i;
 
     iov[0].iov_base = &type;
     iov[0].iov_len = sizeof (type);
 
-    for (i = 1; i < iovcnt; i++) {
-        if (iov[i].iov_len) {
-            uint8_t *iph = iov[i].iov_base;
+    for (i = 1; p && (i < 512); p = p->next) {
+        iov[i].iov_base = p->payload;
+        iov[i].iov_len = p->len;
+        i++;
 
-            if (((iph[0] >> 4) & 0xF) == 4)
+        if (!type && p->len) {
+            if (((*(uint8_t *)p->payload >> 4) & 0xF) == 4)
                 type = htonl (AF_INET);
             else
                 type = htonl (AF_INET6);
-
-            break;
         }
     }
 
-    return writev (fd, iov, iovcnt);
+    res = writev (fd, iov, i);
+    if (res <= sizeof (type))
+        return -1;
+
+    return res;
 }
 
 #endif /* __HEV_TUNNEL_MACOS_H__ */

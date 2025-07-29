@@ -15,15 +15,33 @@
 
 #include <hev-task.h>
 #include <hev-task-io.h>
+#include <hev-memory-allocator.h>
 
 #include "hev-wintun.h"
 
 #include "hev-tunnel.h"
 
+typedef struct _HevPBuf HevPBuf;
+
+struct _HevPBuf
+{
+    struct pbuf_custom base;
+    void *mem;
+};
+
 static HevWinTun *wintun;
 static HevWinTunAdapter *adapter;
 static HevWinTunSession *session;
 static char tun_name[IFNAMSIZ];
+
+static void
+hev_pbuf_free (struct pbuf *p)
+{
+    HevPBuf *buf = (HevPBuf *)p;
+
+    hev_wintun_session_release (session, buf->mem);
+    hev_free (buf);
+}
 
 int
 hev_tunnel_open (const char *name, int multi_queue)
@@ -136,76 +154,61 @@ hev_tunnel_del_task (int fd, HevTask *task)
     hev_task_del_whandle (task, handle);
 }
 
-ssize_t
-hev_tunnel_read (int fd, void *buf, size_t count, HevTaskIOYielder yielder,
-                 void *yielder_data)
+struct pbuf *
+hev_tunnel_read (int fd, int mtu, HevTaskIOYielder yielder, void *yielder_data)
 {
+    HevPBuf *buf;
     void *packet;
+    int spin = 0;
     int size;
 
 retry:
     packet = hev_wintun_session_receive (session, &size);
     if (!packet) {
         if (hev_wintun_get_last_error () == HEV_WINTUN_EAGAIN) {
-            if (yielder) {
+            if (spin++ < 1000) {
+                hev_task_yield (HEV_TASK_YIELD);
+            } else if (yielder) {
                 if (yielder (HEV_TASK_WAITIO, yielder_data))
-                    return -2;
+                    return NULL;
             } else {
                 hev_task_yield (HEV_TASK_WAITIO);
             }
             goto retry;
         } else {
-            return -1;
+            return NULL;
         }
     }
 
-    memcpy (buf, packet, (count < size) ? count : size);
-    hev_wintun_session_release (session, packet);
-    return size;
+    buf = hev_malloc (sizeof (HevPBuf));
+    if (!buf)
+        return NULL;
+
+    buf->mem = packet;
+    buf->base.custom_free_function = hev_pbuf_free;
+    pbuf_alloced_custom (PBUF_RAW, size, PBUF_RAM, &buf->base, packet, size);
+
+    return &buf->base.pbuf;
 }
 
 ssize_t
-hev_tunnel_readv (int fd, struct iovec *iov, int iovcnt,
-                  HevTaskIOYielder yielder, void *yielder_data)
+hev_tunnel_write (int fd, struct pbuf *buf)
 {
-    return -1;
-}
-
-ssize_t
-hev_tunnel_write (int fd, void *buf, size_t count)
-{
+    struct pbuf *p = buf;
     void *packet;
+    size_t size;
 
-    packet = hev_wintun_session_allocate (session, count);
+    packet = hev_wintun_session_allocate (session, p->tot_len);
     if (!packet)
         return -1;
 
-    memcpy (packet, buf, count);
-    hev_wintun_session_send (session, packet);
-    return count;
-}
-
-ssize_t
-hev_tunnel_writev (int fd, struct iovec *iov, int iovcnt)
-{
-    size_t count;
-    void *packet;
-    int i;
-
-    for (i = 1, count = 0; i < iovcnt; i++)
-        count += iov[i].iov_len;
-
-    packet = hev_wintun_session_allocate (session, count);
-    if (!packet)
-        return -1;
-
-    for (i = 1, count = 0; i < iovcnt; i++) {
-        memcpy (packet + count, iov[i].iov_base, iov[i].iov_len);
-        count += iov[i].iov_len;
+    for (size = 0; p; p = p->next) {
+        memcpy (packet + size, p->payload, p->len);
+        size += p->len;
     }
 
     hev_wintun_session_send (session, packet);
-    return count;
+    return size;
 }
 
 #endif /* __MSYS__ */
