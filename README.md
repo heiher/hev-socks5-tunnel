@@ -163,8 +163,21 @@ sudo ip -6 rule add lookup 20 pref 20
 sudo route add -net 10.0.0.1/32 10.0.2.2
 
 # Route others
-sudo route change -inet default -interface utun99
-sudo route change -inet6 default -interface utun99
+sudo route change -inet default -interface tun0
+sudo route change -inet6 default -interface tun0
+```
+
+#### Windows
+
+```zsh
+# Bypass upstream socks5 server
+# 10.0.0.1: socks5 server
+# 10.0.2.2: default gateway
+route add 10.0.0.1/32 10.0.2.2
+
+# Route others
+route change 0.0.0.0/0 0.0.0.0 if tun0
+route change ::/0 :: if tun0
 ```
 
 #### Low memory usage
