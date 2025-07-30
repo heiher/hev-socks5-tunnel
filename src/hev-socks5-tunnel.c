@@ -407,15 +407,15 @@ event_task_init (void)
     int nonblock = 1;
     int res;
 
-    res = pipe (event_fds);
+    res = socketpair (PF_LOCAL, SOCK_STREAM, 0, event_fds);
     if (res < 0) {
-        LOG_E ("socks5 tunnel pipe");
+        LOG_E ("socks5 tunnel event");
         return -1;
     }
 
     res = ioctl (event_fds[0], FIONBIO, (char *)&nonblock);
     if (res < 0) {
-        LOG_E ("socks5 tunnel pipe nonblock");
+        LOG_E ("socks5 tunnel event nonblock");
         return -1;
     }
 
