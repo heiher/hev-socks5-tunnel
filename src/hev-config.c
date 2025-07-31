@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <arpa/inet.h>
+#include <sys/socket.h>
 #include <lwip/tcp.h>
 #include <yaml.h>
 
@@ -27,6 +28,12 @@ static char tun_post_up_script[1024];
 static char tun_pre_down_script[1024];
 
 static HevConfigServer srv;
+
+static int mapdns_address;
+static int mapdns_port;
+static int mapdns_network;
+static int mapdns_netmask;
+static int mapdns_cache_size;
 
 static char log_file[1024];
 static char pid_file[1024];
@@ -245,6 +252,50 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
 }
 
 static int
+hev_config_parse_mapdns (yaml_document_t *doc, yaml_node_t *base)
+{
+    yaml_node_pair_t *pair;
+
+    if (!base || YAML_MAPPING_NODE != base->type)
+        return -1;
+
+    for (pair = base->data.mapping.pairs.start;
+         pair < base->data.mapping.pairs.top; pair++) {
+        yaml_node_t *node;
+        const char *key, *value;
+
+        if (!pair->key || !pair->value)
+            break;
+
+        node = yaml_document_get_node (doc, pair->key);
+        if (!node || YAML_SCALAR_NODE != node->type)
+            break;
+        key = (const char *)node->data.scalar.value;
+
+        node = yaml_document_get_node (doc, pair->value);
+        if (!node || YAML_SCALAR_NODE != node->type)
+            break;
+        value = (const char *)node->data.scalar.value;
+
+        if (0 == strcmp (key, "address"))
+            inet_pton (AF_INET, value, &mapdns_address);
+        else if (0 == strcmp (key, "port"))
+            mapdns_port = strtoul (value, NULL, 10);
+        else if (0 == strcmp (key, "network"))
+            inet_pton (AF_INET, value, &mapdns_network);
+        else if (0 == strcmp (key, "netmask"))
+            inet_pton (AF_INET, value, &mapdns_netmask);
+        else if (0 == strcmp (key, "cache-size"))
+            mapdns_cache_size = strtoul (value, NULL, 10);
+    }
+
+    mapdns_network = ntohl (mapdns_network);
+    mapdns_netmask = ntohl (mapdns_netmask);
+
+    return 0;
+}
+
+static int
 hev_config_parse_log_level (const char *value)
 {
     if (0 == strcmp (value, "debug"))
@@ -335,6 +386,8 @@ hev_config_parse_doc (yaml_document_t *doc)
             res = hev_config_parse_tunnel (doc, node);
         else if (0 == strcmp (key, "socks5"))
             res = hev_config_parse_socks5 (doc, node);
+        else if (0 == strcmp (key, "mapdns"))
+            res = hev_config_parse_mapdns (doc, node);
         else if (0 == strcmp (key, "misc"))
             res = hev_config_parse_misc (doc, node);
 
@@ -478,6 +531,36 @@ HevConfigServer *
 hev_config_get_socks5_server (void)
 {
     return &srv;
+}
+
+int
+hev_config_get_mapdns_address (void)
+{
+    return mapdns_address;
+}
+
+int
+hev_config_get_mapdns_port (void)
+{
+    return mapdns_port;
+}
+
+int
+hev_config_get_mapdns_network (void)
+{
+    return mapdns_network;
+}
+
+int
+hev_config_get_mapdns_netmask (void)
+{
+    return mapdns_netmask;
+}
+
+int
+hev_config_get_mapdns_cache_size (void)
+{
+    return mapdns_cache_size;
 }
 
 int

@@ -8,6 +8,7 @@ CC=$(CROSS_PREFIX)gcc
 AR=$(CROSS_PREFIX)ar
 STRIP=$(CROSS_PREFIX)strip
 CCFLAGS=-O3 -pipe -Wall -Werror $(CFLAGS) \
+		-I$(SRCDIR) \
 		-I$(SRCDIR)/misc \
 		-I$(SRCDIR)/core/include  \
 		-I$(THIRDPARTDIR)/yaml/include \

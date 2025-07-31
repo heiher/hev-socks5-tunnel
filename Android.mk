@@ -33,6 +33,7 @@ include $(LOCAL_PATH)/build.mk
 LOCAL_MODULE    := hev-socks5-tunnel
 LOCAL_SRC_FILES := $(patsubst $(SRCDIR)/%,src/%,$(SRCFILES))
 LOCAL_C_INCLUDES := \
+	$(LOCAL_PATH)/src \
 	$(LOCAL_PATH)/src/misc \
 	$(LOCAL_PATH)/src/core/include \
 	$(LOCAL_PATH)/third-part/yaml/include \
