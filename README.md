@@ -192,6 +192,20 @@ route change 0.0.0.0/0 0.0.0.0 if tun0
 route change ::/0 :: if tun0
 ```
 
+#### OpenWrt 24.10+
+
+Repo: https://github.com/openwrt/packages/tree/master/net/hev-socks5-tunnel
+
+```sh
+# Install package
+opkg install hev-socks5-tunnel
+
+# Edit /etc/config/hev-socks5-tunnel
+
+# Restart service
+/etc/init.d/hev-socks5-tunnel restart
+```
+
 #### Low memory usage
 
 On low-memory systems like iOS, reducing the size of the TCP buffer
