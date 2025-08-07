@@ -1,6 +1,6 @@
 # HevSocks5Tunnel
 
-[![status](https://github.com/heiher/hev-socks5-tunnel/actions/workflows/build.yaml/badge.svg?branch=master&event=push)](https://github.com/heiher/hev-socks5-tunnel)
+[![status](https://github.com/heiher/hev-socks5-tunnel/actions/workflows/build.yaml/badge.svg?branch=main&event=push)](https://github.com/heiher/hev-socks5-tunnel)
 
 A simple, lightweight tunnel over Socks5 proxy (tun2socks).
 
@@ -371,4 +371,4 @@ void hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
 
 MIT
 
-[^1]: See [protocol specification](https://github.com/heiher/hev-socks5-core/tree/master?tab=readme-ov-file#udp-in-tcp). The [hev-socks5-server](https://github.com/heiher/hev-socks5-server) supports UDP relay over TCP.
+[^1]: See [protocol specification](https://github.com/heiher/hev-socks5-core/tree/main?tab=readme-ov-file#udp-in-tcp). The [hev-socks5-server](https://github.com/heiher/hev-socks5-server) supports UDP relay over TCP.
