@@ -1,5 +1,32 @@
-bin
-build
-HevSocks5Tunnel.xcframework
-obj
-libs
+# Binaries
+bin/
+build/
+obj/
+libs/
+
+# XCFrameworks (for Apple platforms)
+HevSocks5Tunnel.xcframework/
+
+# macOS files
+.DS_Store
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Backup files
+*~
+
+# Generated config
+config.h
