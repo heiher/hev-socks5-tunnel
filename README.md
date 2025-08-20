@@ -188,8 +188,8 @@ sudo route change -inet6 default -interface tun0
 route add 10.0.0.1/32 10.0.2.2
 
 # Route others
-route change 0.0.0.0/0 0.0.0.0 if tun0
-route change ::/0 :: if tun0
+route change 0.0.0.0/0 0.0.0.0 if tun-index
+route change ::/0 :: if tun-index
 ```
 
 #### OpenWrt 24.10+
