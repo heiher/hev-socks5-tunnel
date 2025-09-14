@@ -100,7 +100,7 @@ jobs:
       - name: Build ${{ matrix.name }}
         run: |
           sudo mkdir -p /opt/x-tools
-          wget https://github.com/cross-tools/musl-cross/releases/download/20250815/${{ matrix.tool }}.tar.xz
+          wget https://github.com/cross-tools/musl-cross/releases/download/20250911/${{ matrix.tool }}.tar.xz
           sudo tar xf ${{ matrix.tool }}.tar.xz -C /opt/x-tools
           make CROSS_PREFIX=/opt/x-tools/${{ matrix.tool }}/bin/${{ matrix.tool }}- CFLAGS=${{ matrix.env.CFLAGS }} ENABLE_STATIC=1 -j`nproc`
           cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-${{ matrix.name }}
