@@ -249,6 +249,41 @@ hev_socks5_session_udp_bind (HevSocks5 *self, int fd,
     return 0;
 }
 
+static uint16_t
+hev_socks5_addr_get_port (const HevSocks5Addr *addr)
+{
+    uint16_t port = 0;
+
+    switch (addr->atype) {
+    case HEV_SOCKS5_ADDR_TYPE_IPV4:
+        port = addr->ipv4.port;
+        break;
+    case HEV_SOCKS5_ADDR_TYPE_IPV6:
+        port = addr->ipv6.port;
+        break;
+    case HEV_SOCKS5_ADDR_TYPE_NAME:
+        memcpy (&port, addr->domain.addr + addr->domain.len, 2);
+    }
+
+    return port;
+}
+
+static int
+hev_socks5_session_udp_set_upstream_addr (HevSocks5Client *base,
+                                          HevSocks5Addr *addr)
+{
+    HevConfigServer *srv = hev_config_get_socks5_server ();
+    HevSocks5ClientClass *ckptr;
+
+    if (srv->udp_in_udp && srv->udp_addr[0]) {
+        uint16_t port = hev_socks5_addr_get_port (addr);
+        hev_socks5_addr_from_name (addr, srv->udp_addr, port);
+    }
+
+    ckptr = HEV_SOCKS5_CLIENT_CLASS (HEV_SOCKS5_CLIENT_UDP_TYPE);
+    return ckptr->set_upstream_addr (base, addr);
+}
+
 static void
 splice_task_entry (void *data)
 {
@@ -406,6 +441,7 @@ hev_socks5_session_udp_class (void)
 
     if (!okptr->name) {
         HevSocks5Class *skptr;
+        HevSocks5ClientClass *ckptr;
         HevSocks5SessionIface *siptr;
         void *ptr;
 
@@ -418,6 +454,9 @@ hev_socks5_session_udp_class (void)
 
         skptr = HEV_SOCKS5_CLASS (kptr);
         skptr->binder = hev_socks5_session_udp_bind;
+
+        ckptr = HEV_SOCKS5_CLIENT_CLASS (kptr);
+        ckptr->set_upstream_addr = hev_socks5_session_udp_set_upstream_addr;
 
         siptr = &kptr->session;
         siptr->splicer = hev_socks5_session_udp_splice;
