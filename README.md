@@ -107,6 +107,8 @@ socks5:
   address: 127.0.0.1
   # Socks5 UDP relay mode (tcp|udp)
   udp: 'udp'
+  # Override the UDP address provided by the Socks5 server (ipv4/ipv6)
+# udp-address: ''
   # Socks5 handshake using pipeline mode
 # pipeline: false
   # Socks5 server username
