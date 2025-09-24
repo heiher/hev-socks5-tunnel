@@ -157,7 +157,7 @@ tcp_err_handler (void *arg, err_t err)
 }
 
 HevSocks5SessionTCP *
-hev_socks5_session_tcp_new (struct tcp_pcb *pcb, HevTaskMutex *mutex)
+hev_socks5_session_tcp_new (struct tcp_pcb *pcb, HevTaskMutex *mutex, HevFallbackContext *fallback_ctx)
 {
     HevSocks5SessionTCP *self;
     int res;
@@ -166,7 +166,7 @@ hev_socks5_session_tcp_new (struct tcp_pcb *pcb, HevTaskMutex *mutex)
     if (!self)
         return NULL;
 
-    res = hev_socks5_session_tcp_construct (self, pcb, mutex);
+    res = hev_socks5_session_tcp_construct (self, pcb, mutex, fallback_ctx);
     if (res < 0) {
         hev_free (self);
         return NULL;
@@ -186,7 +186,7 @@ hev_socks5_session_tcp_bind (HevSocks5 *self, int fd,
 
     LOG_D ("%p socks5 session tcp bind", self);
 
-    srv = hev_config_get_socks5_server ();
+    srv = hev_config_get_socks5_tcp_server ();
     mark = srv->mark;
 
     if (mark) {
@@ -270,9 +270,20 @@ hev_socks5_session_tcp_get_node (HevSocks5Session *base)
     return &self->data.node;
 }
 
+void
+hev_socks5_session_task_entry (void *data)
+{
+    HevSocks5SessionTCP *self = data;
+    HevConfigServer *srv;
+
+    srv = hev_config_get_socks5_tcp_server ();
+    hev_socks5_session_run (HEV_SOCKS5_SESSION (self), srv, self->fallback_ctx);
+    hev_object_unref (HEV_OBJECT (self));
+}
+
 int
 hev_socks5_session_tcp_construct (HevSocks5SessionTCP *self,
-                                  struct tcp_pcb *pcb, HevTaskMutex *mutex)
+                                  struct tcp_pcb *pcb, HevTaskMutex *mutex, HevFallbackContext *fallback_ctx)
 {
     HevSocks5Addr addr;
     int res;
@@ -297,8 +308,55 @@ hev_socks5_session_tcp_construct (HevSocks5SessionTCP *self,
     self->pcb = pcb;
     self->mutex = mutex;
     self->data.self = self;
+    self->fallback_ctx = fallback_ctx;
 
     return 0;
+}
+
+void
+hev_socks5_session_tcp_try_connect (struct tcp_pcb *pcb, HevTaskMutex *mutex, HevFallbackContext *fallback_ctx)
+{
+    HevSocks5SessionTCP *self;
+    HevTask *task;
+    int stack_size;
+
+    self = hev_malloc0 (sizeof (HevSocks5SessionTCP));
+    if (!self) {
+        LOG_E ("Socks5 TCP: Failed to allocate session.");
+        goto fail_alloc_session;
+    }
+
+    if (hev_socks5_session_tcp_construct (self, pcb, mutex, fallback_ctx) < 0) {
+        LOG_E ("%p Socks5 TCP: Failed to construct session.", self);
+        goto fail_construct_session;
+    }
+
+    stack_size = hev_config_get_misc_task_stack_size ();
+    task = hev_task_new (stack_size);
+    if (!task) {
+        LOG_E ("%p Socks5 TCP: Failed to create task.", self);
+        goto fail_create_task;
+    }
+
+    hev_socks5_session_set_task (HEV_SOCKS5_SESSION (self), task);
+    hev_task_run (task, hev_socks5_session_task_entry, self);
+
+    // The session task will handle signaling fallback_ctx
+    return;
+
+fail_create_task:
+    hev_object_unref (HEV_OBJECT (self)); // This will call destruct
+    return;
+fail_construct_session:
+    hev_free (self);
+fail_alloc_session:
+    // If we reach here, the pcb is still owned by lwip, and will be handled by tcp_accept_handler's return ERR_MEM
+    // or by the fallback manager if it's managing the pcb.
+    if (fallback_ctx) {
+        // If we failed before signaling, ensure fallback_ctx is signaled
+        hev_fallback_context_signal_result (fallback_ctx, HEV_FALLBACK_STATUS_FAILURE);
+    }
+    return;
 }
 
 void

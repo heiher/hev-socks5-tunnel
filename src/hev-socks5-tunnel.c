@@ -15,6 +15,7 @@
 
 #include <lwip/tcp.h>
 #include <lwip/udp.h>
+#include <lwip/prot/udp.h>
 #include <lwip/nd6.h>
 #include <lwip/netif.h>
 #include <lwip/ip4_frag.h>
@@ -27,18 +28,23 @@
 #include <hev-task-system.h>
 #include <hev-memory-allocator.h>
 
-#include "hev-exec.h"
-#include "hev-list.h"
-#include "hev-config.h"
-#include "hev-logger.h"
-#include "hev-tunnel.h"
-#include "hev-compiler.h"
-#include "hev-mapped-dns.h"
-#include "hev-config-const.h"
-#include "hev-socks5-session-tcp.h"
-#include "hev-socks5-session-udp.h"
+#include <hev-exec.h>
+#include <hev-list.h>
+#include <hev-config.h>
+#include <hev-logger.h>
+#include <hev-tunnel.h>
+#include <hev-compiler.h>
+#include <hev-mapped-dns.h>
+#include <hev-config-const.h>
+#include <hev-socks5-session-tcp.h>
+#include <hev-socks5-session-udp.h>
 
-#include "hev-socks5-tunnel.h"
+#include <hev-socks5-tunnel.h>
+
+#include <hev-dns-forwarder.h>
+#include <hev-chnroutes-manager.h>
+#include <hev-direct-connector.h>
+#include <hev-fallback-manager.h>
 
 static int run;
 static int tun_fd = -1;
@@ -110,21 +116,55 @@ netif_init_handler (struct netif *netif)
     return ERR_OK;
 }
 
+typedef struct _HevSocks5SessionTaskData HevSocks5SessionTaskData;
+
+struct _HevSocks5SessionTaskData {
+    HevSocks5Session *session;
+    HevFallbackContext *fallback_ctx;
+};
+
+typedef struct _HevDirectConnectTaskData HevDirectConnectTaskData;
+
+struct _HevDirectConnectTaskData {
+    struct tcp_pcb *pcb;
+    HevTaskMutex *mutex;
+};
+
+static void
+direct_connect_task_entry (void *data)
+{
+    HevDirectConnectTaskData *task_data = data;
+
+    hev_direct_connector_tcp_try_connect (task_data->pcb, task_data->mutex, NULL);
+    hev_free (task_data);
+}
+
 static void
 hev_socks5_session_task_entry (void *data)
 {
-    HevSocks5Session *s = data;
+    HevSocks5SessionTaskData *task_data = (HevSocks5SessionTaskData *)data;
+    HevSocks5Session *s = task_data->session;
+    HevConfigServer *srv;
+    HevSocks5 *socks5 = HEV_SOCKS5 (s);
 
-    hev_socks5_session_run (s);
+    if (socks5->type == HEV_SOCKS5_TYPE_TCP) {
+        srv = hev_config_get_socks5_tcp_server ();
+    } else {
+        srv = hev_config_get_socks5_udp_server ();
+    }
+
+    hev_socks5_session_run (s, srv, task_data->fallback_ctx);
 
     hev_list_del (&session_set, hev_socks5_session_get_node (s));
     hev_object_unref (HEV_OBJECT (s));
+    hev_free (task_data);
 }
 
 static err_t
 tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
 {
-    HevSocks5SessionTCP *tcp;
+    HevSocks5SessionTCP *tcp_session;
+    HevSocks5SessionTaskData *task_data;
     HevListNode *node;
     int stack_size;
     HevTask *task;
@@ -135,22 +175,80 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
     if (!run)
         return ERR_RST;
 
-    tcp = hev_socks5_session_tcp_new (pcb, &mutex);
-    if (!tcp)
-        return ERR_MEM;
-
-    stack_size = hev_config_get_misc_task_stack_size ();
-    task = hev_task_new (stack_size);
-    if (!task) {
-        hev_object_unref (HEV_OBJECT (tcp));
-        return ERR_MEM;
+    int is_domestic_ip = 0; // Default to non-domestic
+    if (hev_config_get_chnroutes_enabled()) {
+        is_domestic_ip = hev_chnroutes_manager_is_domestic(&pcb->local_ip);
+        if (is_domestic_ip == -1) { // Error or not initialized
+            LOG_W("Chnroutes manager error or not initialized. Treating as non-domestic.");
+            is_domestic_ip = 0; // Fallback to non-domestic behavior
+        }
+    } else {
+        LOG_D("Chnroutes disabled. Treating all IPs as non-domestic for decision.");
     }
 
-    hev_socks5_session_set_task (HEV_SOCKS5_SESSION (tcp), task);
-    node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (tcp));
-    hev_list_add_tail (&session_set, node);
-    hev_task_run (task, hev_socks5_session_task_entry, tcp);
-    hev_task_wakeup (task_lwip_timer);
+    // First decision: chnroutes domestic/non-domestic split
+    if (is_domestic_ip == 1) {
+        HevDirectConnectTaskData *task_data;
+
+        LOG_D ("%p TCP: Domestic IP %s:%u, attempting direct connect (no fallback).",
+               pcb, ipaddr_ntoa (&pcb->local_ip), pcb->local_port);
+
+        task_data = hev_malloc (sizeof (HevDirectConnectTaskData));
+        if (!task_data) {
+            tcp_abort (pcb);
+            return ERR_MEM;
+        }
+
+        task_data->pcb = pcb;
+        task_data->mutex = &mutex;
+
+        stack_size = hev_config_get_misc_task_stack_size ();
+        task = hev_task_new (stack_size);
+        if (!task) {
+            hev_free (task_data);
+            tcp_abort (pcb);
+            return ERR_MEM;
+        }
+
+        hev_task_run (task, direct_connect_task_entry, task_data);
+    } else {
+        // Non-domestic IP
+        if (hev_config_get_smart_proxy_enabled()) {
+            LOG_D("%p TCP: Non-domestic IP %s:%u, smart proxy enabled, starting fallback manager.",
+                  pcb, ipaddr_ntoa(&pcb->local_ip), pcb->local_port);
+            hev_fallback_manager_start_tcp(pcb, &mutex); // TCP uses fallback manager
+        } else {
+            LOG_D("%p TCP: Non-domestic IP %s:%u, smart proxy disabled, attempting SOCKS5 connect.",
+                  pcb, ipaddr_ntoa(&pcb->local_ip), pcb->local_port);
+            tcp_session = hev_socks5_session_tcp_new (pcb, &mutex, NULL);
+            if (!tcp_session)
+                return ERR_MEM;
+
+            task_data = hev_malloc0(sizeof(HevSocks5SessionTaskData));
+            if (!task_data) {
+                hev_object_unref(HEV_OBJECT(tcp_session));
+                return ERR_MEM;
+            }
+            task_data->session = HEV_SOCKS5_SESSION(tcp_session);
+            task_data->fallback_ctx = NULL; // No fallback context for direct SOCKS5 session
+
+            stack_size = hev_config_get_misc_task_stack_size ();
+            task = hev_task_new (stack_size);
+            if (!task) {
+                hev_object_unref (HEV_OBJECT (tcp_session));
+                hev_free(task_data);
+                return ERR_MEM;
+            }
+
+            hev_socks5_session_set_task (HEV_SOCKS5_SESSION (tcp_session), task);
+            node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (tcp_session));
+            hev_list_add_tail (&session_set, node);
+            hev_task_run (task, hev_socks5_session_task_entry, task_data);
+            hev_task_wakeup (task_lwip_timer);
+        }
+    }
+
+    tcp_accepted (tcp);
 
     return ERR_OK;
 }
@@ -189,45 +287,93 @@ static void
 udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
                   const ip_addr_t *addr, u16_t port)
 {
-    HevSocks5SessionUDP *udp;
+    HevSocks5SessionUDP *udp_session;
+    HevSocks5SessionTaskData *task_data;
     HevListNode *node;
     HevMappedDNS *dns;
     int stack_size;
     HevTask *task;
 
-    if (!run) {
-        udp_remove (pcb);
+    const ip_addr_t *dest_addr;
+    const ip_addr_t *src_addr;
+    struct udp_hdr *udphdr;
+    u16_t dest_port, src_port;
+
+    if (!p) {
+        LOG_W ("udp: pcb removed");
         return;
     }
 
+    if (!run) {
+        pbuf_free (p);
+        return;
+    }
+
+    // Get src/dest from headers, don't trust callback parameters
+    dest_addr = ip_current_dest_addr ();
+    src_addr = ip_current_src_addr ();
+    udphdr = (struct udp_hdr *)p->payload;
+    dest_port = ntohs (udphdr->dest);
+    src_port = ntohs (udphdr->src);
+
     dns = hev_mapped_dns_get ();
-    if (dns && addr->type == IPADDR_TYPE_V4) {
+    if (dns && src_addr->type == IPADDR_TYPE_V4) {
         int faddr = hev_config_get_mapdns_address ();
         int fport = hev_config_get_mapdns_port ();
-        if (fport == port && faddr == ip_2_ip4 (addr)->addr) {
+        if (fport == src_port && faddr == ip_2_ip4 (src_addr)->addr) {
             udp_recv (pcb, dns_recv_handler, dns);
             return;
         }
     }
 
-    udp = hev_socks5_session_udp_new (pcb, &mutex);
-    if (!udp) {
-        udp_remove (pcb);
-        return;
+    int is_domestic_ip = 0; // Default to non-domestic
+    if (hev_config_get_chnroutes_enabled ()) {
+        is_domestic_ip = hev_chnroutes_manager_is_domestic (dest_addr);
+        if (is_domestic_ip == -1) { // Error or not initialized
+            LOG_W ("Chnroutes manager error or not initialized. Treating as non-domestic.");
+            is_domestic_ip = 0; // Fallback to non-domestic behavior
+        }
+    } else {
+        LOG_D ("Chnroutes disabled. Treating all IPs as non-domestic for decision.");
     }
 
-    stack_size = hev_config_get_misc_task_stack_size ();
-    task = hev_task_new (stack_size);
-    if (!task) {
-        hev_object_unref (HEV_OBJECT (udp));
-        return;
-    }
+    // UDP always uses chnroutes split, no smart proxy fallback
+    if (is_domestic_ip == 1) {
+        LOG_D ("%p UDP: Domestic IP %s:%u, attempting direct connect.", pcb,
+               ipaddr_ntoa (dest_addr), dest_port);
+        hev_direct_connector_udp_run (pcb, &mutex, p, dest_addr, dest_port,
+                                      src_addr, src_port);
+    } else {
+        LOG_D ("%p UDP: Non-domestic IP %s:%u, attempting SOCKS5 connect.", pcb,
+               ipaddr_ntoa (dest_addr), dest_port);
+        udp_session = hev_socks5_session_udp_new (pcb, &mutex);
+        if (!udp_session) {
+            udp_remove (pcb);
+            return;
+        }
 
-    hev_socks5_session_set_task (HEV_SOCKS5_SESSION (udp), task);
-    node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (udp));
-    hev_list_add_tail (&session_set, node);
-    hev_task_run (task, hev_socks5_session_task_entry, udp);
-    hev_task_wakeup (task_lwip_timer);
+        task_data = hev_malloc0 (sizeof (HevSocks5SessionTaskData));
+        if (!task_data) {
+            hev_object_unref (HEV_OBJECT (udp_session));
+            return;
+        }
+        task_data->session = HEV_SOCKS5_SESSION (udp_session);
+        task_data->fallback_ctx = NULL; // No fallback context for UDP
+
+        stack_size = hev_config_get_misc_task_stack_size ();
+        task = hev_task_new (stack_size);
+        if (!task) {
+            hev_object_unref (HEV_OBJECT (udp_session));
+            hev_free (task_data);
+            return;
+        }
+
+        hev_socks5_session_set_task (HEV_SOCKS5_SESSION (udp_session), task);
+        node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (udp_session));
+        hev_list_add_tail (&session_set, node);
+        hev_task_run (task, hev_socks5_session_task_entry, task_data);
+        hev_task_wakeup (task_lwip_timer);
+    }
 }
 
 static void
@@ -404,23 +550,35 @@ tunnel_fini (void)
 static int
 gateway_init (void)
 {
-    ip4_addr_t addr4, mask, gw;
+    ip4_addr_t addr4, mask4, gw4;
     ip6_addr_t addr6;
+    const char *ipv4, *ipv6;
 
     netif_add_noaddr (&netif, NULL, netif_init_handler, ip_input);
 
-    ip4_addr_set_loopback (&addr4);
-    ip4_addr_set_any (&mask);
-    ip4_addr_set_any (&gw);
-    netif_set_addr (&netif, &addr4, &mask, &gw);
+    ipv4 = hev_config_get_tunnel_ipv4_address ();
+    if (ipv4 && ip4addr_aton (ipv4, &addr4)) {
+        ip4_addr_set_any (&mask4);
+        ip4_addr_set_any (&gw4);
+    } else {
+        ip4_addr_set_loopback (&addr4);
+        ip4_addr_set_any (&mask4);
+        ip4_addr_set_any (&gw4);
+    }
+    netif_set_addr (&netif, &addr4, &mask4, &gw4);
 
-    ip6_addr_set_loopback (&addr6);
-    netif_add_ip6_address (&netif, &addr6, NULL);
+    ipv6 = hev_config_get_tunnel_ipv6_address ();
+    if (ipv6 && ip6addr_aton (ipv6, &addr6)) {
+        netif_add_ip6_address (&netif, &addr6, NULL);
+    } else {
+        ip6_addr_set_loopback (&addr6);
+        netif_add_ip6_address (&netif, &addr6, NULL);
+    }
 
     netif_set_up (&netif);
     netif_set_link_up (&netif);
     netif_set_default (&netif);
-    netif_set_flags (&netif, NETIF_FLAG_PRETEND_TCP);
+    netif_set_flags (&netif, NETIF_FLAG_PRETEND_TCP | NETIF_FLAG_PRETEND_UDP);
 
     tcp = tcp_new_ip_type (IPADDR_TYPE_ANY);
     tcp_bind_netif (tcp, &netif);
@@ -537,16 +695,22 @@ static int
 mapped_dns_init (void)
 {
     HevMappedDNS *dns;
+    int address;
+    int port;
     int cache_size;
     int network;
     int netmask;
 
+    address = hev_config_get_mapdns_address ();
+    port = hev_config_get_mapdns_port ();
     network = hev_config_get_mapdns_network ();
     netmask = hev_config_get_mapdns_netmask ();
     cache_size = hev_config_get_mapdns_cache_size ();
 
-    if (!cache_size)
+    if (!address || !port || !network || !netmask || !cache_size) {
+        LOG_D ("MapDNS feature is disabled due to incomplete configuration.");
         return 0;
+    }
 
     dns = hev_mapped_dns_new (network, netmask, cache_size);
     if (!dns)
@@ -600,6 +764,39 @@ hev_socks5_tunnel_init (int tun_fd)
     if (res < 0)
         goto exit;
 
+    // Chnroutes Manager Initialization
+    if (hev_config_get_chnroutes_enabled()) {
+        const char *chnroutes_path = hev_config_get_chnroutes_file_path();
+        if (chnroutes_path && strlen(chnroutes_path) > 0) {
+            res = hev_chnroutes_manager_init(chnroutes_path);
+            if (res < 0) {
+                LOG_E("Failed to initialize chnroutes manager. Disabling chnroutes functionality.");
+            }
+        } else {
+            LOG_W("Chnroutes enabled but file path is empty. Disabling chnroutes functionality.");
+        }
+    } else {
+        LOG_I("Chnroutes functionality is disabled by configuration.");
+    }
+
+    // Smart Proxy Manager Initialization (only if enabled)
+    if (hev_config_get_smart_proxy_enabled()) {
+        res = hev_fallback_manager_init();
+        if (res < 0) {
+            LOG_E("Failed to initialize fallback manager. Smart proxy functionality may be impaired.");
+        } else {
+            LOG_I("Smart-Proxy: Enabled (timeout: %ums, expiry: %umins).",
+                  hev_config_get_smart_proxy_timeout_ms(),
+                  hev_config_get_smart_proxy_blocked_ip_expiry_minutes());
+        }
+    }
+
+    // DNS Forwarder Status
+    if (hev_config_get_dns_forwarder_virtual_ip4() ||
+        hev_config_get_dns_forwarder_virtual_ip6()) {
+        LOG_I("DNS-Forwarder: Enabled.");
+    }
+
     signal (SIGPIPE, SIG_IGN);
 
     hev_task_mutex_init (&mutex);
@@ -622,6 +819,14 @@ hev_socks5_tunnel_fini (void)
     event_task_fini ();
     gateway_fini ();
     tunnel_fini ();
+
+    // Finalize chnroutes and fallback managers
+    if (hev_config_get_chnroutes_enabled()) {
+        hev_chnroutes_manager_fini();
+    }
+    if (hev_config_get_smart_proxy_enabled()) {
+        hev_fallback_manager_fini();
+    }
 
     stat_tx_packets = 0;
     stat_rx_packets = 0;
@@ -667,6 +872,14 @@ hev_socks5_tunnel_stop (void)
 
     res = write (fd, &res, 1);
     assert (res > 0 && "socks5 tunnel write event");
+
+    hev_task_wakeup (task_lwip_io);
+}
+
+int
+hev_socks5_tunnel_is_running (void)
+{
+    return run;
 }
 
 void

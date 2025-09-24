@@ -8,35 +8,44 @@
  */
 
 #include <string.h>
+#include <errno.h>
 
-#include "hev-logger.h"
-#include "hev-config.h"
-#include "hev-socks5-client.h"
+#include <hev-fallback-manager.h>
 
-#include "hev-socks5-session.h"
+#include <hev-logger.h>
+#include <hev-config.h>
+#include <hev-socks5-client.h>
+
+#include <hev-socks5-session.h>
 
 void
-hev_socks5_session_run (HevSocks5Session *self)
+hev_socks5_session_run (HevSocks5Session *self, HevConfigServer *srv, HevFallbackContext *fallback_ctx)
 {
     HevSocks5SessionIface *iface;
-    HevConfigServer *srv;
     int read_write_timeout;
     int connect_timeout;
     int res;
+    HevFallbackStatus status = HEV_FALLBACK_STATUS_FAILURE;
 
     LOG_D ("%p socks5 session run", self);
-
-    srv = hev_config_get_socks5_server ();
-    connect_timeout = hev_config_get_misc_connect_timeout ();
     read_write_timeout = hev_config_get_misc_read_write_timeout ();
+
+    if (fallback_ctx) {
+        connect_timeout = hev_config_get_smart_proxy_timeout_ms();
+    } else {
+        connect_timeout = hev_config_get_misc_connect_timeout ();
+    }
 
     hev_socks5_set_timeout (HEV_SOCKS5 (self), connect_timeout);
 
     res = hev_socks5_client_connect (HEV_SOCKS5_CLIENT (self), srv->addr,
                                      srv->port);
     if (res < 0) {
-        LOG_E ("%p socks5 session connect", self);
-        return;
+        LOG_E ("%p socks5 session connect: %d", self, errno);
+        if (errno == ETIMEDOUT) {
+            status = HEV_FALLBACK_STATUS_TIMEOUT;
+        }
+        goto exit;
     }
 
     hev_socks5_set_timeout (HEV_SOCKS5 (self), read_write_timeout);
@@ -49,12 +58,22 @@ hev_socks5_session_run (HevSocks5Session *self)
 
     res = hev_socks5_client_handshake (HEV_SOCKS5_CLIENT (self), srv->pipeline);
     if (res < 0) {
-        LOG_E ("%p socks5 session handshake", self);
-        return;
+        LOG_E ("%p socks5 session handshake: %d", self, errno);
+        if (errno == ETIMEDOUT) {
+            status = HEV_FALLBACK_STATUS_TIMEOUT;
+        }
+        goto exit;
     }
 
     iface = HEV_OBJECT_GET_IFACE (self, HEV_SOCKS5_SESSION_TYPE);
     iface->splicer (self);
+
+    status = HEV_FALLBACK_STATUS_SUCCESS;
+
+exit:
+    if (fallback_ctx) {
+        hev_fallback_context_signal_result (fallback_ctx, status);
+    }
 }
 
 void

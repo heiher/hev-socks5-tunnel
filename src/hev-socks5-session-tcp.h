@@ -12,8 +12,8 @@
 
 #include <hev-ring-buffer.h>
 #include <hev-socks5-client-tcp.h>
-
 #include "hev-socks5-session.h"
+#include "hev-fallback-manager.h" // Added for HevFallbackContext
 
 #define HEV_SOCKS5_SESSION_TCP(p) ((HevSocks5SessionTCP *)p)
 #define HEV_SOCKS5_SESSION_TCP_CLASS(p) ((HevSocks5SessionTCPClass *)p)
@@ -33,6 +33,7 @@ struct _HevSocks5SessionTCP
     HevTaskMutex *mutex;
     HevRingBuffer *buffer;
     int pcb_eof;
+    HevFallbackContext *fallback_ctx;
 };
 
 struct _HevSocks5SessionTCPClass
@@ -45,9 +46,11 @@ struct _HevSocks5SessionTCPClass
 HevObjectClass *hev_socks5_session_tcp_class (void);
 
 int hev_socks5_session_tcp_construct (HevSocks5SessionTCP *self,
-                                      struct tcp_pcb *pcb, HevTaskMutex *mutex);
+                                      struct tcp_pcb *pcb, HevTaskMutex *mutex, HevFallbackContext *fallback_ctx);
 
 HevSocks5SessionTCP *hev_socks5_session_tcp_new (struct tcp_pcb *pcb,
-                                                 HevTaskMutex *mutex);
+                                                 HevTaskMutex *mutex, HevFallbackContext *fallback_ctx);
+
+void hev_socks5_session_tcp_try_connect(struct tcp_pcb *pcb, HevTaskMutex *mutex, HevFallbackContext *fallback_ctx);
 
 #endif /* __HEV_SOCKS5_SESSION_TCP_H__ */

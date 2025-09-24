@@ -1,6 +1,6 @@
 # HevSocks5Tunnel
 
-[![status](https://github.com/heiher/hev-socks5-tunnel/actions/workflows/build.yaml/badge.svg?branch=main&event=push)](https://github.com/heiher/hev-socks5-tunnel)
+[![status](https://github.com/heiher/hev-socks5-tunnel/actions/workflows/build.yaml/badge.svg?branch=main&event=push)](https://github.com/yiguihai11/hev-socks5-tunnel)
 
 A simple, lightweight tunnel over Socks5 proxy (tun2socks).
 
@@ -35,7 +35,7 @@ See [here](https://github.com/heiher/hev-socks5-tunnel/wiki/Benchmarks) for more
 ### Unix
 
 ```bash
-git clone --recursive https://github.com/heiher/hev-socks5-tunnel
+git clone --depth=1 --recursive https://github.com/yiguihai11/hev-socks5-tunnel
 cd hev-socks5-tunnel
 make
 ```
@@ -45,14 +45,14 @@ make
 ```bash
 mkdir hev-socks5-tunnel
 cd hev-socks5-tunnel
-git clone --recursive https://github.com/heiher/hev-socks5-tunnel jni
+git clone --depth=1 --recursive https://github.com/yiguihai11/hev-socks5-tunnel jni
 ndk-build
 ```
 
 ### iOS and macOS
 
 ```bash
-git clone --recursive https://github.com/heiher/hev-socks5-tunnel
+git clone --depth=1 --recursive https://github.com/yiguihai11/hev-socks5-tunnel
 cd hev-socks5-tunnel
 # will generate HevSocks5Tunnel.xcframework
 ./build-apple.sh
@@ -61,7 +61,7 @@ cd hev-socks5-tunnel
 ### Windows (MSYS2)
 ```bash
 export MSYS=winsymlinks:native
-git clone --recursive https://github.com/heiher/hev-socks5-tunnel
+git clone --depth=1 --recursive https://github.com/yiguihai11/hev-socks5-tunnel
 cd hev-socks5-tunnel
 make
 ```
@@ -69,7 +69,7 @@ make
 ### Library
 
 ```bash
-git clone --recursive https://github.com/heiher/hev-socks5-tunnel
+git clone --depth=1 --recursive https://github.com/yiguihai11/hev-socks5-tunnel
 cd hev-socks5-tunnel
 
 # Static library

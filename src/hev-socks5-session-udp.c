@@ -26,6 +26,7 @@
 #include "hev-compiler.h"
 #include "hev-config-const.h"
 
+#include "hev-dns-forwarder.h"
 #include "hev-socks5-session-udp.h"
 
 typedef struct _HevSocks5UDPFrame HevSocks5UDPFrame;
@@ -180,6 +181,35 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
         return;
     }
 
+    if (pcb->local_port == 53) {
+        const char *vip_str = NULL;
+
+        if (IP_IS_V4 (&pcb->local_ip))
+            vip_str = hev_config_get_dns_forwarder_virtual_ip4 ();
+        else if (IP_IS_V6 (&pcb->local_ip))
+            vip_str = hev_config_get_dns_forwarder_virtual_ip6 ();
+
+        if (vip_str) {
+            ip_addr_t vip;
+            ipaddr_aton (vip_str, &vip);
+            if (ip_addr_cmp (&pcb->local_ip, &vip)) {
+                char saddr[IPADDR_STRLEN_MAX];
+                char daddr[IPADDR_STRLEN_MAX];
+
+                ipaddr_ntoa_r (addr, saddr, sizeof (saddr));
+                ipaddr_ntoa_r (&pcb->local_ip, daddr, sizeof (daddr));
+                LOG_D ("DNS hijack: %s:%u -> %s:%u", saddr, port, daddr,
+                       pcb->local_port);
+
+                int family = IP_IS_V6 (&pcb->local_ip) ? AF_INET6 : AF_INET;
+                hev_dns_forwarder_run (pcb, self->mutex, p, addr, port,
+                                       family);
+                pbuf_free (p);
+                return;
+            }
+        }
+    }
+
     if (self->frames > UDP_POOL_SIZE) {
         pbuf_free (p);
         return;
@@ -235,7 +265,7 @@ hev_socks5_session_udp_bind (HevSocks5 *self, int fd,
 
     LOG_D ("%p socks5 session udp bind", self);
 
-    srv = hev_config_get_socks5_server ();
+    srv = hev_config_get_socks5_udp_server ();
     mark = srv->mark;
 
     if (mark) {
@@ -332,7 +362,7 @@ int
 hev_socks5_session_udp_construct (HevSocks5SessionUDP *self,
                                   struct udp_pcb *pcb, HevTaskMutex *mutex)
 {
-    HevConfigServer *srv = hev_config_get_socks5_server ();
+    HevConfigServer *srv = hev_config_get_socks5_udp_server ();
     int type;
     int res;
 

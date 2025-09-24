@@ -12,7 +12,8 @@
 
 #include <hev-task.h>
 
-#include "hev-list.h"
+#include <hev-list.h>
+#include <hev-fallback-manager.h>
 
 #define HEV_SOCKS5_SESSION(p) ((HevSocks5Session *)p)
 #define HEV_SOCKS5_SESSION_IFACE(p) ((HevSocks5SessionIface *)p)
@@ -39,7 +40,7 @@ struct _HevSocks5SessionIface
 
 void *hev_socks5_session_iface (void);
 
-void hev_socks5_session_run (HevSocks5Session *self);
+void hev_socks5_session_run (HevSocks5Session *self, HevConfigServer *srv, HevFallbackContext *fallback_ctx);
 void hev_socks5_session_terminate (HevSocks5Session *self);
 
 void hev_socks5_session_set_task (HevSocks5Session *self, HevTask *task);

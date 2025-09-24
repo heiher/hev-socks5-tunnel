@@ -17,20 +17,35 @@ tunnel:
 # pre-down-script: down.sh
 
 socks5:
-  # Socks5 server port
-  port: 1080
-  # Socks5 server address (ipv4/ipv6)
-  address: 127.0.0.1
-  # Socks5 UDP relay mode (tcp|udp)
-  udp: 'udp'
-  # Socks5 handshake using pipeline mode
-# pipeline: false
-  # Socks5 server username
-# username: 'username'
-  # Socks5 server password
-# password: 'password'
-  # Socket mark
-# mark: 0
+  # SOCKS5 server for TCP connections
+  tcp:
+    # Socks5 server port
+    port: 1080
+    # Socks5 server address (ipv4/ipv6)
+    address: 127.0.0.1
+    # Socks5 handshake using pipeline mode
+#   pipeline: false
+    # Socks5 server username
+#   username: 'username'
+    # Socks5 server password
+#   password: 'password'
+    # Socket mark
+#   mark: 0
+
+  # SOCKS5 server for UDP connections
+  udp:
+    # Socks5 server port
+    port: 1080
+    # Socks5 server address (ipv4/ipv6)
+    address: 127.0.0.1
+    # Socks5 UDP relay mode (tcp|udp)
+    udp-relay: 'udp'
+    # Socks5 server username
+#   username: 'username'
+    # Socks5 server password
+#   password: 'password'
+    # Socket mark
+#   mark: 0
 
 #mapdns:
   # Mapped DNS address
@@ -44,7 +59,23 @@ socks5:
   # Mapped DNS cache size
 # cache-size: 10000
 
-#misc:
+#dns-forwarder:
+  # Hijack DNS queries sent to this IPv4 address inside the tunnel.
+# virtual-ip4: 8.8.8.8
+  # Hijack DNS queries sent to this IPv6 address inside the tunnel.
+# virtual-ip6: '2001:4860:4860::8844'
+
+  # Forward IPv4 DNS queries to this target.
+  # Port is optional, defaults to 53.
+# target-ip4: 1.1.1.1
+# target-ip4: 1.1.1.1:53
+
+  # Forward IPv6 DNS queries to this target.
+  # Port is optional, defaults to 53.
+# target-ip6: '[2606:4700:4700::1111]'
+# target-ip6: '[2606:4700:4700::1111]:53'
+
+misc:
   # task stack size (bytes)
 # task-stack-size: 86016
   # tcp buffer size (bytes)
@@ -54,10 +85,36 @@ socks5:
   # read-write timeout (ms)
 # read-write-timeout: 60000
   # stdout, stderr or file-path
-# log-file: stderr
+  log-file: stderr
   # debug, info, warn or error
-# log-level: warn
+  log-level: warn
   # If present, run as a daemon with this pid file
 # pid-file: /run/hev-socks5-tunnel.pid
   # If present, set rlimit nofile; else use default value
 # limit-nofile: 65535
+
+#chnroutes:
+  # Enables split routing based on a list of Chinese IP ranges.
+  # When enabled, traffic to IPs within the specified file will be considered "domestic".
+  # This allows for different routing decisions, e.g., domestic traffic can be connected
+  # directly, while other traffic goes through the SOCKS5 proxy.
+  # The feature is enabled if this file path is set.
+# file-path: "conf/chnroutes.txt"
+
+#smart-proxy:
+  # Enables a "smart" fallback mechanism for non-domestic TCP traffic.
+  # When a TCP connection to a non-domestic IP is attempted:
+  # 1. It first tries to connect directly.
+  # 2. If the direct connection attempt times out (takes longer than `timeout-ms`),
+  #    it will then fall back to using the SOCKS5 proxy for that connection.
+  # 3. The IP address that timed out is temporarily "blocked" for a duration of
+  #    `blocked-ip-expiry-minutes`.
+  # 4. Future connection attempts to a blocked IP will skip the direct attempt and
+  #    go straight to the SOCKS5 proxy, improving performance for slow-to-reach sites.
+  #
+  # Feature is enabled if both timeout-ms and blocked-ip-expiry-minutes are set and non-zero.
+
+  # Timeout in milliseconds for direct connection attempts.
+# timeout-ms: 2000
+  # Expiry time in minutes for temporarily blocked IPs.
+# blocked-ip-expiry-minutes: 360

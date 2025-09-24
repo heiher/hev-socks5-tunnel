@@ -56,6 +56,13 @@ hev_list_last (HevList *self)
 void hev_list_add_tail (HevList *self, HevListNode *new_);
 void hev_list_del (HevList *self, HevListNode *node);
 
+static inline void
+hev_list_init (HevList *self)
+{
+    self->head = NULL;
+    self->tail = NULL;
+}
+
 #ifdef __cplusplus
 }
 #endif

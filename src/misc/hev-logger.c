@@ -24,6 +24,9 @@ static HevLoggerLevel req_level;
 int
 hev_logger_init (HevLoggerLevel level, const char *path)
 {
+    if (fd >= 0)
+        return 0;
+
     req_level = level;
 
     if (0 == strcmp (path, "stdout"))

@@ -12,8 +12,7 @@
 
 typedef struct _HevConfigServer HevConfigServer;
 
-struct _HevConfigServer
-{
+struct _HevConfigServer {
     const char *user;
     const char *pass;
     unsigned int mark;
@@ -38,7 +37,13 @@ const char *hev_config_get_tunnel_ipv6_address (void);
 const char *hev_config_get_tunnel_post_up_script (void);
 const char *hev_config_get_tunnel_pre_down_script (void);
 
-HevConfigServer *hev_config_get_socks5_server (void);
+HevConfigServer *hev_config_get_socks5_tcp_server (void);
+HevConfigServer *hev_config_get_socks5_udp_server (void);
+
+const char *hev_config_get_dns_forwarder_virtual_ip4 (void);
+const char *hev_config_get_dns_forwarder_virtual_ip6 (void);
+const char *hev_config_get_dns_forwarder_target4 (void);
+const char *hev_config_get_dns_forwarder_target6 (void);
 
 int hev_config_get_mapdns_address (void);
 int hev_config_get_mapdns_port (void);
@@ -54,5 +59,14 @@ int hev_config_get_misc_limit_nofile (void);
 const char *hev_config_get_misc_pid_file (void);
 const char *hev_config_get_misc_log_file (void);
 int hev_config_get_misc_log_level (void);
+
+/* Chnroutes */
+int hev_config_get_chnroutes_enabled (void);
+const char *hev_config_get_chnroutes_file_path (void);
+
+/* Smart Proxy */
+int hev_config_get_smart_proxy_enabled (void);
+unsigned int hev_config_get_smart_proxy_timeout_ms (void);
+unsigned int hev_config_get_smart_proxy_blocked_ip_expiry_minutes (void);
 
 #endif /* __HEV_CONFIG_H__ */
