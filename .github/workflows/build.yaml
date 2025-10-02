@@ -77,8 +77,14 @@ jobs:
             tool: mips-unknown-linux-musl
           - name: mips32sf
             tool: mips-unknown-linux-muslsf
+          - name: or1k
+            tool: or1k-unknown-linux-musl
+          - name: powerpc64le
+            tool: powerpc64le-unknown-linux-musl
           - name: powerpc64
             tool: powerpc64-unknown-linux-musl
+          - name: powerpcle
+            tool: powerpcle-unknown-linux-musl
           - name: powerpc
             tool: powerpc-unknown-linux-musl
           - name: riscv32
@@ -100,7 +106,7 @@ jobs:
       - name: Build ${{ matrix.name }}
         run: |
           sudo mkdir -p /opt/x-tools
-          wget https://github.com/cross-tools/musl-cross/releases/download/20250911/${{ matrix.tool }}.tar.xz
+          wget https://github.com/cross-tools/musl-cross/releases/download/20250929/${{ matrix.tool }}.tar.xz
           sudo tar xf ${{ matrix.tool }}.tar.xz -C /opt/x-tools
           make CROSS_PREFIX=/opt/x-tools/${{ matrix.tool }}/bin/${{ matrix.tool }}- CFLAGS=${{ matrix.env.CFLAGS }} ENABLE_STATIC=1 -j`nproc`
           cp bin/hev-socks5-tunnel hev-socks5-tunnel-linux-${{ matrix.name }}
