@@ -270,12 +270,12 @@ jobs:
           submodules: true
       - name: Prepare
         run: |
-          wget https://dl.google.com/android/repository/android-ndk-r27b-linux.zip
-          unzip android-ndk-r27b-linux.zip
+          wget https://dl.google.com/android/repository/android-ndk-r27d-linux.zip
+          unzip android-ndk-r27d-linux.zip
           ln -sf . jni
       - name: Build
         run: |
-          ./android-ndk-r27b/ndk-build
+          ./android-ndk-r27d/ndk-build
 
   llvm:
     name: LLVM
