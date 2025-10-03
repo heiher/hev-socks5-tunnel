@@ -40,7 +40,7 @@ static char pid_file[1024];
 static int task_stack_size = 86016;
 static int tcp_buffer_size = 65536;
 static int connect_timeout = 5000;
-static int read_write_timeout = 60000;
+static int read_write_timeout = 300000;
 static int limit_nofile = 65535;
 static int log_level = HEV_LOGGER_WARN;
 
