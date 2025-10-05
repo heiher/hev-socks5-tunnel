@@ -37,6 +37,7 @@ static int mapdns_cache_size;
 
 static char log_file[1024];
 static char pid_file[1024];
+static int max_session_count;
 static int task_stack_size = 86016;
 static int tcp_buffer_size = 65536;
 static int connect_timeout = 10000;
@@ -344,6 +345,8 @@ hev_config_parse_misc (yaml_document_t *doc, yaml_node_t *base)
             task_stack_size = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "tcp-buffer-size"))
             tcp_buffer_size = strtoul (value, NULL, 10);
+        else if (0 == strcmp (key, "max-session-count"))
+            max_session_count = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "connect-timeout"))
             connect_timeout = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "read-write-timeout"))
@@ -579,6 +582,12 @@ int
 hev_config_get_misc_tcp_buffer_size (void)
 {
     return tcp_buffer_size;
+}
+
+int
+hev_config_get_misc_max_session_count (void)
+{
+    return max_session_count;
 }
 
 int

@@ -23,10 +23,23 @@
 #include "hev-config.h"
 #include "hev-logger.h"
 #include "hev-config-const.h"
+#include "hev-socks5-tunnel.h"
 
 #include "hev-socks5-session-tcp.h"
 
-#define task_io_yielder hev_socks5_task_io_yielder
+static int
+task_io_yielder (HevTaskYieldType type, void *data)
+{
+    HevSocks5Session *self = data;
+    HevListNode *node;
+    int res;
+
+    res = hev_socks5_task_io_yielder (type, data);
+    node = hev_socks5_session_get_node (self);
+    hev_socks5_tunnel_update_session (node);
+
+    return res;
+}
 
 static int
 tcp_splice_f (HevSocks5SessionTCP *self)

@@ -135,6 +135,8 @@ socks5:
 # task-stack-size: 86016
   # tcp buffer size (bytes)
 # tcp-buffer-size: 65536
+  # maximum session count (0: unlimited)
+# max-session-count: 0
   # connect timeout (ms)
 # connect-timeout: 10000
   # read-write timeout (ms)
@@ -210,8 +212,9 @@ opkg install hev-socks5-tunnel
 
 #### Low memory usage
 
-On low-memory systems like iOS, reducing the size of the TCP buffer
-and task stack can help prevent out-of-memory issues.
+On low-memory systems like iOS, reducing the size of the TCP buffer and
+task stack, as well as limiting the maximum session count, can help prevent
+out-of-memory issues.
 
 ```yaml
 misc:
@@ -219,6 +222,8 @@ misc:
   task-stack-size: 24576 # 20480 + tcp-buffer-size
   # tcp buffer size (bytes)
   tcp-buffer-size: 4096
+  # maximum session count
+  max-session-count: 1200
 ```
 
 #### Docker Compose

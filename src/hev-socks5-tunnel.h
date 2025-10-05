@@ -10,6 +10,8 @@
 #ifndef __HEV_SOCKS5_TUNNEL_H__
 #define __HEV_SOCKS5_TUNNEL_H__
 
+#include "hev-list.h"
+
 int hev_socks5_tunnel_init (int tun_fd);
 void hev_socks5_tunnel_fini (void);
 
@@ -18,5 +20,7 @@ void hev_socks5_tunnel_stop (void);
 
 void hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
                               size_t *rx_packets, size_t *rx_bytes);
+
+void hev_socks5_tunnel_update_session (HevListNode *node);
 
 #endif /* __HEV_SOCKS5_TUNNEL_H__ */

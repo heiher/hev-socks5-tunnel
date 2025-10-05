@@ -25,6 +25,7 @@
 #include "hev-logger.h"
 #include "hev-compiler.h"
 #include "hev-config-const.h"
+#include "hev-socks5-tunnel.h"
 
 #include "hev-socks5-session-udp.h"
 
@@ -41,6 +42,8 @@ static int
 task_io_yielder (HevTaskYieldType type, void *data)
 {
     HevSocks5 *self = data;
+    HevListNode *node;
+    int res;
 
     if (self->type == HEV_SOCKS5_TYPE_UDP_IN_UDP) {
         ssize_t res;
@@ -53,7 +56,11 @@ task_io_yielder (HevTaskYieldType type, void *data)
         }
     }
 
-    return hev_socks5_task_io_yielder (type, data);
+    res = hev_socks5_task_io_yielder (type, data);
+    node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (self));
+    hev_socks5_tunnel_update_session (node);
+
+    return res;
 }
 
 static int

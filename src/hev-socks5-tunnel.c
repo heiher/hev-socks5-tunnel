@@ -28,7 +28,6 @@
 #include <hev-memory-allocator.h>
 
 #include "hev-exec.h"
-#include "hev-list.h"
 #include "hev-config.h"
 #include "hev-logger.h"
 #include "hev-tunnel.h"
@@ -43,6 +42,7 @@
 static int run;
 static int tun_fd = -1;
 static int tun_fd_local;
+static int session_count;
 static int event_fds[2] = { -1, -1 };
 
 static size_t stat_tx_packets;
@@ -111,13 +111,51 @@ netif_init_handler (struct netif *netif)
 }
 
 static void
+hev_socks5_tunnel_insert_session (HevListNode *node)
+{
+    HevSocks5SessionData *sd;
+    int max_session_count;
+
+    hev_list_add_tail (&session_set, node);
+    session_count++;
+
+    max_session_count = hev_config_get_misc_max_session_count ();
+    if (!max_session_count || session_count < max_session_count)
+        return;
+
+    node = hev_list_first (&session_set);
+    sd = container_of (node, HevSocks5SessionData, node);
+    hev_socks5_session_terminate (sd->self);
+}
+
+static void
+hev_socks5_tunnel_delete_session (HevListNode *node)
+{
+    hev_list_del (&session_set, node);
+    session_count--;
+}
+
+void
+hev_socks5_tunnel_update_session (HevListNode *node)
+{
+    int max_session_count;
+
+    max_session_count = hev_config_get_misc_max_session_count ();
+    if (!max_session_count)
+        return;
+
+    hev_list_del (&session_set, node);
+    hev_list_add_tail (&session_set, node);
+}
+
+static void
 hev_socks5_session_task_entry (void *data)
 {
     HevSocks5Session *s = data;
 
     hev_socks5_session_run (s);
 
-    hev_list_del (&session_set, hev_socks5_session_get_node (s));
+    hev_socks5_tunnel_delete_session (hev_socks5_session_get_node (s));
     hev_object_unref (HEV_OBJECT (s));
 }
 
@@ -148,7 +186,7 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
 
     hev_socks5_session_set_task (HEV_SOCKS5_SESSION (tcp), task);
     node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (tcp));
-    hev_list_add_tail (&session_set, node);
+    hev_socks5_tunnel_insert_session (node);
     hev_task_run (task, hev_socks5_session_task_entry, tcp);
     hev_task_wakeup (task_lwip_timer);
 
@@ -225,7 +263,7 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
 
     hev_socks5_session_set_task (HEV_SOCKS5_SESSION (udp), task);
     node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (udp));
-    hev_list_add_tail (&session_set, node);
+    hev_socks5_tunnel_insert_session (node);
     hev_task_run (task, hev_socks5_session_task_entry, udp);
     hev_task_wakeup (task_lwip_timer);
 }
