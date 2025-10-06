@@ -19,6 +19,7 @@ SOCKS5_PORT="${SOCKS5_PORT:-1080}"
 SOCKS5_USERNAME="${SOCKS5_USERNAME:-}"
 SOCKS5_PASSWORD="${SOCKS5_PASSWORD:-}"
 SOCKS5_UDP_MODE="${SOCKS5_UDP_MODE:-udp}"
+SOCKS5_UDP_ADDR="${SOCKS5_UDP_ADDR:-}"
 
 IPV4_INCLUDED_ROUTES="${IPV4_INCLUDED_ROUTES:-0.0.0.0/0}"
 IPV4_EXCLUDED_ROUTES="${IPV4_EXCLUDED_ROUTES:-}"
@@ -48,6 +49,10 @@ EOF
 
   if [ -n "${SOCKS5_PASSWORD}" ]; then
       echo "  password: '${SOCKS5_PASSWORD}'" >> /hs5t.yml
+  fi
+
+  if [ -n "${SOCKS5_UDP_ADDR}" ]; then
+      echo "  udp-address: '${SOCKS5_UDP_ADDR}'" >> /hs5t.yml
   fi
 }
 
