@@ -41,7 +41,8 @@ static int max_session_count;
 static int task_stack_size = 86016;
 static int tcp_buffer_size = 65536;
 static int connect_timeout = 10000;
-static int read_write_timeout = 300000;
+static int tcp_read_write_timeout = 300000;
+static int udp_read_write_timeout = 60000;
 static int limit_nofile = 65535;
 static int log_level = HEV_LOGGER_WARN;
 
@@ -319,6 +320,9 @@ static int
 hev_config_parse_misc (yaml_document_t *doc, yaml_node_t *base)
 {
     yaml_node_pair_t *pair;
+    int tcp_rw_timeout = -1;
+    int udp_rw_timeout = -1;
+    int rw_timeout = -1;
 
     if (!base || YAML_MAPPING_NODE != base->type)
         return -1;
@@ -350,7 +354,11 @@ hev_config_parse_misc (yaml_document_t *doc, yaml_node_t *base)
         else if (0 == strcmp (key, "connect-timeout"))
             connect_timeout = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "read-write-timeout"))
-            read_write_timeout = strtoul (value, NULL, 10);
+            rw_timeout = strtoul (value, NULL, 10);
+        else if (0 == strcmp (key, "tcp-read-write-timeout"))
+            tcp_rw_timeout = strtoul (value, NULL, 10);
+        else if (0 == strcmp (key, "udp-read-write-timeout"))
+            udp_rw_timeout = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "pid-file"))
             strncpy (pid_file, value, 1024 - 1);
         else if (0 == strcmp (key, "log-file"))
@@ -360,6 +368,16 @@ hev_config_parse_misc (yaml_document_t *doc, yaml_node_t *base)
         else if (0 == strcmp (key, "limit-nofile"))
             limit_nofile = strtol (value, NULL, 10);
     }
+
+    if (tcp_rw_timeout <= 0)
+        tcp_rw_timeout = rw_timeout;
+    if (udp_rw_timeout <= 0)
+        udp_rw_timeout = rw_timeout;
+
+    if (tcp_rw_timeout > 0)
+        tcp_read_write_timeout = tcp_rw_timeout;
+    if (udp_rw_timeout > 0)
+        udp_read_write_timeout = udp_rw_timeout;
 
     return 0;
 }
@@ -597,9 +615,15 @@ hev_config_get_misc_connect_timeout (void)
 }
 
 int
-hev_config_get_misc_read_write_timeout (void)
+hev_config_get_misc_tcp_read_write_timeout (void)
 {
-    return read_write_timeout;
+    return tcp_read_write_timeout;
+}
+
+int
+hev_config_get_misc_udp_read_write_timeout (void)
+{
+    return udp_read_write_timeout;
 }
 
 int

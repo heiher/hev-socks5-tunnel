@@ -40,9 +40,9 @@ hev_socks5_tunnel_main_inner (int tun_fd)
 
     res = hev_config_get_misc_connect_timeout ();
     hev_socks5_set_connect_timeout (res);
-    res = hev_config_get_misc_read_write_timeout ();
+    res = hev_config_get_misc_tcp_read_write_timeout ();
     hev_socks5_set_tcp_timeout (res);
-    res = hev_config_get_misc_read_write_timeout ();
+    res = hev_config_get_misc_udp_read_write_timeout ();
     hev_socks5_set_udp_timeout (res);
 
     res = hev_logger_init (log_level, log_file);

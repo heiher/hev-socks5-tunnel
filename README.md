@@ -139,8 +139,10 @@ socks5:
 # max-session-count: 0
   # connect timeout (ms)
 # connect-timeout: 10000
-  # read-write timeout (ms)
-# read-write-timeout: 300000
+  # TCP read-write timeout (ms)
+# tcp-read-write-timeout: 300000
+  # UDP read-write timeout (ms)
+# udp-read-write-timeout: 60000
   # stdout, stderr or file-path
 # log-file: stderr
   # debug, info, warn or error
