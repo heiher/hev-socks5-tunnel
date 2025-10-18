@@ -394,6 +394,7 @@ hev_config_parse_doc (yaml_document_t *doc)
     yaml_node_t *root;
     yaml_node_pair_t *pair;
     int min_task_stack_size;
+    int udp_buffer_size;
 
     root = yaml_document_get_root_node (doc);
     if (!root || YAML_MAPPING_NODE != root->type)
@@ -431,7 +432,13 @@ hev_config_parse_doc (yaml_document_t *doc)
     if (tcp_buffer_size > TCP_SND_BUF)
         tcp_buffer_size = TCP_SND_BUF;
 
-    min_task_stack_size = TASK_STACK_SIZE + tcp_buffer_size;
+    udp_buffer_size = UDP_BUF_SIZE * udp_copy_buffer_nums;
+
+    if (tcp_buffer_size > udp_buffer_size)
+        min_task_stack_size = TASK_STACK_SIZE + tcp_buffer_size;
+    else
+        min_task_stack_size = TASK_STACK_SIZE + udp_buffer_size;
+
     if (task_stack_size < min_task_stack_size)
         task_stack_size = min_task_stack_size;
 
