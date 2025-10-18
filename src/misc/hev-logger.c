@@ -48,7 +48,7 @@ hev_logger_fini (void)
 int
 hev_logger_enabled (HevLoggerLevel level)
 {
-    if (fd >= 0 && level >= req_level)
+    if (level >= req_level && fd >= 0)
         return 1;
 
     return 0;
@@ -66,7 +66,7 @@ hev_logger_log (HevLoggerLevel level, const char *fmt, ...)
     va_list ap;
     int len;
 
-    if (fd < 0 || level < req_level)
+    if (level < req_level || fd < 0)
         return;
 
     time (&now);
