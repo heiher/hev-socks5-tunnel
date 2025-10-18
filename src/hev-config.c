@@ -40,6 +40,7 @@ static char pid_file[1024];
 static int max_session_count;
 static int task_stack_size = 86016;
 static int tcp_buffer_size = 65536;
+static int udp_recv_buffer_size = 524288;
 static int connect_timeout = 10000;
 static int tcp_read_write_timeout = 300000;
 static int udp_read_write_timeout = 60000;
@@ -349,6 +350,8 @@ hev_config_parse_misc (yaml_document_t *doc, yaml_node_t *base)
             task_stack_size = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "tcp-buffer-size"))
             tcp_buffer_size = strtoul (value, NULL, 10);
+        else if (0 == strcmp (key, "udp-recv-buffer-size"))
+            udp_recv_buffer_size = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "max-session-count"))
             max_session_count = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "connect-timeout"))
@@ -600,6 +603,12 @@ int
 hev_config_get_misc_tcp_buffer_size (void)
 {
     return tcp_buffer_size;
+}
+
+int
+hev_config_get_misc_udp_recv_buffer_size (void)
+{
+    return udp_recv_buffer_size;
 }
 
 int

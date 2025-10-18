@@ -45,6 +45,9 @@ hev_socks5_tunnel_main_inner (int tun_fd)
     res = hev_config_get_misc_udp_read_write_timeout ();
     hev_socks5_set_udp_timeout (res);
 
+    res = hev_config_get_misc_udp_recv_buffer_size ();
+    hev_socks5_set_udp_recv_buffer_size (res);
+
     res = hev_logger_init (log_level, log_file);
     if (res < 0)
         return -2;

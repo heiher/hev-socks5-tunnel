@@ -135,6 +135,8 @@ socks5:
 # task-stack-size: 86016
   # tcp buffer size (bytes)
 # tcp-buffer-size: 65536
+  # udp socket recv buffer (SO_RCVBUF) size (bytes)
+# udp-recv-buffer-size: 524288
   # maximum session count (0: unlimited)
 # max-session-count: 0
   # connect timeout (ms)
