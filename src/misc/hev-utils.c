@@ -53,11 +53,20 @@ run_as_daemon (const char *pid_file)
 int
 set_limit_nofile (int limit_nofile)
 {
-    struct rlimit limit = {
-        .rlim_cur = limit_nofile,
-        .rlim_max = limit_nofile,
-    };
+    struct rlimit limit;
+    int res;
 
+    res = getrlimit (RLIMIT_NOFILE, &limit);
+    if (res < 0)
+        return -1;
+
+    limit.rlim_cur = limit.rlim_max;
+    res = setrlimit (RLIMIT_NOFILE, &limit);
+    if (res < 0)
+        return -1;
+
+    limit.rlim_cur = limit_nofile;
+    limit.rlim_max = limit_nofile;
     return setrlimit (RLIMIT_NOFILE, &limit);
 }
 
