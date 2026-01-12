@@ -193,6 +193,7 @@ hev_mapped_dns_handle (HevMappedDNS *self, void *req, int qlen, void *res,
     shdr->fl = ntohs (shdr->fl);
     shdr->ns = 0;
     shdr->an = 0;
+    shdr->ar = 0;
 
     if (qhdr->qd > 32)
         return -1;
