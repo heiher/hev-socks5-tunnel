@@ -374,12 +374,14 @@ void hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
 * **ebrahimtahernejad** - https://github.com/ebrahimtahernejad
 * **heiby** - https://github.com/heiby
 * **hev** - https://hev.cc
+* **katana** - https://github.com/officialkatana
 * **pronebird** - https://github.com/pronebird
 * **saeeddev94** - https://github.com/saeeddev94
 * **sskaje** - https://github.com/sskaje
 * **wankkoree** - https://github.com/wankkoree
 * **xz-dev** - https://github.com/xz-dev
 * **yiguous** - https://github.com/yiguous
+* **zheshinicheng** - https://github.com/zheshinicheng
 
 ## License
 
