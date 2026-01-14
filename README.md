@@ -165,6 +165,10 @@ socks5:
 # Set socks5.mark = 438
 bin/hev-socks5-tunnel conf/main.yml
 
+# Disable reverse path filter
+sudo sysctl -w net.ipv4.conf.all.rp_filter=0
+sudo sysctl -w net.ipv4.conf.tun0.rp_filter=0
+
 # Bypass upstream socks5 server
 sudo ip rule add fwmark 438 lookup main pref 10
 sudo ip -6 rule add fwmark 438 lookup main pref 10
