@@ -586,7 +586,7 @@ mapped_dns_init (void)
     if (!cache_size)
         return 0;
 
-    dns = hev_mapped_dns_new (network, netmask, cache_size);
+    dns = hev_mapped_dns_init (network, netmask, cache_size);
     if (!dns)
         return -1;
 
@@ -602,7 +602,7 @@ mapped_dns_fini (void)
 
     dns = hev_mapped_dns_get ();
     if (dns) {
-        hev_object_unref (HEV_OBJECT (dns));
+	hev_mapped_dns_destroy(dns);
         hev_mapped_dns_put (NULL);
     }
 }

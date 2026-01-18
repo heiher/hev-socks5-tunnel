@@ -26,33 +26,42 @@ typedef struct _HevMappedDNS HevMappedDNS;
 typedef struct _HevMappedDNSClass HevMappedDNSClass;
 typedef struct _HevMappedDNSNode HevMappedDNSNode;
 
+typedef char RfcDomainNameLength[256];
+/* rfc1035  2.3.4. Size limits "names 255 octets or less" */
+
+typedef struct _RfcDNSHeadFlag RfcDNSHeadFlag;
+/* rfc1035 4.1.1. Header section format */
+
 struct _HevMappedDNS
 {
-    HevObject base;
-
     int use;
     int max;
     int net;
-    int mask;
-
-    HevList list;
-    HevRBTree tree;
-    HevMappedDNSNode *records[0];
+    int mask;// domain.buf block memory size = min(~mask, max) * sizeof(RfcDomainNameLength[256])
+    struct {
+        int hip;//First IP address
+        int tip;//Last IP address
+        RfcDomainNameLength *buf;
+        RfcDomainNameLength *head;
+        RfcDomainNameLength *tail;
+        RfcDomainNameLength *read;
+        RfcDomainNameLength *write;
+    }domain;
 };
+/* _HevMappedDNS.doamin Circular buffer
+ * A DNS request occupies one "RfcDomainNameLength".
+ * Mapping methods:
+ *   (QueryIP - domain.hip) = index
+ *   domain->buf[index] = *DomainNameStr
+*/
 
-struct _HevMappedDNSClass
-{
-    HevObjectClass base;
-};
-
-HevObjectClass *hev_mapped_dns_class (void);
-
-int hev_mapped_dns_construct (HevMappedDNS *self, int net, int mask, int max);
-
-HevMappedDNS *hev_mapped_dns_new (int net, int mask, int max);
+HevMappedDNS *hev_mapped_dns_init (int net, int mask, int max);
+void hev_mapped_dns_destroy (HevMappedDNS *self);
 
 HevMappedDNS *hev_mapped_dns_get (void);
 void hev_mapped_dns_put (HevMappedDNS *self);
+
+void hev_mapped_dns_cache_ttl (int ttl);
 
 int hev_mapped_dns_handle (HevMappedDNS *self, void *req, int qlen, void *res,
                            int slen);

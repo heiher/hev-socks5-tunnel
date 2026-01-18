@@ -33,33 +33,125 @@ struct _DNSHdr
     uint16_t ar;
 };
 
-struct _HevMappedDNSNode
+static const DNSHdr dnshdr_example = {
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+    .fl = 0x8081,
+    .qd = 0x0100,
+    .an = 0x0100,
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+    .fl = 0x8180,
+    .qd = 0x0001,
+    .an = 0x0001,
+#endif
+    .id = 0x0,
+    .ns = 0x0,
+    .ar = 0x0
+};//Forged DNS response header template
+
+#pragma pack(1)
+static struct {
+    uint16_t name;
+    uint16_t type;
+    uint16_t class;
+    uint32_t ttl;
+    uint16_t len;
+    uint32_t data;
+} dns_answer_example = {
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+    .name = 0x0cc0,
+    .type = 0x0100,
+    .class = 0x0100,
+    .ttl = 0x01000000,
+    .len = 0x0400,
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+    .name = 0xc00c,
+    .type = 0x0001,
+    .class = 0x0001,
+    .ttl = 0x00000001,
+    .len = 0x0004,
+#endif
+    .data= 0x0
+};//4.1.3. Resource record format "dns ipv4 A answer"
+#pragma pack()
+
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+struct _RfcDNSHeadFlag
 {
-    HevRBTreeNode tree;
-    HevListNode list;
-    char *name;
-    int idx;
+    uint16_t ra		: 1;
+    uint16_t z		: 3;
+    uint16_t rcode	: 4;
+    uint16_t qr		: 1;
+    uint16_t opcode	: 4;
+    uint16_t aa		: 1;
+    uint16_t tc		: 1;
+    uint16_t rd		: 1;
+};//rfc1035 4.1.1. Header section format
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+struct _RfcDNSHeadFlag
+{
+    uint16_t qr		: 1;
+    uint16_t opcode	: 4;
+    uint16_t aa		: 1;
+    uint16_t tc		: 1;
+    uint16_t rd		: 1;
+    uint16_t ra		: 1;
+    uint16_t z		: 3;
+    uint16_t rcode	: 4;
+};//rfc1035 4.1.1. Header section format
+#endif
+
+
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+struct _IPv4Dec {
+    uint8_t d;
+    uint8_t c;
+    uint8_t b;
+    uint8_t a;
 };
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+struct _IPv4Dec {
+    uint8_t a;
+    uint8_t b;
+    uint8_t c;
+    uint8_t d;
+};
+#endif
+
 
 HevMappedDNS *
-hev_mapped_dns_new (int net, int mask, int max)
+hev_mapped_dns_init (int net, int mask, int max)
 {
     HevMappedDNS *self;
-    int res;
-
-    self = hev_malloc0 (sizeof (HevMappedDNS) + sizeof (void *) * max);
+    self = malloc(sizeof(HevMappedDNS));
     if (!self)
         return NULL;
-
-    res = hev_mapped_dns_construct (self, net, mask, max);
-    if (res < 0) {
-        hev_free (self);
+    memset(self, 0, sizeof(HevMappedDNS));
+    int pool_size = (~mask >= max) ? max : ~mask;
+    self->domain.buf = malloc(sizeof(RfcDomainNameLength) * pool_size);
+    if (!(self->domain.buf)) {
+        free(self);
         return NULL;
     }
+    self->max = pool_size;
+    memset(self->domain.buf, 0, (sizeof(RfcDomainNameLength) * pool_size));
+    self->domain.hip = net;
+    self->domain.tip = (self->domain.hip) + pool_size;
+    LOG_I ("%p mapdns ip pools [map ipv4: %d] [memory byte: %d]", self->domain.buf, pool_size, (pool_size * sizeof(RfcDomainNameLength)));
+    self->domain.head = self->domain.buf;
+    self->domain.tail = (self->domain.buf) + pool_size;
+    self->domain.read = self->domain.head;
+    self->domain.write = self->domain.head;
 
-    LOG_D ("%p mapped dns new", self);
-
+hev_mapped_dns_cache_ttl(0xff);
     return self;
+}
+void
+hev_mapped_dns_destroy(HevMappedDNS *self)
+{
+    memset((self->domain.buf), 0, sizeof(RfcDomainNameLength) * (self->max));
+    free(self->domain.buf);
+    memset(self, 0, sizeof(HevMappedDNS));
+    free(self);
 }
 
 HevMappedDNS *
@@ -74,259 +166,150 @@ hev_mapped_dns_put (HevMappedDNS *self)
     singleton = self;
 }
 
-static HevMappedDNSNode *
-hev_mapped_dns_node_alloc (const char *name)
+const char *
+hev_mapped_dns_lookup (HevMappedDNS *self, int ip)
 {
-    HevMappedDNSNode *node;
-
-    node = hev_malloc0 (sizeof (HevMappedDNSNode));
-    if (!node)
-        return NULL;
-
-    node->name = strdup (name);
-
-    return node;
+    if(ip >= (self->domain.hip) && ip <= (self->domain.tip)) {
+        char *name = (char *)((self->domain.buf) + (ip - (self->domain.hip)));
+        return name;
+    }
+    return NULL;
 }
 
-static void
-hev_mapped_dns_node_free (HevMappedDNSNode *node)
+void
+hev_mapped_dns_cache_ttl (int ttl)
 {
-    free (node->name);
-    hev_free (node);
-}
+    #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+        ttl = htonl(ttl);
+    #endif
+    dns_answer_example.ttl = ttl;
+}//dns.resp.ttl 
 
 static int
-hev_mapped_dns_find (HevMappedDNS *self, const char *name)
+hev_mapped_dns_block (HevMappedDNS *self, char *qname)
 {
-    HevRBTreeNode **new = &self->tree.root, *parent = NULL;
-    HevMappedDNSNode *node;
-    int idx = self->use;
+    //qname = dns.qry.name
+    int ipv4;
+    uint8_t *reject = (uint8_t *)&ipv4;
+    #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+        reject = &(reject[0]);
+    #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+        reject = &(reject[3]);
+    #endif
+    if(self->domain.write != self->domain.head)
+        (self->domain.write)++;
 
-    while (*new) {
-        int res;
+    /*  ipv4 = x.x.x.255  *reject = 255 "Pointing to a location example"
+     *  Some special address need to be skipped during allocation:
+     *    rfc1812  4.2.2.11 Addres_ipsing (a) { 0, 0 } "skip address x.x.0.0"
+     *    rfc1812  4.2.2.11 Addres_ipsing (c) { -1, -1 } "skip address x.x.255.255"
+     *    rfc1812  4.2.2.11 Addres_ipsing (d) { <Network-prefix>, -1 } "skip address x.x.x.255"
+     */
+    while(1) {
+        if(self->domain.write >= self->domain.head && self->domain.write <= self->domain.tail) {
+        }//Quickly verify the pointer to ensure it is valid.
+        else {
+            self->domain.write = self->domain.head;
+            LOG_I ("%p mapdns Jump to the first block in the circular buffer", (self->domain.buf));
+        }
 
-        node = container_of (*new, HevMappedDNSNode, tree);
-        res = strcmp (node->name, name);
-        parent = *new;
-
-        if (res < 0) {
-            new = &((*new)->left);
-        } else if (res > 0) {
-            new = &((*new)->right);
-        } else {
-            hev_list_del (&self->list, &node->list);
-            hev_list_add_tail (&self->list, &node->list);
-            return node->idx;
+        ipv4 = ((self->domain.write) - (self->domain.head)) + (self->domain.hip);
+        if(*reject == 0x0 || *reject == 0xff) {
+            //skip address x.x.x.0 x.x.x.255
+            (self->domain.write)++;
+        }
+        else {
+            break;
         }
     }
 
-    node = hev_mapped_dns_node_alloc (name);
-    if (!node)
-        return -1;
-
-    hev_rbtree_node_link (&node->tree, parent, new);
-    hev_rbtree_insert_color (&self->tree, &node->tree);
-    hev_list_add_tail (&self->list, &node->list);
-
-    if (self->use < self->max) {
-        self->use++;
-    } else {
-        HevMappedDNSNode *nf;
-        HevListNode *nl;
-
-        nl = hev_list_first (&self->list);
-        nf = container_of (nl, HevMappedDNSNode, list);
-
-        idx = nf->idx;
-        hev_rbtree_erase (&self->tree, &nf->tree);
-        hev_list_del (&self->list, &nf->list);
-        hev_mapped_dns_node_free (nf);
+    uint8_t labels;
+    uint8_t names = 0;
+    char *write = (char *) (self->domain.write);
+    char *read = qname;
+    while(1) {
+        labels = (uint8_t)(*read);
+        read++;
+        if(labels > 63 || names == 0xff)//rfc1035 2.3.4:  1.labels 63 octets or less  2.names 255 octets or less
+            break;
+        memcpy(write, read, labels);
+        names = names + labels + 1;
+        read += labels;
+        write += labels;
+        if(*read == 0x00) {
+            *write = 0x00;
+            break;
+        }
+        else {
+            *write = 0x2e;
+        }
+        write++;
     }
-
-    self->records[idx] = node;
-    node->idx = idx;
-
-    return node->idx;
+   write = (char *) (self->domain.write);
+   struct  _IPv4Dec *dec = (struct  _IPv4Dec *)&ipv4;
+   LOG_I ("%p mapped map index:%d [%d.%d.%d.%d -> %s]", (self->domain.write), (int)(self->domain.write - self->domain.head), dec->a, dec->b, dec->c, dec->d, write);
+    #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+        return htonl(ipv4);
+    #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+        return ipv4;
+    #endif
+    //Returns network bytes IPv4
 }
 
-static inline uint16_t
-read_u16 (const uint8_t *p)
-{
-    return ((uint16_t)p[0] << 8) | p[1];
-}
 
-static inline void
-write_u16 (uint8_t *p, uint16_t v)
-{
-    p[0] = v >> 8;
-    p[1] = v;
-}
-
-static inline void
-write_u32 (uint8_t *p, uint32_t v)
-{
-    p[0] = v >> 24;
-    p[1] = v >> 16;
-    p[2] = v >> 8;
-    p[3] = v;
-}
-
-int
-hev_mapped_dns_handle (HevMappedDNS *self, void *req, int qlen, void *res,
+int hev_mapped_dns_handle (HevMappedDNS *self, void *req, int qlen, void *res,
                        int slen)
 {
     DNSHdr *qhdr = req;
     DNSHdr *shdr = res;
-    uint8_t *rb = req;
-    uint8_t *sb = res;
-    int ips[32];
-    int ipo[32];
-    int ipn = 0;
-    int off;
-    int i;
-
+    RfcDNSHeadFlag *qflg = (RfcDNSHeadFlag *) &(qhdr->fl);
     if (slen < qlen)
-        return -1;
+         return -1;
 
-    memcpy (res, req, qlen);
-    qhdr->qd = ntohs (qhdr->qd);
-    shdr->fl = ntohs (shdr->fl);
-    shdr->ns = 0;
-    shdr->an = 0;
-    shdr->ar = 0;
+    #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+        if(qhdr->qd != 0x0100) {
+    #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+        if(qhdr->qd != 0x0001) {
+    #endif
+            LOG_I ("%p mapdns dns.count.queries %d", qhdr, ntohs(qhdr->qd));
+        }/*The RFC specifies that a single DNS packet can contain multiple `dns.count.queries`,
+            but in practice, only one is typically used. If you see this warning in the logs, open an Issues window. */
 
-    if (qhdr->qd > 32)
-        return -1;
+    if(qflg->qr != 0b0 || qflg->opcode != 0b0) {
+        LOG_I ("%p mapdns only accept standard query qr:%d opcode:%d", qflg, (qflg->qr), (qflg->opcode));
+        return -1;//only accept standard query (QUERY)
+    }
 
-    off = sizeof (DNSHdr);
-    for (i = 0; i < qhdr->qd; i++) {
-        ipo[ipn] = off;
+    if (qflg->tc != 0b0) {
+        LOG_I ("%p mapdns only accept Message is not truncated tc:%d", qflg, (qflg->tc));
+        return -1;//only accept Message is not truncated
+    }
 
-        while (rb[off]) {
-            int poff = off;
+    memcpy (shdr, &dnshdr_example, sizeof(DNSHdr));//copy dns head flag example
+    shdr->id = qhdr->id;
 
-            off += 1 + rb[off];
-            if (off >= qlen)
-                return -1;
-
-            rb[poff] = '.';
-        }
-
-        off++;
-        if ((off + 3) >= qlen)
+    char *qname = ((char *) qhdr) + sizeof(DNSHdr);
+    char *sname = ((char *) shdr) + sizeof(DNSHdr);
+    int qnamelen = strlen(qname) + 4 + 1;
+    memcpy(sname, qname, qnamelen);
+    /* 5:
+     * dns.qry.name end 1byte
+     * dns.qry.type 2byte
+     * dns.qry.class 2byte
+     */
+    uint16_t *qry_class = (uint16_t *)(qname + qnamelen - 2);
+    #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+        if(*qry_class != 0x0100) {
+    #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+        if(*qry_class != 0x0001) {
+    #endif
+            uint16_t *qry_type = (uint16_t *)(qname + qnamelen - 4);
+            LOG_I ("%p mapdns reject Type:0x%x Class:0x%x  ID:0x%x", qhdr, ntohs(*qry_type), ntohs(*qry_class), ntohs(qhdr->id));
             return -1;
+        }//Only accepts queries with Class:IN
+    dns_answer_example.data = hev_mapped_dns_block(self, qname);
 
-        if ((read_u16 (&rb[off + 0]) == 1) && (read_u16 (&rb[off + 2]) == 1)) {
-            int idx;
-
-            idx = hev_mapped_dns_find (self, (char *)&rb[ipo[ipn] + 1]);
-            if (idx >= 0) {
-                ips[ipn] = self->net | idx;
-                ipn++;
-            }
-        }
-
-        off += 4;
-    }
-
-    for (i = 0; i < ipn; i++) {
-        if ((off + 15) >= slen)
-            return -1;
-
-        sb[off + 0] = 0xc0;
-        sb[off + 1] = ipo[i];
-        write_u16 (&sb[off + 2], 1);
-        write_u16 (&sb[off + 4], 1);
-        write_u32 (&sb[off + 6], 1);
-        write_u16 (&sb[off + 10], 4);
-        write_u32 (&sb[off + 12], ips[i]);
-
-        off += 16;
-    }
-
-    shdr->fl = htons (shdr->fl | 0x8000 | ((shdr->fl & 0x100) >> 1));
-    shdr->an = htons (ipn);
-
-    return off;
-}
-
-const char *
-hev_mapped_dns_lookup (HevMappedDNS *self, int ip)
-{
-    HevMappedDNSNode *node;
-    int idx;
-
-    idx = ip & ~self->mask;
-    if (idx >= self->max)
-        return NULL;
-
-    node = self->records[idx];
-    if (!node)
-        return NULL;
-
-    hev_list_del (&self->list, &node->list);
-    hev_list_add_tail (&self->list, &node->list);
-
-    return node->name;
-}
-
-int
-hev_mapped_dns_construct (HevMappedDNS *self, int net, int mask, int max)
-{
-    int res;
-
-    res = hev_object_construct (&self->base);
-    if (res < 0)
-        return res;
-
-    LOG_D ("%p mapped dns construct", self);
-
-    HEV_OBJECT (self)->klass = HEV_MAPPED_DNS_TYPE;
-
-    if (max > ~mask)
-        return -1;
-
-    self->max = max;
-    self->net = net;
-    self->mask = mask;
-
-    return 0;
-}
-
-static void
-hev_mapped_dns_destruct (HevObject *base)
-{
-    HevMappedDNS *self = HEV_MAPPED_DNS (base);
-    HevListNode *n;
-
-    LOG_D ("%p mapped dns destruct", self);
-
-    n = hev_list_first (&self->list);
-    while (n) {
-        HevMappedDNSNode *t;
-
-        t = container_of (n, HevMappedDNSNode, list);
-        n = hev_list_node_next (n);
-        hev_mapped_dns_node_free (t);
-    }
-
-    HEV_OBJECT_TYPE->destruct (base);
-    hev_free (base);
-}
-
-HevObjectClass *
-hev_mapped_dns_class (void)
-{
-    static HevMappedDNSClass klass;
-    HevMappedDNSClass *kptr = &klass;
-    HevObjectClass *okptr = HEV_OBJECT_CLASS (kptr);
-
-    if (!okptr->name) {
-        memcpy (kptr, HEV_OBJECT_TYPE, sizeof (HevObjectClass));
-
-        okptr->name = "HevMappedDNS";
-        okptr->destruct = hev_mapped_dns_destruct;
-    }
-
-    return okptr;
+    char *answer = sname + qnamelen;
+    memcpy(answer, &dns_answer_example, sizeof(dns_answer_example));
+    return (qnamelen + sizeof(DNSHdr) + sizeof(dns_answer_example));
 }
