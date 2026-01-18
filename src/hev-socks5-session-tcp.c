@@ -100,6 +100,8 @@ tcp_splice_b (HevSocks5SessionTCP *self)
         } else {
             hev_ring_buffer_write_finish (self->buffer, s);
         }
+    } else {
+        res = 0;
     }
 
     hev_task_mutex_lock (self->mutex);
