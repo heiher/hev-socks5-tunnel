@@ -30,7 +30,7 @@ hev_tunnel_read (int fd, int mtu, HevTaskIOYielder yielder, void *yielder_data)
     iov[1].iov_len = buf->len;
 
     s = hev_task_io_readv (fd, iov, 2, yielder, yielder_data);
-    if (s <= sizeof (type)) {
+    if (s <= 0) {
         pbuf_free (buf);
         return NULL;
     }
