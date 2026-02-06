@@ -385,6 +385,7 @@ void hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
 * **wankkoree** - https://github.com/wankkoree
 * **xz-dev** - https://github.com/xz-dev
 * **yiguous** - https://github.com/yiguous
+* **yujinpan** - https://github.com/yujinpan
 * **zheshinicheng** - https://github.com/zheshinicheng
 
 ## License
