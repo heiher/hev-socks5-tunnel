@@ -3,6 +3,7 @@
 set -e
 
 XCFRAMEWORK_DIR="./apple_xcframework"
+LIB_NAME="HevSocks5Tunnel"
 
 # buildStatic iphoneos -mios-version-min=15.0 arm64
 buildStatic()
@@ -61,9 +62,9 @@ buildStatic appletvsimulator arm64 17.0
 mergeStatic appletvsimulator x86_64 arm64
 
 INCLUDE_DIR="$XCFRAMEWORK_DIR/include"
-mkdir -p $INCLUDE_DIR
-cp ./src/hev-main.h $INCLUDE_DIR
-cp ./module.modulemap $INCLUDE_DIR
+mkdir -p $INCLUDE_DIR/$LIB_NAME
+cp ./src/hev-main.h $INCLUDE_DIR/$LIB_NAME
+cp ./module.modulemap $INCLUDE_DIR/$LIB_NAME
 xcodebuild -create-xcframework \
     -library ./apple_xcframework/iphoneos-arm64/libhev-socks5-tunnel.a -headers $INCLUDE_DIR \
     -library ./apple_xcframework/iphonesimulator-x86_64-arm64/libhev-socks5-tunnel.a -headers $INCLUDE_DIR \
