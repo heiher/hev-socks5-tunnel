@@ -10,7 +10,7 @@ RUN apk add --update --no-cache \
 WORKDIR /src
 COPY . /src
 
-RUN make
+RUN make clean && make
 
 FROM alpine:latest
 LABEL org.opencontainers.image.source="https://github.com/heiher/hev-socks5-tunnel"
