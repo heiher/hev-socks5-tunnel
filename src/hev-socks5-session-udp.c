@@ -111,12 +111,17 @@ hev_socks5_session_udp_fwd_f (HevSocks5SessionUDP *self, unsigned int num)
 static int
 hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self, unsigned int num)
 {
-    char buf[UDP_BUF_SIZE * num];
     HevSocks5UDPMsg msgv[num];
     int i, res;
 
+    if (!self->recv_buf) {
+        self->recv_buf = hev_malloc (UDP_BUF_SIZE * num);
+        if (!self->recv_buf)
+            return -1;
+    }
+
     for (i = 0; i < num; i++) {
-        msgv[i].buf = buf + UDP_BUF_SIZE * i;
+        msgv[i].buf = self->recv_buf + UDP_BUF_SIZE * i;
         msgv[i].len = UDP_BUF_SIZE;
     }
 
@@ -396,6 +401,9 @@ hev_socks5_session_udp_destruct (HevObject *base)
         udp_remove (self->pcb);
     }
     hev_task_mutex_unlock (self->mutex);
+
+    if (self->recv_buf)
+        hev_free (self->recv_buf);
 
     HEV_SOCKS5_CLIENT_UDP_TYPE->destruct (base);
 }

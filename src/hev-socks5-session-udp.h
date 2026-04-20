@@ -30,6 +30,7 @@ struct _HevSocks5SessionUDP
     HevList frame_list;
     struct udp_pcb *pcb;
     HevTaskMutex *mutex;
+    char *recv_buf;
     int frames;
     int addr;
     int port;

@@ -228,13 +228,18 @@ out-of-memory issues.
 
 ```yaml
 misc:
-  # task stack size (bytes)
-  task-stack-size: 24576 # 20480 + tcp-buffer-size
+  # task stack size (bytes); must be >= 20480 + tcp-buffer-size
+  task-stack-size: 24576
   # tcp buffer size (bytes)
   tcp-buffer-size: 4096
   # maximum session count
   max-session-count: 1200
 ```
+
+Note: `task-stack-size` is a per-session stack, so its contribution to
+total memory grows linearly with the number of concurrent sessions. The
+UDP receive batch (`udp-copy-buffer-nums`) is allocated on the heap and
+does not affect the required stack size.
 
 #### Docker Compose
 
