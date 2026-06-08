@@ -215,6 +215,47 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  android:
+    name: Android Arm64
+    runs-on: ubuntu-latest
+    env:
+      API: 24
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Setup NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r27d
+      - name: Configure Android toolchain
+        run: |
+          export TOOLCHAIN=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64
+
+          echo "CC=$TOOLCHAIN/bin/aarch64-linux-android${API}-clang" >> $GITHUB_ENV
+          echo "CXX=$TOOLCHAIN/bin/aarch64-linux-android${API}-clang++" >> $GITHUB_ENV
+          echo "AR=$TOOLCHAIN/bin/llvm-ar" >> $GITHUB_ENV
+          echo "RANLIB=$TOOLCHAIN/bin/llvm-ranlib" >> $GITHUB_ENV
+          echo "STRIP=$TOOLCHAIN/bin/llvm-strip" >> $GITHUB_ENV
+      - name: Build
+        run: |
+          make \
+            CC="$CC" \
+            AR="$AR" \
+            RANLIB="$RANLIB" \
+            STRIP="$STRIP" \
+            -j$(nproc)
+          cp bin/hev-socks5-tunnel hev-socks5-tunnel-android-arm64-v8a
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: hev-socks5-tunnel-android-arm64-v8a
+          path: hev-socks5-tunnel-android-arm64-v8a
+          if-no-files-found: error
+          retention-days: 1
+
   release:
     name: Release
     runs-on: ubuntu-latest
@@ -224,6 +265,7 @@ jobs:
       - macos
       - freebsd
       - windows
+      - android
     if: github.event_name == 'release'
     steps:
       - name: Checkout
@@ -258,8 +300,8 @@ jobs:
         run: |
           ./build-apple.sh
 
-  android:
-    name: Android
+  android-lib:
+    name: Android Library
     runs-on: ubuntu-latest
     if: github.event_name != 'release'
     steps:
