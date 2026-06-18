@@ -129,7 +129,7 @@ show_help (const char *self_path)
 }
 
 static void
-sigint_handler (int signum)
+sig_handler (int signum)
 {
     hev_socks5_tunnel_stop ();
 }
@@ -144,7 +144,8 @@ main (int argc, char *argv[])
         return -1;
     }
 
-    signal (SIGINT, sigint_handler);
+    signal (SIGINT, sig_handler);
+    signal (SIGTERM, sig_handler);
 
     res = hev_socks5_tunnel_main (argv[1], -1);
     if (res < 0)
