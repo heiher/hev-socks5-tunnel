@@ -7,14 +7,6 @@ PP=$(CROSS_PREFIX)cpp
 CC=$(CROSS_PREFIX)gcc
 AR=$(CROSS_PREFIX)ar
 STRIP=$(CROSS_PREFIX)strip
-
-# Android's Bionic libc already provides pthread functions.
-ifeq ($(findstring android,$(CC)),)
-    PTHREAD_LDFLAG=-lpthread
-else
-    PTHREAD_LDFLAG=
-endif
-
 CCFLAGS=-O3 -pipe -Wall -Werror $(CFLAGS) \
 		-I$(SRCDIR) \
 		-I$(SRCDIR)/misc \
@@ -24,11 +16,10 @@ CCFLAGS=-O3 -pipe -Wall -Werror $(CFLAGS) \
 		-I$(THIRDPARTDIR)/lwip/src/include \
 		-I$(THIRDPARTDIR)/lwip/src/ports/include \
 		-I$(THIRDPARTDIR)/hev-task-system/include
-
 LDFLAGS=-L$(THIRDPARTDIR)/yaml/bin -lyaml \
 		-L$(THIRDPARTDIR)/lwip/bin -llwip \
 		-L$(THIRDPARTDIR)/hev-task-system/bin -lhev-task-system \
-		$(PTHREAD_LDFLAG) $(LFLAGS)
+		-lpthread $(LFLAGS)
 
 SRCDIR=src
 BINDIR=bin
