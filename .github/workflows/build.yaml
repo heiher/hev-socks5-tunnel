@@ -215,6 +215,45 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Prepare
+        run: |
+          wget https://dl.google.com/android/repository/android-ndk-r27d-linux.zip
+          unzip android-ndk-r27d-linux.zip
+          ln -sf . jni
+      - name: Build android-so
+        if: github.event_name != 'release'
+        run: |
+          ./android-ndk-r27d/ndk-build clean
+          ./android-ndk-r27d/ndk-build APP_MODULES=hev-socks5-tunnel -j$(nproc)
+      - name: Build android-bin
+        run: |
+          ./android-ndk-r27d/ndk-build clean
+          ./android-ndk-r27d/ndk-build APP_MODULES=hev-socks5-tunnel-bin -j$(nproc)
+          cp libs/armeabi-v7a/hev-socks5-tunnel-bin hev-socks5-tunnel-android-armeabi-v7a
+          cp libs/arm64-v8a/hev-socks5-tunnel-bin hev-socks5-tunnel-android-arm64-v8a
+          cp libs/x86/hev-socks5-tunnel-bin hev-socks5-tunnel-android-x86
+          cp libs/x86_64/hev-socks5-tunnel-bin hev-socks5-tunnel-android-x86_64
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: hev-socks5-tunnel-android
+          path: |
+            hev-socks5-tunnel-android-armeabi-v7a
+            hev-socks5-tunnel-android-arm64-v8a
+            hev-socks5-tunnel-android-x86
+            hev-socks5-tunnel-android-x86_64
+          if-no-files-found: error
+          retention-days: 1
+
   release:
     name: Release
     runs-on: ubuntu-latest
@@ -224,6 +263,7 @@ jobs:
       - macos
       - freebsd
       - windows
+      - android
     if: github.event_name == 'release'
     steps:
       - name: Checkout
@@ -257,25 +297,6 @@ jobs:
       - name: Build
         run: |
           ./build-apple.sh
-
-  android:
-    name: Android
-    runs-on: ubuntu-latest
-    if: github.event_name != 'release'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-          submodules: true
-      - name: Prepare
-        run: |
-          wget https://dl.google.com/android/repository/android-ndk-r27d-linux.zip
-          unzip android-ndk-r27d-linux.zip
-          ln -sf . jni
-      - name: Build
-        run: |
-          ./android-ndk-r27d/ndk-build
 
   llvm:
     name: LLVM
