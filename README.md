@@ -363,6 +363,10 @@ void hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
 
 ## Use Cases
 
+### HarmonyOS NEXT
+
+* [Hey VPN](https://github.com/popsiclelmlm/Hey)
+
 ### Android VPN
 
 * [SocksTun](https://github.com/heiher/sockstun)
