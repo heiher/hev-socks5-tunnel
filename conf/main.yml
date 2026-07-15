@@ -11,6 +11,8 @@ tunnel:
   ipv4: 198.18.0.1
   # IPv6 address
   ipv6: 'fc00::1'
+  # ICMP Echo mode (off|reply)
+  icmp: 'off'
   # Post up script
 # post-up-script: up.sh
   # Pre down script

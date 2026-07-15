@@ -20,6 +20,7 @@
 static char tun_name[64];
 static unsigned int tun_mtu = 8500;
 static int multi_queue;
+static int icmp;
 
 static char tun_ipv4_address[16];
 static char tun_ipv6_address[64];
@@ -152,6 +153,8 @@ hev_config_parse_tunnel (yaml_document_t *doc, yaml_node_t *base)
                 strncpy (tun_ipv4_address, value, 16 - 1);
             else if (0 == strcmp (key, "ipv6"))
                 strncpy (tun_ipv6_address, value, 64 - 1);
+            else if (0 == strcmp (key, "icmp"))
+                icmp = !strcasecmp (value, "reply");
             else if (0 == strcmp (key, "post-up-script"))
                 strncpy (tun_post_up_script, value, 64 - 1);
             else if (0 == strcmp (key, "pre-down-script"))
@@ -535,6 +538,12 @@ int
 hev_config_get_tunnel_multi_queue (void)
 {
     return multi_queue;
+}
+
+int
+hev_config_get_tunnel_icmp (void)
+{
+    return icmp;
 }
 
 const char *
