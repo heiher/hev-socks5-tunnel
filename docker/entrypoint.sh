@@ -4,6 +4,7 @@ TUN="${TUN:-tun0}"
 MTU="${MTU:-8500}"
 IPV4="${IPV4:-198.18.0.1}"
 IPV6="${IPV6:-}"
+ICMP="${ICMP:-off}"
 
 CONFIG_ROUTES="${CONFIG_ROUTES:-1}"
 
@@ -35,6 +36,7 @@ tunnel:
   mtu: ${MTU}
   ipv4: '${IPV4}'
   ipv6: '${IPV6}'
+  icmp: '${ICMP}'
   post-up-script: '/route.sh'
 socks5:
   address: '${SOCKS5_ADDR}'

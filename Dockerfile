@@ -22,6 +22,7 @@ ENV TUN=tun0 \
     MTU=8500 \
     IPV4=198.18.0.1 \
     IPV6='' \
+    ICMP=off \
     TABLE=20 \
     MARK=438 \
     SOCKS5_ADDR=172.17.0.1 \

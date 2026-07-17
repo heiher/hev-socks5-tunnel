@@ -265,6 +265,8 @@ services:
       TUN: tun0 # optional, tun interface name, default `tun0`
       MTU: 8500 # optional, MTU is MTU, default `8500`
       IPV4: 198.18.0.1 # optional, tun interface ip, default `198.18.0.1`
+      IPV6: fc00::1 # optional, tun interface ip
+      ICMP: off # optional, ICMP Echo mode, default `off`, other option `reply`
       TABLE: 20 # optional, ip route table id, default `20`
       MARK: 438 # optional, ip route rule mark, dec or hex format, default `438`
       SOCKS5_ADDR: a.b.c.d # socks5 proxy server address
