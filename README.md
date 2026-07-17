@@ -9,6 +9,7 @@ A simple, lightweight tunnel over Socks5 proxy (tun2socks).
 * IPv4/IPv6. (dual stack)
 * Redirect TCP connections.
 * Redirect UDP packets. (Fullcone NAT, UDP-in-UDP and UDP-in-TCP [^1])
+* Optional local ICMP Echo (ping) replies.
 * Linux/Android/FreeBSD/macOS/iOS/Windows.
 
 ## Benchmarks
