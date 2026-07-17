@@ -136,13 +136,10 @@ tcp_recv_handler (void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
     HevSocks5SessionTCP *self = arg;
 
     if (p) {
-        if (!self->queue) {
-            self->queue = p;
-        } else {
-            if (self->queue->tot_len > TCP_WND_MAX (pcb))
-                return ERR_WOULDBLOCK;
+        if (self->queue)
             pbuf_cat (self->queue, p);
-        }
+        else
+            self->queue = p;
     } else {
         self->pcb_eof = 1;
     }
