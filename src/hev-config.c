@@ -18,7 +18,7 @@
 #include "hev-config-const.h"
 
 static char tun_name[64];
-static unsigned int tun_mtu = 8500;
+static unsigned int tun_mtu;
 static int multi_queue;
 static int icmp;
 
@@ -39,15 +39,15 @@ static int mapdns_cache_size;
 static char log_file[1024];
 static char pid_file[1024];
 static int max_session_count;
-static int task_stack_size = 86016;
-static int tcp_buffer_size = 65536;
-static int udp_recv_buffer_size = 524288;
-static int udp_copy_buffer_nums = 10;
-static int connect_timeout = 10000;
-static int tcp_read_write_timeout = 300000;
-static int udp_read_write_timeout = 60000;
-static int limit_nofile = 65535;
-static int log_level = HEV_LOGGER_WARN;
+static int task_stack_size;
+static int tcp_buffer_size;
+static int udp_recv_buffer_size;
+static int udp_copy_buffer_nums;
+static int connect_timeout;
+static int tcp_read_write_timeout;
+static int udp_read_write_timeout;
+static int limit_nofile;
+static int log_level;
 
 static int
 hev_config_parse_tunnel_ipv4 (yaml_document_t *doc, yaml_node_t *base)
@@ -454,6 +454,40 @@ hev_config_parse_doc (yaml_document_t *doc)
     return 0;
 }
 
+static void
+hev_config_reset (void)
+{
+    memset (tun_ipv4_address, 0, sizeof (tun_ipv4_address));
+    memset (tun_ipv6_address, 0, sizeof (tun_ipv6_address));
+    memset (tun_post_up_script, 0, sizeof (tun_post_up_script));
+    memset (tun_pre_down_script, 0, sizeof (tun_pre_down_script));
+    memset (tun_name, 0, sizeof (tun_name));
+    memset (log_file, 0, sizeof (log_file));
+    memset (pid_file, 0, sizeof (pid_file));
+    memset (&srv, 0, sizeof (srv));
+
+    tun_mtu = 8500;
+    multi_queue = 0;
+    icmp = 0;
+
+    mapdns_address = 0;
+    mapdns_port = 0;
+    mapdns_network = 0;
+    mapdns_netmask = 0;
+    mapdns_cache_size = 0;
+
+    max_session_count = 0;
+    task_stack_size = 86016;
+    tcp_buffer_size = 65536;
+    udp_recv_buffer_size = 524288;
+    udp_copy_buffer_nums = 10;
+    connect_timeout = 10000;
+    tcp_read_write_timeout = 300000;
+    udp_read_write_timeout = 60000;
+    limit_nofile = 65535;
+    log_level = HEV_LOGGER_WARN;
+}
+
 int
 hev_config_init_from_file (const char *config_path)
 {
@@ -461,6 +495,8 @@ hev_config_init_from_file (const char *config_path)
     yaml_document_t doc;
     FILE *fp;
     int res = -1;
+
+    hev_config_reset ();
 
     if (!yaml_parser_initialize (&parser))
         goto exit;
@@ -496,6 +532,8 @@ hev_config_init_from_str (const unsigned char *config_str,
     yaml_document_t doc;
     int res = -1;
 
+    hev_config_reset ();
+
     if (!yaml_parser_initialize (&parser))
         goto exit;
 
@@ -512,11 +550,6 @@ exit_free_parser:
     yaml_parser_delete (&parser);
 exit:
     return res;
-}
-
-void
-hev_config_fini (void)
-{
 }
 
 const char *

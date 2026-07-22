@@ -80,7 +80,6 @@ hev_socks5_tunnel_main_inner (int tun_fd)
     hev_socks5_tunnel_fini ();
     hev_socks5_logger_fini ();
     hev_logger_fini ();
-    hev_config_fini ();
     hev_task_system_fini ();
 
     return 0;
