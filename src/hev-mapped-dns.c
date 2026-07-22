@@ -84,6 +84,10 @@ hev_mapped_dns_node_alloc (const char *name)
         return NULL;
 
     node->name = strdup (name);
+    if (!node->name) {
+        free (node);
+        return NULL;
+    }
 
     return node;
 }
