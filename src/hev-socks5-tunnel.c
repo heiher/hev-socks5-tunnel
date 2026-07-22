@@ -8,9 +8,9 @@
  */
 
 #include <errno.h>
-#include <assert.h>
 #include <signal.h>
 #include <string.h>
+#include <stdatomic.h>
 #include <sys/ioctl.h>
 
 #include <lwip/tcp.h>
@@ -39,7 +39,17 @@
 
 #include "hev-socks5-tunnel.h"
 
+enum
+{
+    SYNC_SEND = 1 << 0,
+    SYNC_SENT = 1 << 1,
+    SYNC_WAIT = 1 << 2,
+    SYNC_STOP = 1 << 3,
+};
+
 static int run;
+static atomic_int tsync;
+
 static int tun_fd = -1;
 static int tun_fd_local;
 static int session_count;
@@ -281,6 +291,8 @@ event_task_entry (void *data)
     hev_task_io_read (event_fds[0], &val, sizeof (val), NULL, NULL);
 
     run = 0;
+    atomic_fetch_and (&tsync, ~SYNC_SENT);
+
     node = hev_list_first (&session_set);
     for (; node; node = hev_list_node_next (node)) {
         HevSocks5SessionData *sd;
@@ -672,6 +684,8 @@ hev_socks5_tunnel_init (int tun_fd)
 
     hev_task_mutex_init (&mutex);
 
+    atomic_fetch_or (&tsync, SYNC_SEND);
+
     return 0;
 
 exit:
@@ -683,6 +697,12 @@ void
 hev_socks5_tunnel_fini (void)
 {
     LOG_D ("socks5 tunnel fini");
+
+retry:
+    if (atomic_fetch_and (&tsync, ~SYNC_SEND) & SYNC_WAIT) {
+        usleep (500);
+        goto retry;
+    }
 
     mapped_dns_fini ();
     lwip_timer_task_fini ();
@@ -702,6 +722,9 @@ hev_socks5_tunnel_run (void)
 {
     LOG_D ("socks5 tunnel run");
 
+    if (atomic_fetch_and (&tsync, ~SYNC_STOP) & SYNC_STOP)
+        return 0;
+
     task_event = hev_task_ref (task_event);
     hev_task_run (task_event, event_task_entry, NULL);
 
@@ -720,21 +743,26 @@ hev_socks5_tunnel_run (void)
 void
 hev_socks5_tunnel_stop (void)
 {
-    int res = 0;
-    int fd;
+    int res;
 
     LOG_D ("socks5 tunnel stop");
 
-    for (;;) {
-        fd = READ_ONCE (event_fds[1]);
-        if (fd >= 0)
-            break;
-        /* Wait for async initialization */
-        usleep (100 * 1000);
+retry:
+    res = atomic_fetch_or (&tsync, SYNC_WAIT);
+    if (res & SYNC_WAIT) {
+        usleep (500);
+        goto retry;
     }
 
-    res = write (fd, &res, 1);
-    assert (res > 0 && "socks5 tunnel write event");
+    if (res & SYNC_SEND) {
+        res = atomic_fetch_or (&tsync, SYNC_SENT);
+        if (!(res & SYNC_SENT))
+            write (event_fds[1], &res, 1);
+    } else {
+        atomic_fetch_or (&tsync, SYNC_STOP);
+    }
+
+    atomic_fetch_and (&tsync, ~SYNC_WAIT);
 }
 
 void
