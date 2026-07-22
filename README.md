@@ -295,6 +295,8 @@ You can also set the route rules with multiple network segments like:
 
 ## API
 
+### C
+
 ```c
 /**
  * hev_socks5_tunnel_main:
@@ -366,6 +368,27 @@ void hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
                               size_t *rx_packets, size_t *rx_bytes);
 ```
 
+### Java
+
+```java
+public class TProxyService {
+    private static native boolean TProxyStartService(String config_path, int fd);
+    private static native boolean TProxyStopService();
+    private static native boolean TProxyIsRunning();
+    private static native long[] TProxyGetStats();
+
+    static {
+        System.loadLibrary("hev-socks5-tunnel");
+    }
+}
+```
+
+Allow overriding the package and class names in `Application.mk`[^2].
+
+```makefile
+APP_CFLAGS := -DPKGNAME=hev/sockstun -DCLSNAME=TProxyService
+```
+
 ## Use Cases
 
 ### Android VPN
@@ -403,3 +426,4 @@ void hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
 MIT
 
 [^1]: See [protocol specification](https://github.com/heiher/hev-socks5-core/tree/main?tab=readme-ov-file#udp-in-tcp). The [hev-socks5-server](https://github.com/heiher/hev-socks5-server) supports UDP relay over TCP.
+[^2]: See [Application.mk](https://github.com/heiher/sockstun/blob/12830d444fe60ad1c5d68ea6e60ec141cd2c6d97/app/src/main/jni/Application.mk#L19)
