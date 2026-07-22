@@ -50,7 +50,7 @@ static size_t stat_rx_packets;
 static size_t stat_tx_bytes;
 static size_t stat_rx_bytes;
 
-static struct netif netif;
+static struct netif *netif;
 static struct tcp_pcb *tcp;
 static struct udp_pcb *udp;
 
@@ -314,7 +314,7 @@ lwip_io_task_entry (void *data)
         stat_tx_bytes += buf->tot_len;
 
         hev_task_mutex_lock (&mutex);
-        if (netif.input (buf, &netif) != ERR_OK)
+        if (netif->input (buf, netif) != ERR_OK)
             pbuf_free (buf);
         hev_task_mutex_unlock (&mutex);
     }
@@ -373,6 +373,7 @@ tunnel_init (int extern_tun_fd)
         return 0;
     }
 
+    tun_fd_local = 1;
     name = hev_config_get_tunnel_name ();
     multi_queue = hev_config_get_tunnel_multi_queue ();
     tun_fd = hev_tunnel_open (name, multi_queue);
@@ -417,7 +418,6 @@ tunnel_init (int extern_tun_fd)
         hev_exec_run (script_path, hev_tunnel_get_name (),
                       hev_tunnel_get_index (), 0);
 
-    tun_fd_local = 1;
     return 0;
 }
 
@@ -434,44 +434,61 @@ tunnel_fini (void)
         hev_exec_run (script_path, hev_tunnel_get_name (),
                       hev_tunnel_get_index (), 1);
 
-    hev_tunnel_close (tun_fd);
-    tun_fd_local = 0;
-    tun_fd = -1;
+    if (tun_fd >= 0) {
+        hev_tunnel_close (tun_fd);
+        tun_fd_local = 0;
+        tun_fd = -1;
+    }
 }
 
 static int
 gateway_init (void)
 {
+    static struct netif _netif;
     ip4_addr_t addr4, mask, gw;
     ip6_addr_t addr6;
 
-    netif_add_noaddr (&netif, NULL, netif_init_handler, ip_input);
+    netif = netif_add_noaddr (&_netif, NULL, netif_init_handler, ip_input);
+    if (!netif) {
+        LOG_E ("socks5 tunnel netif");
+        return -1;
+    }
 
     ip4_addr_set_loopback (&addr4);
     ip4_addr_set_any (&mask);
     ip4_addr_set_any (&gw);
-    netif_set_addr (&netif, &addr4, &mask, &gw);
+    netif_set_addr (netif, &addr4, &mask, &gw);
 
     ip6_addr_set_loopback (&addr6);
-    netif_add_ip6_address (&netif, &addr6, NULL);
+    netif_add_ip6_address (netif, &addr6, NULL);
 
-    netif_set_up (&netif);
-    netif_set_link_up (&netif);
-    netif_set_default (&netif);
-    netif_set_flags (&netif, NETIF_FLAG_PRETEND_TCP);
-    netif_set_flags (&netif, NETIF_FLAG_PRETEND_UDP);
+    netif_set_up (netif);
+    netif_set_link_up (netif);
+    netif_set_default (netif);
+    netif_set_flags (netif, NETIF_FLAG_PRETEND_TCP);
+    netif_set_flags (netif, NETIF_FLAG_PRETEND_UDP);
 
     if (hev_config_get_tunnel_icmp ())
-        netif_set_flags (&netif, NETIF_FLAG_PRETEND_ICMP);
+        netif_set_flags (netif, NETIF_FLAG_PRETEND_ICMP);
 
     tcp = tcp_new_ip_type (IPADDR_TYPE_ANY);
-    tcp_bind_netif (tcp, &netif);
+    if (!tcp) {
+        LOG_E ("socks5 tunnel tcp");
+        return -1;
+    }
+
+    tcp_bind_netif (tcp, netif);
     tcp_bind (tcp, NULL, 0);
     tcp = tcp_listen (tcp);
     tcp_accept (tcp, tcp_accept_handler);
 
     udp = udp_new_ip_type (IPADDR_TYPE_ANY);
-    udp_bind_netif (udp, &netif);
+    if (!udp) {
+        LOG_E ("socks5 tunnel udp");
+        return -1;
+    }
+
+    udp_bind_netif (udp, netif);
     udp_bind (udp, NULL, 0);
     udp_recv (udp, udp_recv_handler, NULL);
 
@@ -481,9 +498,18 @@ gateway_init (void)
 static void
 gateway_fini (void)
 {
-    udp_remove (udp);
-    tcp_close (tcp);
-    netif_remove (&netif);
+    if (udp) {
+        udp_remove (udp);
+        udp = NULL;
+    }
+    if (tcp) {
+        tcp_close (tcp);
+        tcp = NULL;
+    }
+    if (netif) {
+        netif_remove (netif);
+        netif = NULL;
+    }
 }
 
 static int
