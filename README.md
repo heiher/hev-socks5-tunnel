@@ -152,8 +152,8 @@ socks5:
 # tcp-read-write-timeout: 300000
   # UDP read-write timeout (ms)
 # udp-read-write-timeout: 60000
-  # stdout, stderr or file-path
-# log-file: stderr
+  # null, stdout, stderr or file-path
+# log-file: null
   # debug, info, warn or error
 # log-level: warn
   # If present, run as a daemon with this pid file

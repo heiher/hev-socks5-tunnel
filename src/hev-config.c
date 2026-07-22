@@ -685,7 +685,9 @@ const char *
 hev_config_get_misc_log_file (void)
 {
     if (!log_file[0])
-        return "stderr";
+        return NULL;
+    if (0 == strcmp (log_file, "null"))
+        return NULL;
 
     return log_file;
 }
