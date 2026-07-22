@@ -104,7 +104,9 @@ hev_logger_log (HevLoggerLevel level, const char *fmt, ...)
 
     va_start (ap, fmt);
     iov[2].iov_base = msg;
-    iov[2].iov_len = vsnprintf (msg, 1024, fmt, ap);
+    iov[2].iov_len = vsnprintf (msg, sizeof (msg), fmt, ap);
+    if (iov[2].iov_len >= sizeof (msg))
+        iov[2].iov_len = sizeof (msg) - 1;
     va_end (ap);
 
     iov[3].iov_base = "\n";
