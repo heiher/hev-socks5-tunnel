@@ -50,11 +50,11 @@ hev_socks5_tunnel_main_inner (int tun_fd)
 
     res = hev_logger_init (log_level, log_file);
     if (res < 0)
-        return -2;
+        goto exit;
 
     res = hev_socks5_logger_init (log_level, log_file);
     if (res < 0)
-        return -3;
+        goto free_logger;
 
     nofile = hev_config_get_misc_limit_nofile ();
     res = set_limit_nofile (nofile);
@@ -67,22 +67,26 @@ hev_socks5_tunnel_main_inner (int tun_fd)
 
     res = hev_task_system_init ();
     if (res < 0)
-        return -4;
+        goto free_socks5_logger;
 
     lwip_init ();
 
     res = hev_socks5_tunnel_init (tun_fd);
     if (res < 0)
-        return -5;
+        goto free_task_sys;
 
     hev_socks5_tunnel_run ();
 
     hev_socks5_tunnel_fini ();
-    hev_socks5_logger_fini ();
-    hev_logger_fini ();
-    hev_task_system_fini ();
 
-    return 0;
+free_task_sys:
+    hev_task_system_fini ();
+free_socks5_logger:
+    hev_socks5_logger_fini ();
+free_logger:
+    hev_logger_fini ();
+exit:
+    return res;
 }
 
 int
