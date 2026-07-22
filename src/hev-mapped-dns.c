@@ -187,6 +187,8 @@ hev_mapped_dns_handle (HevMappedDNS *self, void *req, int qlen, void *res,
 
     if (slen < qlen)
         return -1;
+    if (qlen < sizeof (DNSHdr))
+        return -1;
 
     memcpy (res, req, qlen);
     qhdr->qd = ntohs (qhdr->qd);
@@ -201,6 +203,9 @@ hev_mapped_dns_handle (HevMappedDNS *self, void *req, int qlen, void *res,
     off = sizeof (DNSHdr);
     for (i = 0; i < qhdr->qd; i++) {
         ipo[ipn] = off;
+
+        if (off >= qlen)
+            return -1;
 
         while (rb[off]) {
             int poff = off;
