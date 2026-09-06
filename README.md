@@ -403,6 +403,33 @@ Allow overriding the package and class names in `Application.mk`[^2].
 APP_CFLAGS := -DPKGNAME=hev/sockstun -DCLSNAME=TProxyService
 ```
 
+### Prebuilt Android AAR
+
+The Android CI job also produces an AAR (`hev-socks5-tunnel.aar`, containing all four ABIs)
+built with the default JNI contract — no `PKGNAME`/`CLSNAME` overrides — so its natives
+register to `hev.htproxy.TProxyService`. The AAR is generic: instead of rebuilding it per
+consumer package, add a small shim class in your app:
+
+```kotlin
+// app/src/main/java/hev/htproxy/TProxyService.kt
+package hev.htproxy
+
+object TProxyService {
+    external fun TProxyStartService(config_path: String, fd: Int): Boolean
+    external fun TProxyStopService(): Boolean
+    external fun TProxyIsRunning(): Boolean
+    external fun TProxyGetStats(): LongArray
+
+    init {
+        System.loadLibrary("hev-socks5-tunnel")
+    }
+}
+```
+
+Then call these methods from your own code; no per-package rebuild is required. The AAR is
+also attached to tagged releases. Consumers that need a custom package or class name can
+still override `PKGNAME`/`CLSNAME` in `Application.mk` as shown above and build themselves.
+
 ## Use Cases
 
 ### Android VPN

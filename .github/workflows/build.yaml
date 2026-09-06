@@ -253,6 +253,32 @@ jobs:
             hev-socks5-tunnel-android-x86_64
           if-no-files-found: error
           retention-days: 1
+      - name: Build android-aar
+        run: |
+          # Built with the default JNI contract (natives register to
+          # hev.htproxy.TProxyService) so the AAR is generic and can be consumed
+          # by any app via a small shim class; see README "Prebuilt Android AAR".
+          ./android-ndk-r27d/ndk-build clean
+          ./android-ndk-r27d/ndk-build APP_MODULES=hev-socks5-tunnel -j$(nproc)
+          mkdir -p aar/jni
+          for abi in armeabi-v7a arm64-v8a x86 x86_64; do
+            mkdir -p aar/jni/$abi
+            cp libs/$abi/libhev-socks5-tunnel.so aar/jni/$abi/
+          done
+          cat > aar/AndroidManifest.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="hev.socks5.tunnel">
+            <uses-sdk android:minSdkVersion="29"/>
+          </manifest>
+          EOF
+          (cd aar && zip -q -r ../hev-socks5-tunnel.aar .)
+      - name: Upload aar
+        uses: actions/upload-artifact@v7
+        with:
+          name: hev-socks5-tunnel.aar
+          path: hev-socks5-tunnel.aar
+          if-no-files-found: error
+          retention-days: 1
 
   release:
     name: Release
