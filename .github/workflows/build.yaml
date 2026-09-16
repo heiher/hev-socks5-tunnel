@@ -253,11 +253,17 @@ jobs:
             hev-socks5-tunnel-android-x86_64
           if-no-files-found: error
           retention-days: 1
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
       - name: Build android-aar
         run: |
           # Built with the default JNI contract (natives register to
-          # hev.htproxy.TProxyService) so the AAR is generic and can be consumed
-          # by any app via a small shim class; see README "Prebuilt Android AAR".
+          # hev.htproxy.TProxyService), and that binding class is bundled in the
+          # AAR itself, so consumers call it directly instead of adding a shim
+          # class; see README "Prebuilt Android AAR".
           ./android-ndk-r27d/ndk-build clean
           ./android-ndk-r27d/ndk-build APP_MODULES=hev-socks5-tunnel -j$(nproc)
           mkdir -p aar/jni
@@ -265,6 +271,12 @@ jobs:
             mkdir -p aar/jni/$abi
             cp libs/$abi/libhev-socks5-tunnel.so aar/jni/$abi/
           done
+          javac --release 8 -Xlint:-options -d classes android/hev/htproxy/TProxyService.java
+          (cd classes && jar cf ../aar/classes.jar .)
+          rm -rf classes
+          cat > aar/proguard.txt <<'EOF'
+          -keep class hev.htproxy.** { *; }
+          EOF
           cat > aar/AndroidManifest.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="hev.socks5.tunnel">
