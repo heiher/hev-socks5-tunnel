@@ -436,6 +436,7 @@ still override `PKGNAME`/`CLSNAME` in `Application.mk` as shown above and build 
 
 * [SocksTun](https://github.com/heiher/sockstun)
 * [Orbot](https://github.com/guardianproject/orbot-android)
+* [EasyssTun](https://github.com/nange/EasyssTun)
 
 ### iOS
 
@@ -452,6 +453,7 @@ still override `PKGNAME`/`CLSNAME` in `Application.mk` as shown above and build 
 * **hev** - https://hev.cc
 * **ihipop** - https://ihipop.com
 * **katana** - https://github.com/officialkatana
+* **nange** - https://github.com/nange
 * **pronebird** - https://github.com/pronebird
 * **saeeddev94** - https://github.com/saeeddev94
 * **sskaje** - https://github.com/sskaje
