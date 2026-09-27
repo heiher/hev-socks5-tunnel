@@ -451,6 +451,7 @@ still override `PKGNAME`/`CLSNAME` in `Application.mk` as shown above and build 
 * **codewithtamim** - https://github.com/codewithtamim
 * **dovecoteescapee** - https://github.com/dovecoteescapee
 * **ebrahimtahernejad** - https://github.com/ebrahimtahernejad
+* **egavr** - https://github.com/egavr
 * **heiby** - https://github.com/heiby
 * **hev** - https://hev.cc
 * **ihipop** - https://ihipop.com
