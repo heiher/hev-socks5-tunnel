@@ -264,6 +264,9 @@ hev_mapped_dns_lookup (HevMappedDNS *self, int ip)
     HevMappedDNSNode *node;
     int idx;
 
+    if ((ip & self->mask) != self->net)
+        return NULL;
+
     idx = ip & ~self->mask;
     if (idx >= self->max)
         return NULL;
