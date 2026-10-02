@@ -71,6 +71,9 @@ ifeq ($(MSYSTEM),MSYS)
 	LDFLAGS+=-lmsys-2.0 -lws2_32 -lIphlpapi
 endif
 
+// going to add msvc
+// windows native api(s)
+
 V :=
 ECHO_PREFIX := @
 ifeq ($(V),1)
