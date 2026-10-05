@@ -78,6 +78,7 @@ hev_socks5_tunnel_main_inner (int tun_fd)
     hev_socks5_tunnel_run ();
 
     hev_socks5_tunnel_fini ();
+    lwip_fini ();
 
 free_task_sys:
     hev_task_system_fini ();
