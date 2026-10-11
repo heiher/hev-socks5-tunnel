@@ -331,13 +331,15 @@ static void
 lwip_io_task_entry (void *data)
 {
     const unsigned int mtu = hev_config_get_tunnel_mtu ();
+    unsigned int i;
 
     LOG_D ("socks5 tunnel lwip task run");
 
     hev_tunnel_add_task (tun_fd, task_lwip_io);
 
-    for (; READ_ONCE (run);) {
+    for (i = 0; READ_ONCE (run);) {
         struct pbuf *buf;
+        uint8_t *data;
 
         buf = hev_tunnel_read (tun_fd, mtu, task_io_yielder, NULL);
         if (!buf)
@@ -346,10 +348,24 @@ lwip_io_task_entry (void *data)
         stat_tx_packets++;
         stat_tx_bytes += buf->tot_len;
 
+        data = buf->payload;
+        if ((data[0] >> 4) == 4 ? (data[9] == IP_PROTO_UDP) :
+                                  (data[6] == IP_PROTO_UDP))
+            i++;
+
         hev_task_mutex_lock (&mutex);
         if (netif->input (buf, netif) != ERR_OK)
             pbuf_free (buf);
         hev_task_mutex_unlock (&mutex);
+
+        /*
+         * Let the UDP sessions forward what has been received so far, instead
+         * of reading packets that will be dropped by full session queues.
+         */
+        if (i >= TUN_READ_BATCH) {
+            hev_task_yield (HEV_TASK_YIELD);
+            i = 0;
+        }
     }
 
     hev_tunnel_del_task (tun_fd, task_lwip_io);
@@ -506,7 +522,8 @@ gateway_init (void)
 
     if (hev_tunnel_get_offload () & HEV_TUNNEL_OFFLOAD_CSUM)
         NETIF_SET_CHECKSUM_CTRL (netif, NETIF_CHECKSUM_ENABLE_ALL &
-                                            ~NETIF_CHECKSUM_GEN_TCP));
+                                            ~(NETIF_CHECKSUM_GEN_TCP |
+                                              NETIF_CHECKSUM_GEN_UDP));
 
     if (hev_config_get_tunnel_icmp ())
         netif_set_flags (netif, NETIF_FLAG_PRETEND_ICMP);

@@ -23,6 +23,7 @@
 #include "hev-utils.h"
 #include "hev-config.h"
 #include "hev-logger.h"
+#include "hev-tunnel.h"
 #include "hev-compiler.h"
 #include "hev-config-const.h"
 #include "hev-socks5-tunnel.h"
@@ -64,60 +65,118 @@ task_io_yielder (HevTaskYieldType type, void *data)
 }
 
 static int
-hev_socks5_session_udp_fwd_f (HevSocks5SessionUDP *self, unsigned int num)
+hev_socks5_session_udp_fwd_f (HevSocks5SessionUDP *self)
 {
-    HevSocks5UDPMsg msgv[num];
+    HevSocks5UDPMsg msgv[UDP_SEND_BATCH];
     HevSocks5UDPFrame *frame;
     HevListNode *node;
     struct pbuf *buf;
     int i, res;
 
-    res = self->frames;
-    if (res <= 0)
+    if (self->frames <= 0)
         return 0;
 
-    res = (res > num) ? num : res;
-    node = hev_list_first (&self->frame_list);
-    for (i = 0; i < res; i++) {
-        frame = container_of (node, HevSocks5UDPFrame, node);
-        node = hev_list_node_next (node);
-        buf = frame->data;
-
-        msgv[i].buf = buf->payload;
-        msgv[i].len = buf->len;
-        msgv[i].addr = &frame->addr;
-    }
-
-    res = hev_socks5_udp_sendmmsg (HEV_SOCKS5_UDP (self), msgv, res);
-    if (res <= 0) {
-        LOG_D ("%p socks5 session udp fwd f send", self);
-        return -1;
-    }
-
-    for (i = 0; i < res; i++) {
+    /* Drain the whole queue, frames keep arriving while we are away. */
+    while (self->frames > 0) {
+        res = (self->frames > UDP_SEND_BATCH) ? UDP_SEND_BATCH : self->frames;
         node = hev_list_first (&self->frame_list);
-        frame = container_of (node, HevSocks5UDPFrame, node);
-        buf = frame->data;
+        for (i = 0; i < res; i++) {
+            frame = container_of (node, HevSocks5UDPFrame, node);
+            node = hev_list_node_next (node);
+            buf = frame->data;
 
-        hev_list_del (&self->frame_list, node);
-        hev_free (frame);
-        pbuf_free (buf);
-        self->frames--;
+            msgv[i].buf = buf->payload;
+            msgv[i].len = buf->len;
+            msgv[i].addr = &frame->addr;
+        }
+
+        res = hev_socks5_udp_sendmmsg (HEV_SOCKS5_UDP (self), msgv, res);
+        if (res <= 0) {
+            LOG_D ("%p socks5 session udp fwd f send", self);
+            return -1;
+        }
+
+        for (i = 0; i < res; i++) {
+            node = hev_list_first (&self->frame_list);
+            frame = container_of (node, HevSocks5UDPFrame, node);
+            buf = frame->data;
+
+            hev_list_del (&self->frame_list, node);
+            hev_free (frame);
+            pbuf_free (buf);
+            self->frames--;
+        }
     }
 
     return 1;
 }
 
-static int
-hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self, unsigned int num)
+static unsigned int
+hev_socks5_session_udp_gso_count (HevSocks5UDPMsg *msgv, unsigned int num)
 {
-    char buf[UDP_BUF_SIZE * num];
+    size_t size = msgv[0].len;
+    size_t total = size;
+    int alen;
+    int i;
+
+    alen = hev_socks5_addr_len (msgv[0].addr);
+
+    /*
+     * Datagrams from the same source with the same size can be sent as one
+     * UDP GSO packet, only the last one is allowed to be shorter.
+     */
+    for (i = 1; i < num && i < 64; i++) {
+        if (!msgv[i].addr || (msgv[i].len == 0) || (msgv[i].len > size))
+            break;
+        if ((total + msgv[i].len) > 65000)
+            break;
+        if (memcmp (msgv[i].addr, msgv[0].addr, alen) != 0)
+            break;
+        total += msgv[i].len;
+        if (msgv[i].len < size) {
+            i++;
+            break;
+        }
+    }
+
+    return i;
+}
+
+static struct pbuf *
+hev_socks5_session_udp_gso_buf (HevSocks5UDPMsg *msgv, unsigned int num)
+{
+    struct pbuf *b;
+    int i;
+
+    b = pbuf_alloc (PBUF_TRANSPORT, 0, PBUF_RAM);
+    if (!b)
+        return NULL;
+
+    b->gso_size = msgv[0].len;
+    for (i = 0; i < num; i++) {
+        struct pbuf *p;
+
+        p = pbuf_alloc_reference (msgv[i].buf, msgv[i].len, PBUF_REF);
+        if (!p) {
+            pbuf_free (b);
+            return NULL;
+        }
+        pbuf_cat (b, p);
+    }
+
+    return b;
+}
+
+static int
+hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self, char *buf,
+                              unsigned int size, unsigned int num)
+{
     HevSocks5UDPMsg msgv[num];
-    int i, res;
+    int i, n, res, gso;
 
     for (i = 0; i < num; i++) {
-        msgv[i].buf = buf + UDP_BUF_SIZE * i;
-        msgv[i].len = UDP_BUF_SIZE;
+        msgv[i].buf = buf + size * i;
+        msgv[i].len = size;
     }
 
     res = hev_socks5_udp_recvmmsg (HEV_SOCKS5_UDP (self), msgv, num, 1);
@@ -128,13 +187,16 @@ hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self, unsigned int num)
         return -1;
     }
 
-    for (i = 0; i < res; i++) {
+    gso = hev_tunnel_get_offload () & HEV_TUNNEL_OFFLOAD_UDP;
+
+    for (i = 0; i < res; i += n) {
         ip_addr_t saddr;
         struct pbuf *b;
         uint16_t port;
         err_t err;
         int ret;
 
+        n = 1;
         if (!msgv[i].addr || msgv[i].len == 0)
             continue;
 
@@ -150,7 +212,13 @@ hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self, unsigned int num)
             }
         }
 
-        b = pbuf_alloc_reference (msgv[i].buf, msgv[i].len, PBUF_REF);
+        if (gso)
+            n = hev_socks5_session_udp_gso_count (&msgv[i], res - i);
+
+        if (n > 1)
+            b = hev_socks5_session_udp_gso_buf (&msgv[i], n);
+        else
+            b = pbuf_alloc_reference (msgv[i].buf, msgv[i].len, PBUF_REF);
         if (!b) {
             LOG_D ("%p socks5 session udp fwd b buf", self);
             return -1;
@@ -161,6 +229,13 @@ hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self, unsigned int num)
         hev_task_mutex_unlock (self->mutex);
 
         pbuf_free (b);
+        if ((err != ERR_OK) && (n > 1) &&
+            !(hev_tunnel_get_offload () & HEV_TUNNEL_OFFLOAD_UDP)) {
+            /* UDP GSO was rejected, send these datagrams one by one. */
+            gso = 0;
+            n = 0;
+            continue;
+        }
         if (err != ERR_OK) {
             LOG_D ("%p socks5 session udp fwd b send", self);
             return -1;
@@ -185,6 +260,15 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
     if (self->frames > UDP_POOL_SIZE) {
         pbuf_free (p);
         return;
+    }
+
+    /* Reassembled datagrams are chained, the payload must be contiguous. */
+    if (p->next) {
+        struct pbuf *q = pbuf_clone (PBUF_RAW, PBUF_RAM, p);
+        pbuf_free (p);
+        if (!q)
+            return;
+        p = q;
     }
 
     frame = hev_malloc (sizeof (HevSocks5UDPFrame));
@@ -269,12 +353,24 @@ hev_socks5_session_udp_splice (HevSocks5Session *base)
     HevSocks5SessionUDP *self = HEV_SOCKS5_SESSION_UDP (base);
     HevTask *task = hev_task_self ();
     int res_f = 1, res_b = 1;
+    unsigned int size;
+    char *buf;
     int num;
     int fd;
 
     LOG_D ("%p socks5 session udp splice", self);
 
+    /* Datagrams up to the tunnel MTU, plus room for the socks5 header. */
+    size = hev_config_get_tunnel_mtu ();
+    if (size < UDP_BUF_SIZE)
+        size = UDP_BUF_SIZE;
+    size += 256;
+
     num = hev_config_get_misc_udp_copy_buffer_nums ();
+    buf = hev_malloc (size * num);
+    if (!buf)
+        return;
+
     fd = hev_socks5_udp_get_fd (HEV_SOCKS5_UDP (self));
     if (hev_task_mod_fd (task, fd, POLLIN | POLLOUT) < 0)
         hev_task_add_fd (task, fd, POLLIN | POLLOUT);
@@ -283,9 +379,9 @@ hev_socks5_session_udp_splice (HevSocks5Session *base)
         HevTaskYieldType type;
 
         if (res_f >= 0)
-            res_f = hev_socks5_session_udp_fwd_f (self, num);
+            res_f = hev_socks5_session_udp_fwd_f (self);
         if (res_b >= 0)
-            res_b = hev_socks5_session_udp_fwd_b (self, num);
+            res_b = hev_socks5_session_udp_fwd_b (self, buf, size, num);
 
         if (res_f > 0 || res_b > 0)
             type = HEV_TASK_YIELD;
@@ -297,6 +393,8 @@ hev_socks5_session_udp_splice (HevSocks5Session *base)
         if (task_io_yielder (type, self))
             break;
     }
+
+    hev_free (buf);
 }
 
 static HevTask *
