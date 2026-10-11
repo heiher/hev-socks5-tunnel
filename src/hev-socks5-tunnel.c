@@ -170,6 +170,23 @@ hev_socks5_session_task_entry (void *data)
     hev_object_unref (HEV_OBJECT (s));
 }
 
+static void
+tcp_pcb_set_gso (struct tcp_pcb *pcb)
+{
+    /* Leave room for IP and TCP headers within the 64K packet limit. */
+    const unsigned int max = 65535 - 128;
+    unsigned int n = (max + pcb->mss - 1) / pcb->mss;
+
+    /*
+     * Send super segments of n segments, the tunnel device segments them
+     * into packets of gso_mss on demand (GSO). The segments are shrunk
+     * evenly to fill up the 64K limit, so a 64K buffer goes out as one
+     * packet instead of a full and a small one.
+     */
+    pcb->gso_mss = max / n;
+    pcb->mss = n * pcb->gso_mss;
+}
+
 static err_t
 tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
 {
@@ -194,6 +211,9 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
         hev_object_unref (HEV_OBJECT (tcp));
         return ERR_MEM;
     }
+
+    if (hev_tunnel_get_offload () & HEV_TUNNEL_OFFLOAD_TCP)
+        tcp_pcb_set_gso (pcb);
 
     hev_socks5_session_set_task (HEV_SOCKS5_SESSION (tcp), task);
     node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (tcp));
@@ -383,6 +403,7 @@ tunnel_init (int extern_tun_fd)
         }
 
         tun_fd = extern_tun_fd;
+        hev_tunnel_set_offload (tun_fd);
         return 0;
     }
 
@@ -395,6 +416,7 @@ tunnel_init (int extern_tun_fd)
         LOG_E ("socks5 tunnel open (%s)", strerror (errno));
         return -1;
     }
+    hev_tunnel_set_offload (tun_fd);
 
     mtu = hev_config_get_tunnel_mtu ();
     res = hev_tunnel_set_mtu (mtu);
@@ -481,6 +503,10 @@ gateway_init (void)
     netif_set_default (netif);
     netif_set_flags (netif, NETIF_FLAG_PRETEND_TCP);
     netif_set_flags (netif, NETIF_FLAG_PRETEND_UDP);
+
+    if (hev_tunnel_get_offload () & HEV_TUNNEL_OFFLOAD_CSUM)
+        NETIF_SET_CHECKSUM_CTRL (netif, NETIF_CHECKSUM_ENABLE_ALL &
+                                            ~NETIF_CHECKSUM_GEN_TCP));
 
     if (hev_config_get_tunnel_icmp ())
         netif_set_flags (netif, NETIF_FLAG_PRETEND_ICMP);

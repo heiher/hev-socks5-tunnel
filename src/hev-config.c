@@ -444,6 +444,10 @@ hev_config_parse_doc (yaml_document_t *doc)
     if (tcp_buffer_size > TCP_SND_BUF)
         tcp_buffer_size = TCP_SND_BUF;
 
+    /* Keep segments from straddling the end of the ring buffer. */
+    if (tcp_buffer_size > TCP_MSS)
+        tcp_buffer_size -= tcp_buffer_size % TCP_MSS;
+
     udp_buffer_size = UDP_BUF_SIZE * udp_copy_buffer_nums;
 
     if (tcp_buffer_size > udp_buffer_size)
