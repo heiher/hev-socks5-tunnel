@@ -71,6 +71,17 @@ hev_tunnel_close (int fd)
     hev_wintun_close (wintun);
 }
 
+void
+hev_tunnel_set_offload (int fd)
+{
+}
+
+int
+hev_tunnel_get_offload (void)
+{
+    return 0;
+}
+
 int
 hev_tunnel_set_mtu (int mtu)
 {
