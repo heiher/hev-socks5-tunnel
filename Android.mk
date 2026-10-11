@@ -22,6 +22,7 @@ ifeq ($(filter $(modules-get-list),lwip),)
     include $(TOP_PATH)/third-part/lwip/Android.mk
 endif
 ifeq ($(filter $(modules-get-list),hev-task-system),)
+    ENABLE_MEMALLOC_SLICE := 0
     include $(TOP_PATH)/third-part/hev-task-system/Android.mk
 endif
 
