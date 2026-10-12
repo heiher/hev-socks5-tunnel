@@ -113,8 +113,18 @@ hev_tunnel_set_offload (int fd, int offload)
      */
     if ((fd < 0) || (ioctl (fd, TUNGETIFF, &ifr) < 0))
         return;
+
+    /*
+     * The kernel takes packets larger than the MTU from the tunnel device,
+     * so TCP segments of up to 64K can be sent as plain packets when TSO is
+     * not available. They are fine for the local stack, but don't fit into
+     * the MTU if they are forwarded to another interface.
+     */
+    tun_offload = offload & HEV_TUNNEL_OFFLOAD_JUMBO;
+
     if (!(ifr.ifr_flags & IFF_VNET_HDR)) {
-        LOG_I ("socks5 tunnel offload: -tso -uso");
+        LOG_I ("socks5 tunnel offload: -tso -uso %cjumbo",
+               (tun_offload & HEV_TUNNEL_OFFLOAD_JUMBO) ? '+' : '-');
         return;
     }
 
@@ -130,7 +140,7 @@ hev_tunnel_set_offload (int fd, int offload)
 
     tun_vnet_hdr_sz = size;
 
-    tun_offload = HEV_TUNNEL_OFFLOAD_CSUM;
+    tun_offload |= HEV_TUNNEL_OFFLOAD_CSUM;
     tun_offload |= offload & HEV_TUNNEL_OFFLOAD_TCP;
     if (offload & HEV_TUNNEL_OFFLOAD_TCP)
         rx = tso;
@@ -145,9 +155,10 @@ hev_tunnel_set_offload (int fd, int offload)
         if (ioctl (fd, TUNSETOFFLOAD, TUN_F_CSUM) < 0)
             ioctl (fd, TUNSETOFFLOAD, 0);
 
-    LOG_I ("socks5 tunnel offload: %ctso %cuso",
+    LOG_I ("socks5 tunnel offload: %ctso %cuso %cjumbo",
            (tun_offload & HEV_TUNNEL_OFFLOAD_TCP) ? '+' : '-',
-           (tun_offload & HEV_TUNNEL_OFFLOAD_UDP) ? '+' : '-');
+           (tun_offload & HEV_TUNNEL_OFFLOAD_UDP) ? '+' : '-',
+           (tun_offload & HEV_TUNNEL_OFFLOAD_JUMBO) ? '+' : '-');
 }
 
 int

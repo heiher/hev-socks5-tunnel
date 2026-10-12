@@ -106,6 +106,9 @@ tunnel:
 #   tso: true
     # UDP segmentation offload
 #   uso: true
+    # Send TCP segments larger than the MTU without TSO, only for local
+    # delivery, disable it if the traffic is forwarded to other interfaces
+#   jumbo: true
   # Post up script
 # post-up-script: up.sh
   # Pre down script

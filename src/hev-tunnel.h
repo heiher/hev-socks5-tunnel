@@ -15,6 +15,7 @@ enum
     HEV_TUNNEL_OFFLOAD_CSUM = 1 << 0,
     HEV_TUNNEL_OFFLOAD_TCP = 1 << 1,
     HEV_TUNNEL_OFFLOAD_UDP = 1 << 2,
+    HEV_TUNNEL_OFFLOAD_JUMBO = 1 << 3,
 };
 
 #include <netinet/in.h>

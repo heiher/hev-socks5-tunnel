@@ -151,6 +151,8 @@ hev_config_parse_tunnel_offload (yaml_document_t *doc, yaml_node_t *base)
             flag = HEV_TUNNEL_OFFLOAD_TCP;
         else if (0 == strcmp (key, "uso"))
             flag = HEV_TUNNEL_OFFLOAD_UDP;
+        else if (0 == strcmp (key, "jumbo"))
+            flag = HEV_TUNNEL_OFFLOAD_JUMBO;
 
         if (strcasecmp (value, "false"))
             offload |= flag;
@@ -523,7 +525,8 @@ hev_config_reset (void)
 
     tun_mtu = 8500;
     multi_queue = 0;
-    offload = HEV_TUNNEL_OFFLOAD_TCP | HEV_TUNNEL_OFFLOAD_UDP;
+    offload = HEV_TUNNEL_OFFLOAD_TCP | HEV_TUNNEL_OFFLOAD_UDP |
+              HEV_TUNNEL_OFFLOAD_JUMBO;
     icmp = 0;
 
     mapdns_address = 0;

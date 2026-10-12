@@ -179,9 +179,9 @@ tcp_pcb_set_gso (struct tcp_pcb *pcb)
 
     /*
      * Send super segments of n segments, the tunnel device segments them
-     * into packets of gso_mss on demand (GSO). The segments are shrunk
-     * evenly to fill up the 64K limit, so a 64K buffer goes out as one
-     * packet instead of a full and a small one.
+     * into packets of gso_mss on demand (GSO), or they are delivered as is
+     * (jumbo). The segments are shrunk evenly to fill up the 64K limit, so
+     * a 64K buffer goes out as one packet instead of a full and a small one.
      */
     pcb->gso_mss = max / n;
     pcb->mss = n * pcb->gso_mss;
@@ -212,7 +212,8 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
         return ERR_MEM;
     }
 
-    if (hev_tunnel_get_offload () & HEV_TUNNEL_OFFLOAD_TCP)
+    if (hev_tunnel_get_offload () &
+        (HEV_TUNNEL_OFFLOAD_TCP | HEV_TUNNEL_OFFLOAD_JUMBO))
         tcp_pcb_set_gso (pcb);
 
     hev_socks5_session_set_task (HEV_SOCKS5_SESSION (tcp), task);
