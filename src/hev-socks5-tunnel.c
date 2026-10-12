@@ -14,6 +14,10 @@
 #include <stdatomic.h>
 #include <sys/ioctl.h>
 
+#ifdef __GLIBC__
+#include <malloc.h>
+#endif
+
 #include <lwip/tcp.h>
 #include <lwip/udp.h>
 #include <lwip/nd6.h>
@@ -398,8 +402,13 @@ lwip_timer_task_entry (void *data)
 
         if (hev_list_first (&session_set))
             hev_task_sleep (TCP_TMR_INTERVAL);
-        else
+        else {
+#if defined(__GLIBC__) && !defined(ENABLE_LIBRARY)
+            /* Release free memory from the heap */
+            malloc_trim (0);
+#endif
             hev_task_yield (HEV_TASK_WAITIO);
+        }
     }
 }
 
