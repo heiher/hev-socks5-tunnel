@@ -85,16 +85,17 @@ exit:
 void
 hev_tunnel_close (int fd)
 {
-    hev_tunnel_set_offload (-1);
+    hev_tunnel_set_offload (-1, 0);
     close (fd);
 }
 
 void
-hev_tunnel_set_offload (int fd)
+hev_tunnel_set_offload (int fd, int offload)
 {
     const unsigned int tso = TUN_F_CSUM | TUN_F_TSO4 | TUN_F_TSO6;
     const unsigned int uso = TUN_F_USO4 | TUN_F_USO6;
     struct ifreq ifr = { 0 };
+    unsigned int rx = TUN_F_CSUM;
     int size;
 
     if (tun_rbuf) {
@@ -107,12 +108,15 @@ hev_tunnel_set_offload (int fd)
     /*
      * Everything is probed on the fd, which may also come from outside
      * (e.g. Android VpnService). Any failure (old or broken kernels, denied
-     * ioctls) falls back to plain packets.
+     * ioctls) falls back to plain packets. The segmentation offloads can be
+     * disabled by the configuration.
      */
     if ((fd < 0) || (ioctl (fd, TUNGETIFF, &ifr) < 0))
         return;
-    if (!(ifr.ifr_flags & IFF_VNET_HDR))
+    if (!(ifr.ifr_flags & IFF_VNET_HDR)) {
+        LOG_I ("socks5 tunnel offload: -tso -uso");
         return;
+    }
 
     if (ioctl (fd, TUNGETVNETHDRSZ, &size) < 0)
         return;
@@ -125,16 +129,25 @@ hev_tunnel_set_offload (int fd)
         return;
 
     tun_vnet_hdr_sz = size;
-    tun_offload = HEV_TUNNEL_OFFLOAD_CSUM | HEV_TUNNEL_OFFLOAD_TCP;
+
+    tun_offload = HEV_TUNNEL_OFFLOAD_CSUM;
+    tun_offload |= offload & HEV_TUNNEL_OFFLOAD_TCP;
+    if (offload & HEV_TUNNEL_OFFLOAD_TCP)
+        rx = tso;
 
     /* Kernels that know USO accept UDP GSO packets (Linux 6.2+). */
-    if (ioctl (fd, TUNSETOFFLOAD, tso | uso) == 0)
+    if ((offload & HEV_TUNNEL_OFFLOAD_UDP) &&
+        (ioctl (fd, TUNSETOFFLOAD, rx | uso) == 0))
         tun_offload |= HEV_TUNNEL_OFFLOAD_UDP;
 
-    /* Receive TSO packets if possible, USO packets are not handled. */
-    if (ioctl (fd, TUNSETOFFLOAD, tso) < 0)
+    /* Receive TSO packets if enabled, USO packets are not handled. */
+    if (ioctl (fd, TUNSETOFFLOAD, rx) < 0)
         if (ioctl (fd, TUNSETOFFLOAD, TUN_F_CSUM) < 0)
             ioctl (fd, TUNSETOFFLOAD, 0);
+
+    LOG_I ("socks5 tunnel offload: %ctso %cuso",
+           (tun_offload & HEV_TUNNEL_OFFLOAD_TCP) ? '+' : '-',
+           (tun_offload & HEV_TUNNEL_OFFLOAD_UDP) ? '+' : '-');
 }
 
 int

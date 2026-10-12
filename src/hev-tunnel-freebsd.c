@@ -95,7 +95,7 @@ hev_tunnel_close (int fd)
 }
 
 void
-hev_tunnel_set_offload (int fd)
+hev_tunnel_set_offload (int fd, int offload)
 {
 }
 

@@ -33,6 +33,7 @@ const char *hev_config_get_tunnel_name (void);
 const char *hev_config_get_tunnel_guid (void);
 unsigned int hev_config_get_tunnel_mtu (void);
 int hev_config_get_tunnel_multi_queue (void);
+int hev_config_get_tunnel_offload (void);
 int hev_config_get_tunnel_icmp (void);
 
 const char *hev_config_get_tunnel_ipv4_address (void);

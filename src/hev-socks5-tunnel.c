@@ -406,8 +406,10 @@ static int
 tunnel_init (int extern_tun_fd)
 {
     const char *script_path, *name, *guid, *ipv4, *ipv6;
-    int multi_queue, res;
+    int multi_queue, offload, res;
     unsigned int mtu;
+
+    offload = hev_config_get_tunnel_offload ();
 
     if (extern_tun_fd >= 0) {
         int nonblock = 1;
@@ -419,7 +421,7 @@ tunnel_init (int extern_tun_fd)
         }
 
         tun_fd = extern_tun_fd;
-        hev_tunnel_set_offload (tun_fd);
+        hev_tunnel_set_offload (tun_fd, offload);
         return 0;
     }
 
@@ -432,7 +434,7 @@ tunnel_init (int extern_tun_fd)
         LOG_E ("socks5 tunnel open (%s)", strerror (errno));
         return -1;
     }
-    hev_tunnel_set_offload (tun_fd);
+    hev_tunnel_set_offload (tun_fd, offload);
 
     mtu = hev_config_get_tunnel_mtu ();
     res = hev_tunnel_set_mtu (mtu);
