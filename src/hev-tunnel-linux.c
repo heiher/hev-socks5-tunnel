@@ -463,13 +463,20 @@ hev_tunnel_fill_vnet_hdr (struct virtio_net_hdr *hdr, struct pbuf *buf)
         return;
     }
 
+    /*
+     * Copy the headers into the linear part of the skb, the payload goes to
+     * the page frags. Otherwise the kernel copies only up to the checksum
+     * field, so the TCP header has to be pulled later and a payload of 8K
+     * plus a few bytes spills over into an extra page.
+     */
+    tcphl = (data[iphl + 12] >> 4) << 2;
+    hdr->hdr_len = iphl + tcphl;
+
     if (!(tun_offload & HEV_TUNNEL_OFFLOAD_TCP))
         return;
 
-    tcphl = (data[iphl + 12] >> 4) << 2;
     if (buf->gso_size && ((len - tcphl) > buf->gso_size)) {
         hdr->gso_type = gso_type;
-        hdr->hdr_len = iphl + tcphl;
         hdr->gso_size = buf->gso_size;
     }
 }
