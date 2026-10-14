@@ -11,7 +11,7 @@
 #define __HEV_CONFIG_CONST_H__
 
 #define MAJOR_VERSION (2)
-#define MINOR_VERSION (18)
+#define MINOR_VERSION (19)
 #define MICRO_VERSION (0)
 
 #define UDP_BUF_SIZE 1500
