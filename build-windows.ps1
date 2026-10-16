@@ -1,27 +1,36 @@
 # ============================================================================
 #  build-windows.ps1 - Native MSVC/Windows build for hev-socks5-tunnel
 #
+#  Supported architectures: x64 (default), x86 and arm64 (select with
+#  -Arch). Each architecture uses its own assembler (ml64 / ml /
+#  armasm64), coroutine entry assembly and Windows SDK LIBPATHs; see the
+#  note at the top of Makefile.msvc. x64 keeps the original output paths
+#  (build-msvc\...); x86 and arm64 build into build-msvc\x86\... and
+#  build-msvc\arm64\... .
+#
 #  PowerShell counterpart to build-apple.sh: builds with NMake + MSVC
-#  (cl / lib / link / ml64), no CMake required.
+#  (cl / lib / link / ml64|ml|armasm64), no CMake required.
 #
 #  Prerequisites:
-#    - Visual Studio 2019/2022/2026 (or VS Build Tools) with the x64 C++
-#      toolset. MSVC 19.35+ (VS2022 17.5+) is required because the C code
-#      uses _Generic. This is a toolchain limitation and is NOT worked
-#      around here.
+#    - Visual Studio 2019/2022/2026 (or VS Build Tools) with the C++
+#      toolset for the target architecture; the x86 and ARM64 cross tools
+#      ship in the same "Desktop development with C++" workload. MSVC
+#      19.35+ (VS2022 17.5+) is required because the C code uses _Generic.
+#      This is a toolchain limitation and is NOT worked around here.
 #    - No Developer Command Prompt needed: if cl.exe / link.exe /
 #      ml64.exe / nmake.exe are not on PATH, the script locates Visual
 #      Studio via vswhere.exe and imports the developer environment with
 #      Microsoft.VisualStudio.DevShell.dll + Enter-VsDevShell.
 #
 #  Outputs:
-#    build-msvc\dist\bin\     - hev-socks5-tunnel.exe, .dll, wintun.dll
-#    build-msvc\dist\lib\     - hev-socks5-tunnel-static.lib, import .lib
-#    build-msvc\dist\include\ - public header (hev-main.h)
+#    build-msvc[\x86|\arm64]\dist\bin\     - hev-socks5-tunnel.exe, .dll
+#    build-msvc[\x86|\arm64]\dist\lib\     - hev-socks5-tunnel-static.lib,
+#                                            import .lib
+#    build-msvc[\x86|\arm64]\dist\include\ - public header (hev-main.h)
 #
 #  Usage:
-#    .\build-windows.ps1 [-d|-DebugBuild] [-StaticCrt] [-Clean] [-Help]
-#                        [-- ...nmake args...]
+#    .\build-windows.ps1 [-Arch x64|x86|arm64] [-d|-DebugBuild] [-StaticCrt]
+#                        [-Clean] [-Help] [-- ...nmake args...]
 #    Extra args after -- are forwarded to nmake, e.g.:
 #      .\build-windows.ps1 -- DEBUG=1
 #
@@ -29,6 +38,10 @@
 # ============================================================================
 [CmdletBinding()]
 param(
+    # Target architecture, forwarded to nmake as ARCH=<value>.
+    [ValidateSet('x64', 'x86', 'arm64')]
+    [string]$Arch = 'x64',
+
     # DEBUG=1. -d is the short alias. Note: -Debug is a PowerShell common
     # parameter (from [CmdletBinding()]); it is also accepted and treated
     # exactly the same as -d / -DebugBuild.
@@ -59,7 +72,7 @@ $ErrorActionPreference = 'Stop'
 # ============================================================================
 
 function Write-Usage {
-    Write-Host 'Usage: build-windows.ps1 [-d|-DebugBuild] [-StaticCrt] [-Clean] [-Help] [-- ...nmake args...]'
+    Write-Host 'Usage: build-windows.ps1 [-Arch x64|x86|arm64] [-d|-DebugBuild] [-StaticCrt] [-Clean] [-Help] [-- ...nmake args...]'
     Write-Host '       VAR=val and targets (all/static/shared/exe/dist/clean) may be passed directly.'
 }
 
@@ -88,6 +101,9 @@ function Invoke-VsDevShellSetup {
 
     # Prefer an installation that actually has the C++ toolset; fall back to
     # the workload-level requirement for newer VS versions (VS2026+).
+    # ARM64 cross-compilation tools ship in the same "Desktop development
+    # with C++" workload, so the component requirements below cover all
+    # three architectures.
     $vswhereArgs = @('-latest', '-products', '*', '-prerelease',
         '-property', 'installationPath', '-format', 'value',
         '-requires', 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64')
@@ -114,8 +130,23 @@ function Invoke-VsDevShellSetup {
         throw "Microsoft.VisualStudio.DevShell.dll not found at: $devShellDll"
     }
     Import-Module -Name $devShellDll
+    # Import the developer environment for the requested target architecture
+    # (cross builds run on an x64 host; on an ARM64 device use the native
+    # ARM64 host tools when available).
+    $devCmdArch = switch ($Arch) {
+        'x64' { '-arch=x64 -host_arch=x64' }
+        'x86' { '-arch=x86 -host_arch=x64' }
+        'arm64' {
+            if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') {
+                '-arch=arm64 -host_arch=arm64'
+            }
+            else {
+                '-arch=arm64 -host_arch=x64'
+            }
+        }
+    }
     Enter-VsDevShell -VsInstallPath $installPath -SkipAutomaticLocation `
-        -DevCmdArguments '-arch=x64 -host_arch=x64'
+        -DevCmdArguments $devCmdArch
 }
 
 function Fail-MissingTools {
@@ -124,10 +155,10 @@ function Fail-MissingTools {
     Write-Host "ERROR: required tool(s) still not found on PATH: $($ToolNames -join ', ')" `
         -ForegroundColor Red
     Write-Host 'Fix: import the VS developer environment first, either:'
-    Write-Host '  - open a "Developer Command Prompt for VS" and re-run this script, or'
-    Write-Host '  - run vcvarsall.bat: "& \"<VS path>\VC\Auxiliary\Build\vcvarsall.bat\" x64", or'
+    Write-Host '  - open a "Developer Command Prompt for VS" matching -Arch and re-run this script, or'
+    Write-Host '  - run vcvarsall.bat: "& \"<VS path>\VC\Auxiliary\Build\vcvarsall.bat\" <arch>", or'
     Write-Host '  - Enter-VsDevShell -VsInstallPath <VS path> -SkipAutomaticLocation'
-    Write-Host "      -DevCmdArguments '-arch=x64 -host_arch=x64'"
+    Write-Host "      -DevCmdArguments '-arch=<x64|x86|arm64> -host_arch=x64'"
     exit 1
 }
 
@@ -154,9 +185,11 @@ try {
     if ($Clean) {
         # Matches the original .cmd: --clean runs only "nmake clean" and exits;
         # other options on the same command line are ignored.
+        $nmakeArgsList.Add("ARCH=$Arch")
         $nmakeArgsList.Add('clean')
     }
     else {
+        $nmakeArgsList.Add("ARCH=$Arch")
         if ($DebugBuild -or $PSBoundParameters.ContainsKey('Debug')) {
             $nmakeArgsList.Add('DEBUG=1')
         }
@@ -203,7 +236,12 @@ try {
     # ------------------------------------------------------------------
     #  Toolchain discovery (Developer Prompt OR auto-setup via vswhere)
     # ------------------------------------------------------------------
-    $requiredTools = @('nmake', 'cl', 'ml64', 'link')
+    # Each architecture uses a different macro assembler: ml64 (x64),
+    # ml (x86) or armasm64 (ARM64).
+    $assembler = if ($Arch -eq 'x64') { 'ml64' }
+        elseif ($Arch -eq 'x86') { 'ml' }
+        else { 'armasm64' }
+    $requiredTools = @('nmake', 'cl', 'link', $assembler)
     $missing = Get-RequiredToolMissing $requiredTools
 
     if ($missing.Count -gt 0) {
@@ -220,6 +258,12 @@ try {
     # ------------------------------------------------------------------
     #  Sanity checks and warnings (after auto-setup, as in the .cmd)
     # ------------------------------------------------------------------
+    # A developer environment targeting a different architecture would
+    # silently compile wrong-arch objects into build-msvc\<arch>, so fail
+    # early when the imported environment disagrees with -Arch.
+    if ($env:VSCMD_ARG_TGT_ARCH -and $env:VSCMD_ARG_TGT_ARCH -ne $Arch) {
+        throw "Developer environment targets '$($env:VSCMD_ARG_TGT_ARCH)' but -Arch is '$Arch'. Re-run from a matching environment or let the script set one up (delete stale build-msvc\$Arch output first)."
+    }
     if (-not (Test-Path -LiteralPath (Join-Path (Get-Location) 'Makefile.msvc'))) {
         throw "Makefile.msvc not found in $(Get-Location)."
     }
@@ -247,9 +291,11 @@ try {
 
     Write-Host ''
     Write-Host 'Build finished.'
-    Write-Host '  binaries:   build-msvc\dist\bin'
-    Write-Host '  libraries:  build-msvc\dist\lib'
-    Write-Host '  headers:    build-msvc\dist\include'
+    $distDir = if ($Arch -eq 'x64') { 'build-msvc\dist' } else { "build-msvc\$Arch\dist" }
+    Write-Host "  arch:       $Arch"
+    Write-Host "  binaries:   $distDir\bin"
+    Write-Host "  libraries:  $distDir\lib"
+    Write-Host "  headers:    $distDir\include"
     exit 0
 }
 catch {

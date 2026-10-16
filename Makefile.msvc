@@ -1,18 +1,34 @@
-# Makefile.msvc - Native MSVC/Windows x64 build for hev-socks5-tunnel
+# Makefile.msvc - Native MSVC/Windows build for hev-socks5-tunnel
+#
+# Supported architectures: x64 (default), x86 and arm64.
+#
+# Each architecture uses its own assembler (ml64 / ml / armasm64), coroutine
+# entry assembly (hev-task-execute-x86_64.asm / hev-task-execute-x86.asm /
+# hev-task-execute-arm64-msvc.asm) and Windows SDK LIBPATH. x64 keeps the
+# original output paths (build-msvc\...); x86 and arm64 build into
+# build-msvc\x86\... and build-msvc\arm64\... so no architecture ever
+# overwrites another's artifacts.
 #
 # Make-based counterpart to build-apple.sh (which uses GNU make).
-# Uses NMake + cl / lib / link / ml64, no CMake required.
+# Uses NMake + cl / lib / link / ml64|ml|armasm64, no CMake required.
 #
-# Usage (from a VS2022 Developer Command Prompt, x64):
-#   nmake /F Makefile.msvc                 - Release, dynamic CRT (/MD)
-#   nmake /F Makefile.msvc DEBUG=1         - Debug, dynamic CRT (/MDd)
-#   nmake /F Makefile.msvc STATIC_CRT=1    - Release, static CRT (/MT)
-#   nmake /F Makefile.msvc clean           - remove build-msvc/
+# Usage (from a VS2022 Developer Command Prompt matching the target arch):
+#   nmake /F Makefile.msvc                  - x64 Release, dynamic CRT (/MD)
+#   nmake /F Makefile.msvc ARCH=x86         - x86 Release
+#   nmake /F Makefile.msvc ARCH=arm64       - ARM64 Release
+#   nmake /F Makefile.msvc DEBUG=1          - Debug, dynamic CRT (/MDd)
+#   nmake /F Makefile.msvc STATIC_CRT=1     - Release, static CRT (/MT)
+#   nmake /F Makefile.msvc clean            - remove build outputs for the
+#                                        selected arch (x64: build-msvc\obj
+#                                        and build-msvc\dist; x86/arm64:
+#                                        build-msvc\<arch>\)
 #
 # Outputs:
-#   build-msvc\dist\bin\  - hev-socks5-tunnel.exe, hev-socks5-tunnel.dll, wintun.dll
-#   build-msvc\dist\lib\  - hev-socks5-tunnel-static.lib, hev-socks5-tunnel.lib (import)
-#   build-msvc\dist\include\ - public header (hev-main.h)
+#   build-msvc[\x86|\arm64]\dist\bin\  - hev-socks5-tunnel.exe,
+#                                        hev-socks5-tunnel.dll, wintun.dll
+#   build-msvc[\x86|\arm64]\dist\lib\  - hev-socks5-tunnel-static.lib,
+#                                        hev-socks5-tunnel.lib (import)
+#   build-msvc[\x86|\arm64]\dist\include\ - public header (hev-main.h)
 
 PROJECT = hev-socks5-tunnel
 OUTDIR = build-msvc
@@ -22,7 +38,11 @@ DISTBIN = $(DISTDIR)\bin
 DISTLIB = $(DISTDIR)\lib
 DISTINC = $(DISTDIR)\include
 
-WINTUN_DLL = third-part\wintun\bin\wintun.dll
+# The bundled wintun redistributable ships one DLL per architecture; the
+# per-arch selection happens in the ARCH block below.
+WINTUN_DLL_AMD64 = third-part\wintun\bin\wintun.dll
+WINTUN_DLL_X86 = third-part\wintun\bin\wintun-x86.dll
+WINTUN_DLL_ARM64 = third-part\wintun\bin\wintun-arm64.dll
 PUBHEADER = src\hev-main.h
 COMPAT_HEADER = third-part\hev-task-system\win32-compat\hev-win-compat.h
 
@@ -31,7 +51,59 @@ CC = cl
 # which NMAKE exports to child processes and link.exe needs to find CRT/SDK libs.
 AR = lib
 LINK = link
+
+# ------------------------ architecture selection ------------------------
+# ARCH comes from the nmake command line (nmake /F Makefile.msvc ARCH=x86).
+!IF "$(ARCH)" == "x86"
+ARCH_DIR = x86
+ML = ml
+# x86 MASM needs explicit COFF output and SafeSEH metadata.
+MLFLAGS = /nologo /c /coff /safeseh
+WINTUN_DLL = $(WINTUN_DLL_X86)
+TASK_ASM = third-part\hev-task-system\src\arch\x86\hev-task-execute-x86.asm
+TASK_ASM_DIR = third-part\hev-task-system\src\arch\x86
+TASK_ASM_OBJ = $(OBJDIR)\task\hev-task-execute-x86.obj
+ASM_CMD = $(ML) $(MLFLAGS) /Fo$@ $<
+!ELSEIF "$(ARCH)" == "arm64"
+ARCH_DIR = arm64
+ML = armasm64
+# armasm64 has no /Fo switch: the object file is its second positional
+# argument. -machine ARM64 guarantees genuine native ARM64 COFF objects
+# and prevents armasm64 from emitting ARM64EC code.
+MLFLAGS = -nologo -machine ARM64
+WINTUN_DLL = $(WINTUN_DLL_ARM64)
+TASK_ASM = third-part\hev-task-system\src\arch\arm\hev-task-execute-arm64-msvc.asm
+TASK_ASM_DIR = third-part\hev-task-system\src\arch\arm
+TASK_ASM_OBJ = $(OBJDIR)\task\hev-task-execute-arm64-msvc.obj
+ASM_CMD = $(ML) $(MLFLAGS) $< $@
+!ELSEIF "$(ARCH)" == "x64" || !DEFINED(ARCH)
+ARCH_DIR = x64
 ML = ml64
+MLFLAGS = /nologo /c
+WINTUN_DLL = $(WINTUN_DLL_AMD64)
+TASK_ASM = third-part\hev-task-system\src\arch\x86\hev-task-execute-x86_64.asm
+TASK_ASM_DIR = third-part\hev-task-system\src\arch\x86
+TASK_ASM_OBJ = $(OBJDIR)\task\hev-task-execute-x86_64.obj
+ASM_CMD = $(ML) $(MLFLAGS) /Fo$@ $<
+!ELSE
+!ERROR Unknown ARCH "$(ARCH)". Use x64 (default), x86 or arm64.
+!ENDIF
+
+# Explicit /MACHINE for lib and link: their default target machine depends
+# on the developer environment and can disagree with ARCH in cross setups.
+!IF "$(ARCH_DIR)" == "x86"
+MACHINE_OPT = /MACHINE:X86
+!ELSEIF "$(ARCH_DIR)" == "arm64"
+MACHINE_OPT = /MACHINE:ARM64
+!ELSE
+MACHINE_OPT = /MACHINE:X64
+!ENDIF
+
+# Keep the established x64 output paths; x86 and arm64 build into
+# subfolders so no architecture overwrites another's artifacts.
+!IF "$(ARCH_DIR)" != "x64"
+OUTDIR = build-msvc\$(ARCH_DIR)
+!ENDIF
 
 !IF DEFINED(DEBUG)
 CFLAGS_EXTRA = /Od /Zi /MDd
@@ -107,14 +179,19 @@ CFLAGS_EXE = /nologo /c /W4 /utf-8 /experimental:c11atomics /std:c11 $(CFLAGS_EX
 	/Ithird-part\wintun\include \
 	/FIhev-win-compat.h
 
-MLFLAGS = /nologo /c
 WINLIBS = Ws2_32.lib Iphlpapi.lib Advapi32.lib
 # Windows SDK import libs (Ws2_32/Iphlpapi/Advapi32) are normally found via
 # the LIB env var from the Developer Prompt. Add explicit /LIBPATH fallbacks
 # (unconditional: a non-existent dir is harmlessly ignored by link) so a
 # broken LIB cannot cause LNK1181 when the SDK is actually installed.
-SDK_LIBPATH = $(WindowsSdkDir)Lib\$(WindowsSDKVersion)um\x64
-LINKOPTS = /NOLOGO /CETCOMPAT:NO /LIBPATH:"$(SDK_LIBPATH)" /LIBPATH:"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.26100.0\um\x64" /LIBPATH:"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x64"
+SDK_LIBPATH = $(WindowsSdkDir)Lib\$(WindowsSDKVersion)um\$(ARCH_DIR)
+# /CETCOMPAT is x64/x86 only; ARM64 has no CET shadow stack.
+!IF "$(ARCH_DIR)" == "arm64"
+CET_OPT =
+!ELSE
+CET_OPT = /CETCOMPAT:NO
+!ENDIF
+LINKOPTS = /NOLOGO $(CET_OPT) $(MACHINE_OPT) /LIBPATH:"$(SDK_LIBPATH)" /LIBPATH:"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.26100.0\um\$(ARCH_DIR)" /LIBPATH:"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\$(ARCH_DIR)"
 
 # ------------------------------- sources --------------------------------
 
@@ -199,8 +276,6 @@ TASK_SRCS = \
 	third-part\hev-task-system\src\mem\base\hev-memory-allocator.c \
 	third-part\hev-task-system\src\mem\simple\hev-memory-allocator-simple.c \
 	third-part\hev-task-system\src\mem\slice\hev-memory-allocator-slice.c
-
-TASK_ASM = third-part\hev-task-system\src\arch\x86\hev-task-execute-x86_64.asm
 
 CORE_SRCS = \
 	src\core\src\hev-socks5-authenticator.c \
@@ -310,7 +385,7 @@ TASK_OBJS = $(OBJDIR)\task\hev-task-system.obj \
 	$(OBJDIR)\task\hev-memory-allocator.obj \
 	$(OBJDIR)\task\hev-memory-allocator-simple.obj \
 	$(OBJDIR)\task\hev-memory-allocator-slice.obj \
-	$(OBJDIR)\task\hev-task-execute-x86_64.obj
+	$(TASK_ASM_OBJ)
 
 CORE_OBJS = $(OBJDIR)\core\hev-socks5-authenticator.obj \
 	$(OBJDIR)\core\hev-socks5-client-tcp.obj \
@@ -384,11 +459,11 @@ dist : $(STATIC_LIB) $(SHARED_DLL) $(EXE)
 	if not exist $(DISTLIB) mkdir $(DISTLIB)
 	if not exist $(DISTINC) mkdir $(DISTINC)
 	copy /Y $(PUBHEADER) $(DISTINC)
-	copy /Y $(WINTUN_DLL) $(DISTBIN)
+	copy /Y $(WINTUN_DLL) $(DISTBIN)\wintun.dll
 
 $(STATIC_LIB) : $(LIB_OBJS)
 	if not exist $(DISTLIB) mkdir $(DISTLIB)
-	$(AR) /NOLOGO /OUT:$@ $(LIB_OBJS)
+	$(AR) /NOLOGO $(MACHINE_OPT) /OUT:$@ $(LIB_OBJS)
 
 $(SHARED_DLL) : $(LIB_OBJS)
 	if not exist $(DISTBIN) mkdir $(DISTBIN)
@@ -400,7 +475,12 @@ $(EXE) : $(EXE_OBJS)
 	$(LINK) $(LINKOPTS) /SUBSYSTEM:CONSOLE /OUT:$@ $(EXE_OBJS) $(WINLIBS)
 
 clean :
+!IF "$(ARCH_DIR)" == "x64"
+	if exist $(OUTDIR)\obj rmdir /S /Q $(OUTDIR)\obj
+	if exist $(OUTDIR)\dist rmdir /S /Q $(OUTDIR)\dist
+!ELSE
 	if exist $(OUTDIR) rmdir /S /Q $(OUTDIR)
+!ENDIF
 
 # --------------------------- inference rules ----------------------------
 
@@ -512,9 +592,9 @@ clean :
 	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
 	$(CC) $(CFLAGS) /Fo$@ $<
 
-{third-part\hev-task-system\src\arch\x86}.asm{$(OBJDIR)\task}.obj :
+{$(TASK_ASM_DIR)}.asm{$(OBJDIR)\task}.obj :
 	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
-	$(ML) $(MLFLAGS) /Fo$@ $<
+	$(ASM_CMD)
 
 {third-part\hev-task-system\win32-compat}.c{$(OBJDIR)\tunnel}.obj :
 	if not exist $(OBJDIR)\tunnel mkdir $(OBJDIR)\tunnel

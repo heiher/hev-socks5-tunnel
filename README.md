@@ -67,6 +67,19 @@ cd hev-socks5-tunnel
 make
 ```
 
+### Windows (MSVC)
+
+Native x64 build with the Microsoft toolchain (requires Visual Studio 2022
+17.5+ with the "Desktop development with C++" workload).
+
+```bat
+:: PowerShell (locates Visual Studio via vswhere automatically)
+powershell -ExecutionPolicy Bypass -File build-windows.ps1
+
+:: Or from an x64 Developer Command Prompt
+nmake /F Makefile.msvc
+```
+
 ### Library
 
 ```bash
@@ -267,7 +280,7 @@ services:
     network_mode: "service:tun"
 
   tun:
-    image: ghcr.io/heiher/hev-socks5-tunnel:latest # `latest` for the latest published version; `nightly` for the latest source build; `vX.Y.Z` for the specific version 
+    image: ghcr.io/heiher/hev-socks5-tunnel:latest # `latest` for the latest published version; `nightly` for the latest source build; `vX.Y.Z` for the specific version
     cap_add:
       - NET_ADMIN # needed
     devices:
