@@ -27,7 +27,9 @@ PUBHEADER = src\hev-main.h
 COMPAT_HEADER = third-part\hev-task-system\win32-compat\hev-win-compat.h
 
 CC = cl
-LIB = lib
+# Named AR (not LIB) so it cannot clobber the LIB environment variable,
+# which NMAKE exports to child processes and link.exe needs to find CRT/SDK libs.
+AR = lib
 LINK = link
 ML = ml64
 
@@ -67,8 +69,10 @@ CFLAGS = /nologo /c /W4 /utf-8 /experimental:c11atomics /std:c11 $(CFLAGS_EXTRA)
 	/Ithird-part\lwip\src\ports\include \
 	/Ithird-part\hev-task-system\include \
 	/Ithird-part\hev-task-system\src \
+	/Ithird-part\hev-task-system\win32-compat \
+	/Ithird-part\hev-task-system\win32-compat\include \
 	/Ithird-part\wintun\include \
-	/FI"third-part\hev-task-system\win32-compat\hev-win-compat.h"
+	/FIhev-win-compat.h
 
 # Same as CFLAGS but without /DENABLE_LIBRARY, so hev-main.c gets main().
 CFLAGS_EXE = /nologo /c /W4 /utf-8 /experimental:c11atomics /std:c11 $(CFLAGS_EXTRA) \
@@ -98,12 +102,19 @@ CFLAGS_EXE = /nologo /c /W4 /utf-8 /experimental:c11atomics /std:c11 $(CFLAGS_EX
 	/Ithird-part\lwip\src\ports\include \
 	/Ithird-part\hev-task-system\include \
 	/Ithird-part\hev-task-system\src \
+	/Ithird-part\hev-task-system\win32-compat \
+	/Ithird-part\hev-task-system\win32-compat\include \
 	/Ithird-part\wintun\include \
-	/FI"third-part\hev-task-system\win32-compat\hev-win-compat.h"
+	/FIhev-win-compat.h
 
 MLFLAGS = /nologo /c
 WINLIBS = Ws2_32.lib Iphlpapi.lib Advapi32.lib
-LINKOPTS = /NOLOGO /CETCOMPAT:NO
+# Windows SDK import libs (Ws2_32/Iphlpapi/Advapi32) are normally found via
+# the LIB env var from the Developer Prompt. Add explicit /LIBPATH fallbacks
+# (unconditional: a non-existent dir is harmlessly ignored by link) so a
+# broken LIB cannot cause LNK1181 when the SDK is actually installed.
+SDK_LIBPATH = $(WindowsSdkDir)Lib\$(WindowsSDKVersion)um\x64
+LINKOPTS = /NOLOGO /CETCOMPAT:NO /LIBPATH:"$(SDK_LIBPATH)" /LIBPATH:"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.26100.0\um\x64" /LIBPATH:"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x64"
 
 # ------------------------------- sources --------------------------------
 
@@ -372,12 +383,12 @@ dist : $(STATIC_LIB) $(SHARED_DLL) $(EXE)
 	if not exist $(DISTBIN) mkdir $(DISTBIN)
 	if not exist $(DISTLIB) mkdir $(DISTLIB)
 	if not exist $(DISTINC) mkdir $(DISTINC)
-	copy /Y $(PUBHEADER) $(DISTINC)\
-	copy /Y $(WINTUN_DLL) $(DISTBIN)\
+	copy /Y $(PUBHEADER) $(DISTINC)
+	copy /Y $(WINTUN_DLL) $(DISTBIN)
 
 $(STATIC_LIB) : $(LIB_OBJS)
 	if not exist $(DISTLIB) mkdir $(DISTLIB)
-	$(LIB) /NOLOGO /OUT:$@ $(LIB_OBJS)
+	$(AR) /NOLOGO /OUT:$@ $(LIB_OBJS)
 
 $(SHARED_DLL) : $(LIB_OBJS)
 	if not exist $(DISTBIN) mkdir $(DISTBIN)
