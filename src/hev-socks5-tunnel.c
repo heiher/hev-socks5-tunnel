@@ -9,10 +9,14 @@
 
 #include <errno.h>
 #include <assert.h>
+#if !defined(_MSC_VER)
 #include <signal.h>
+#endif
 #include <string.h>
 #include <stdatomic.h>
+#if !defined(_MSC_VER)
 #include <sys/ioctl.h>
+#endif
 
 #ifdef __GLIBC__
 #include <malloc.h>
@@ -737,7 +741,9 @@ hev_socks5_tunnel_init (int tun_fd)
     if (res < 0)
         goto exit;
 
+#if !defined(_MSC_VER)
     signal (SIGPIPE, SIG_IGN);
+#endif
 
     hev_task_mutex_init (&mutex);
 

@@ -11,6 +11,9 @@
 #define __HEV_RING_BUFFER_H__
 
 #include <stdlib.h>
+#if defined(_MSC_VER)
+#include <malloc.h>
+#endif
 #include <sys/uio.h>
 #include <sys/types.h>
 
@@ -27,6 +30,29 @@ struct _HevRingBuffer
     unsigned char data[0];
 };
 
+#if defined(_MSC_VER)
+/*
+ * MSVC C mode has no statement expressions. Provide an initializer
+ * function instead of the GNU alloca macro.
+ */
+static inline HevRingBuffer *
+hev_ring_buffer_alloca_init (void *mem, size_t size)
+{
+    HevRingBuffer *self = (HevRingBuffer *)mem;
+
+    self->rp = 0;
+    self->wp = 0;
+    self->rda_size = 0;
+    self->use_size = 0;
+    self->max_size = size;
+
+    return self;
+}
+
+#define hev_ring_buffer_alloca(s)                           \
+    hev_ring_buffer_alloca_init (                           \
+        _alloca (sizeof (HevRingBuffer) + (size_t)(s)), (s))
+#else
 #define hev_ring_buffer_alloca(s)                     \
     ({                                                \
         HevRingBuffer *__self;                        \
@@ -38,6 +64,7 @@ struct _HevRingBuffer
         __self->max_size = s;                         \
         __self;                                       \
     })
+#endif
 
 size_t hev_ring_buffer_get_max_size (HevRingBuffer *self);
 size_t hev_ring_buffer_get_use_size (HevRingBuffer *self);

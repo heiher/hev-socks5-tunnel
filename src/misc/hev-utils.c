@@ -8,10 +8,18 @@
  */
 
 #include <stdio.h>
+#if !defined(_MSC_VER)
 #include <unistd.h>
+#endif
 #include <string.h>
+#if defined(_MSC_VER)
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windows.h>
+#else
 #include <sys/socket.h>
 #include <sys/resource.h>
+#endif
 
 #if defined(__APPLE__)
 #include <Availability.h>
@@ -41,6 +49,9 @@ run_as_daemon (const char *pid_file)
         return;
     }
 
+#if defined(_MSC_VER)
+    fprintf (fp, "%u\n", (unsigned int)_getpid ());
+#else
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #if !(TARGET_OS_TV)
@@ -51,9 +62,18 @@ run_as_daemon (const char *pid_file)
 #pragma GCC diagnostic pop
 
     fprintf (fp, "%u\n", getpid ());
+#endif
     fclose (fp);
 }
 
+#if defined(_MSC_VER)
+int
+set_limit_nofile (int limit_nofile)
+{
+    (void)limit_nofile;
+    return 0;
+}
+#else
 int
 set_limit_nofile (int limit_nofile)
 {
@@ -73,6 +93,7 @@ set_limit_nofile (int limit_nofile)
     limit.rlim_max = limit_nofile;
     return setrlimit (RLIMIT_NOFILE, &limit);
 }
+#endif
 
 int
 set_sock_mark (int fd, unsigned int mark)

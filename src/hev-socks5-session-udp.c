@@ -9,6 +9,9 @@
 
 #include <errno.h>
 #include <string.h>
+#if defined(_MSC_VER)
+#include <malloc.h>
+#endif
 
 #include <lwip/udp.h>
 
@@ -171,7 +174,11 @@ static int
 hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self, char *buf,
                               unsigned int size, unsigned int num)
 {
+#if defined(_MSC_VER)
+    HevSocks5UDPMsg *msgv = _alloca (sizeof (HevSocks5UDPMsg) * num);
+#else
     HevSocks5UDPMsg msgv[num];
+#endif
     int i, n, res, gso;
 
     for (i = 0; i < num; i++) {

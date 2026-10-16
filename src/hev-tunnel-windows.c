@@ -7,11 +7,19 @@
  ============================================================================
  */
 
-#if defined(__MSYS__)
+#if defined(_MSC_VER) || defined(__MSYS__)
 
 #include <stdio.h>
 #include <string.h>
+#if defined(_MSC_VER)
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#ifndef IFNAMSIZ
+#define IFNAMSIZ 32
+#endif
+#else
 #include <arpa/inet.h>
+#endif
 
 #include <hev-task.h>
 #include <hev-task-io.h>
@@ -214,7 +222,12 @@ hev_tunnel_write (int fd, struct pbuf *buf)
         return -1;
 
     for (size = 0; p; p = p->next) {
+#if defined(_MSC_VER)
+        /* MSVC does not support arithmetic on void pointers. */
+        memcpy ((char *)packet + size, p->payload, p->len);
+#else
         memcpy (packet + size, p->payload, p->len);
+#endif
         size += p->len;
     }
 
@@ -222,4 +235,4 @@ hev_tunnel_write (int fd, struct pbuf *buf)
     return size;
 }
 
-#endif /* __MSYS__ */
+#endif /* _MSC_VER || __MSYS__ */
