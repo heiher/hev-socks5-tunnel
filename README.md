@@ -73,10 +73,12 @@ Native x64 build with the Microsoft toolchain (requires Visual Studio 2022
 17.5+ with the "Desktop development with C++" workload).
 
 ```bat
-:: PowerShell (locates Visual Studio via vswhere automatically)
+git clone --recursive https://github.com/heiher/hev-socks5-tunnel
+cd hev-socks5-tunnel
+build-windows.cmd
+# or
 powershell -ExecutionPolicy Bypass -File build-windows.ps1
-
-:: Or from an x64 Developer Command Prompt
+# or from Developer Command Prompt
 nmake /F Makefile.msvc
 ```
 
