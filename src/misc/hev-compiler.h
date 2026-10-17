@@ -10,24 +10,47 @@
 #ifndef __HEV_COMPILER_H__
 #define __HEV_COMPILER_H__
 
+#if defined(_MSC_VER)
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdatomic.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#if defined(_MSC_VER)
+#define ALIGN_UP(addr, align)                                                  \
+    (((uintptr_t)(addr) + (uintptr_t)(align) - 1) & ~((uintptr_t)(align) - 1))
+
+#define ALIGN_DOWN(addr, align) \
+    ((uintptr_t)(addr) & ~((uintptr_t)(align) - 1))
+#else
 #define ALIGN_UP(addr, align) \
     ((addr + (typeof (addr))align - 1) & ~((typeof (addr))align - 1))
 
 #define ALIGN_DOWN(addr, align) ((addr) & ~((typeof (addr))align - 1))
+#endif
 
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(x) (sizeof (x) / sizeof (x[0]))
 #endif
 
 #ifndef EXPORT_SYMBOL
+#if defined(_MSC_VER)
+#define EXPORT_SYMBOL
+#else
 #define EXPORT_SYMBOL __attribute__ ((visibility ("default")))
 #endif
+#endif
 
+#if defined(_MSC_VER)
+#define barrier() atomic_signal_fence (memory_order_seq_cst)
+#else
 #define barrier() __asm__ __volatile__ ("" : : : "memory")
+#endif
 
 static inline void
 __read_once_size (void *dst, const volatile void *src, int size)
@@ -44,7 +67,11 @@ __read_once_size (void *dst, const volatile void *src, int size)
         break;
     default:
         barrier ();
+#if defined(_MSC_VER)
+        memcpy ((void *)dst, (const void *)src, size);
+#else
         __builtin_memcpy ((void *)dst, (const void *)src, size);
+#endif
         barrier ();
     }
 }
@@ -64,10 +91,42 @@ __write_once_size (volatile void *dst, const void *src, int size)
         break;
     default:
         barrier ();
+#if defined(_MSC_VER)
+        memcpy ((void *)dst, (const void *)src, size);
+#else
         __builtin_memcpy ((void *)dst, (const void *)src, size);
+#endif
         barrier ();
     }
 }
+
+#if defined(_MSC_VER)
+
+/*
+ * The default association is pointer-sized and only valid for pointers on x64.
+ */
+#define HEV_ONCE_PTR(x)                                                        \
+    _Generic ((x),                                                             \
+        _Bool: (volatile _Bool *)&(x),                                         \
+        char: (volatile char *)&(x),                                           \
+        signed char: (volatile signed char *)&(x),                             \
+        unsigned char: (volatile unsigned char *)&(x),                         \
+        short: (volatile short *)&(x),                                         \
+        unsigned short: (volatile unsigned short *)&(x),                       \
+        int: (volatile int *)&(x),                                             \
+        unsigned int: (volatile unsigned int *)&(x),                           \
+        long: (volatile long *)&(x),                                           \
+        unsigned long: (volatile unsigned long *)&(x),                         \
+        long long: (volatile long long *)&(x),                                 \
+        unsigned long long: (volatile unsigned long long *)&(x),               \
+        float: (volatile float *)&(x),                                         \
+        double: (volatile double *)&(x),                                       \
+        default: (void *volatile *)&(x))
+
+#define READ_ONCE(x) (*HEV_ONCE_PTR (x))
+#define WRITE_ONCE(x, val) (*HEV_ONCE_PTR (x) = (val))
+
+#else /* GNU compatible compilers */
 
 #define READ_ONCE(x)                                  \
     ({                                                \
@@ -91,12 +150,19 @@ __write_once_size (volatile void *dst, const void *src, int size)
         __u.__val;                                     \
     })
 
+#endif /* _MSC_VER */
+
 #ifndef container_of
+#if defined(_MSC_VER)
+#define container_of(ptr, type, member)                     \
+    ((type *)(void *)((char *)(ptr) - offsetof (type, member)))
+#else
 #define container_of(ptr, type, member)               \
     ({                                                \
         void *__mptr = (void *)(ptr);                 \
         ((type *)(__mptr - offsetof (type, member))); \
     })
+#endif
 #endif
 
 #ifdef __cplusplus
