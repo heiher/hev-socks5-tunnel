@@ -332,6 +332,29 @@ event_task_entry (void *data)
     hev_task_del_fd (task_event, event_fds[0]);
 }
 
+/*
+ * Packets are read into MTU-sized pbufs. The ones that are queued by a
+ * session would pin the whole buffer, so small packets are moved into a
+ * pbuf that fits them.
+ */
+static struct pbuf *
+tunnel_compact_pbuf (struct pbuf *buf)
+{
+    struct pbuf *p;
+
+    if (buf->next || (buf->tot_len > COMPACT_PBUF_SIZE))
+        return buf;
+
+    p = pbuf_alloc (PBUF_RAW, buf->tot_len, PBUF_RAM);
+    if (!p)
+        return buf;
+
+    memcpy (p->payload, buf->payload, buf->tot_len);
+    pbuf_free (buf);
+
+    return p;
+}
+
 static void
 lwip_io_task_entry (void *data)
 {
@@ -352,6 +375,8 @@ lwip_io_task_entry (void *data)
 
         stat_tx_packets++;
         stat_tx_bytes += buf->tot_len;
+
+        buf = tunnel_compact_pbuf (buf);
 
         data = buf->payload;
         if ((data[0] >> 4) == 4 ? (data[9] == IP_PROTO_UDP) :

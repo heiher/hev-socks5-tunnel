@@ -18,6 +18,7 @@
 #define UDP_POOL_SIZE 512
 #define UDP_SEND_BATCH 64
 #define TUN_READ_BATCH 64
+#define COMPACT_PBUF_SIZE 2048
 #define TASK_STACK_SIZE 20480
 
 #endif /* __HEV_CONFIG_CONST_H__ */
