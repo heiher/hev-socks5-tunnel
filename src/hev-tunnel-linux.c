@@ -500,7 +500,11 @@ hev_tunnel_write (int fd, struct pbuf *buf)
         struct virtio_net_hdr hdr;
         uint8_t data[VNET_HDR_MAX];
     } vnet = { 0 };
-    struct iovec iov[512];
+    /*
+     * Not on the stack: a session's task would touch two more pages for it.
+     * Writes don't yield and are serialized by the lwIP lock.
+     */
+    static struct iovec iov[512];
     struct pbuf *p = buf;
     ssize_t res;
     int i = 0;
