@@ -497,7 +497,8 @@ hev_config_parse_doc (yaml_document_t *doc)
     if (tcp_buffer_size > TCP_MSS)
         tcp_buffer_size -= tcp_buffer_size % TCP_MSS;
 
-    udp_buffer_size = UDP_BUF_SIZE * udp_copy_buffer_nums;
+    /* Datagrams plus room for the socks5 header. */
+    udp_buffer_size = (UDP_BUF_SIZE + 256) * udp_copy_buffer_nums;
 
     if (tcp_buffer_size > udp_buffer_size)
         min_task_stack_size = TASK_STACK_SIZE + tcp_buffer_size;

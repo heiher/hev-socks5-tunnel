@@ -40,12 +40,8 @@ struct _HevSocks5UDPFrame
 };
 
 static int
-task_io_yielder (HevTaskYieldType type, void *data)
+udp_check_ctrl (HevSocks5 *self)
 {
-    HevSocks5 *self = data;
-    HevListNode *node;
-    int res;
-
     if (self->type == HEV_SOCKS5_TYPE_UDP_IN_UDP) {
         ssize_t res;
         char buf;
@@ -56,6 +52,19 @@ task_io_yielder (HevTaskYieldType type, void *data)
             return -1;
         }
     }
+
+    return 0;
+}
+
+static int
+task_io_yielder (HevTaskYieldType type, void *data)
+{
+    HevSocks5 *self = data;
+    HevListNode *node;
+    int res;
+
+    if (udp_check_ctrl (self) < 0)
+        return -1;
 
     res = hev_socks5_task_io_yielder (type, data);
     node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (self));
@@ -349,51 +358,79 @@ hev_socks5_session_udp_set_upstream_addr (HevSocks5Client *base,
     return ckptr->set_upstream_addr (base, addr);
 }
 
+/*
+ * Returns -1 when the session is done, otherwise it is idle: 0 if nothing was
+ * transferred, 1 if something was.
+ */
+static __attribute__ ((noinline)) int
+udp_splice_active (HevSocks5SessionUDP *self, unsigned int size,
+                   unsigned int num, int *res_f, int *res_b)
+{
+    char *buf = alloca (size * num);
+    int busy = 0;
+
+    for (;;) {
+        HevTaskYieldType type;
+
+        if (*res_f >= 0)
+            *res_f = hev_socks5_session_udp_fwd_f (self);
+        if (*res_b >= 0)
+            *res_b = hev_socks5_session_udp_fwd_b (self, buf, size, num);
+
+        if (*res_f > 0 || *res_b > 0)
+            type = HEV_TASK_YIELD;
+        else if ((*res_f & *res_b) == 0)
+            type = HEV_TASK_WAITIO;
+        else
+            break;
+
+        /* Nothing in flight, leave the frame to let the stack be released. */
+        if (type == HEV_TASK_WAITIO)
+            return busy;
+
+        if (task_io_yielder (type, self))
+            break;
+        busy = 1;
+    }
+
+    return -1;
+}
+
 static void
 hev_socks5_session_udp_splice (HevSocks5Session *base)
 {
     HevSocks5SessionUDP *self = HEV_SOCKS5_SESSION_UDP (base);
     HevTask *task = hev_task_self ();
     int res_f = 1, res_b = 1;
+    int released = 0;
     unsigned int size;
-    char *buf;
     int num;
+    int res;
     int fd;
 
     LOG_D ("%p socks5 session udp splice", self);
 
     /* Datagrams plus room for the socks5 header. */
     size = UDP_BUF_SIZE + 256;
-
     num = hev_config_get_misc_udp_copy_buffer_nums ();
-    buf = hev_malloc (size * num);
-    if (!buf)
-        return;
 
     fd = hev_socks5_udp_get_fd (HEV_SOCKS5_UDP (self));
     if (hev_task_mod_fd (task, fd, POLLIN | POLLOUT) < 0)
         hev_task_add_fd (task, fd, POLLIN | POLLOUT);
 
     for (;;) {
-        HevTaskYieldType type;
-
-        if (res_f >= 0)
-            res_f = hev_socks5_session_udp_fwd_f (self);
-        if (res_b >= 0)
-            res_b = hev_socks5_session_udp_fwd_b (self, buf, size, num);
-
-        if (res_f > 0 || res_b > 0)
-            type = HEV_TASK_YIELD;
-        else if ((res_f & res_b) == 0)
-            type = HEV_TASK_WAITIO;
-        else
+        res = udp_splice_active (self, size, num, &res_f, &res_b);
+        if (res < 0)
             break;
+        if (res > 0)
+            released = 0;
 
-        if (task_io_yielder (type, self))
+        if (udp_check_ctrl (HEV_SOCKS5 (self)) < 0)
+            break;
+        released = hev_socks5_session_idle_wait (base, released);
+        if (released < 0)
             break;
     }
-
-    hev_free (buf);
 }
 
 static HevTask *
