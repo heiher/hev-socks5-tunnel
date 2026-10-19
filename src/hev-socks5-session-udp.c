@@ -360,11 +360,8 @@ hev_socks5_session_udp_splice (HevSocks5Session *base)
 
     LOG_D ("%p socks5 session udp splice", self);
 
-    /* Datagrams up to the tunnel MTU, plus room for the socks5 header. */
-    size = hev_config_get_tunnel_mtu ();
-    if (size < UDP_BUF_SIZE)
-        size = UDP_BUF_SIZE;
-    size += 256;
+    /* Datagrams plus room for the socks5 header. */
+    size = UDP_BUF_SIZE + 256;
 
     num = hev_config_get_misc_udp_copy_buffer_nums ();
     buf = hev_malloc (size * num);
