@@ -120,6 +120,8 @@ hev_socks5_session_udp_gso_count (HevSocks5UDPMsg *msgv, unsigned int num)
     int i;
 
     alen = hev_socks5_addr_len (msgv[0].addr);
+    if (alen <= 0)
+        return 1;
 
     /*
      * Datagrams from the same source with the same size can be sent as one
