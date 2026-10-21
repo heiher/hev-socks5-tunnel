@@ -24,7 +24,11 @@ extern "C" {
 #endif
 
 #ifndef EXPORT_SYMBOL
+#if defined(_MSC_VER)
+#define EXPORT_SYMBOL
+#else
 #define EXPORT_SYMBOL __attribute__ ((visibility ("default")))
+#endif
 #endif
 
 #define barrier() __asm__ __volatile__ ("" : : : "memory")
@@ -85,7 +89,7 @@ __write_once_size (volatile void *dst, const void *src, int size)
         union                                          \
         {                                              \
             typeof (x) __val;                          \
-            char __c[1];                               \
+            char __c[1];                              \
         } __u = { .__val = (typeof (x))(val) };        \
         __write_once_size (&(x), __u.__c, sizeof (x)); \
         __u.__val;                                     \

@@ -3,3 +3,13 @@ build
 HevSocks5Tunnel.xcframework
 obj
 libs
+
+# Native MSVC/Windows build outputs (Makefile.msvc / build-windows.*)
+build-msvc/
+*.pdb
+*.obj
+*.lib
+*.exp
+
+# The per-arch wintun redistributable DLLs are vendored, not ignored.
+!third-part/wintun/bin/

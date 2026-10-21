@@ -9,7 +9,9 @@
 
 #include <errno.h>
 #include <assert.h>
+#if !defined(_WIN32)
 #include <signal.h>
+#endif
 #include <string.h>
 #include <stdatomic.h>
 #include <sys/ioctl.h>
@@ -737,7 +739,9 @@ hev_socks5_tunnel_init (int tun_fd)
     if (res < 0)
         goto exit;
 
+#if !defined(_WIN32)
     signal (SIGPIPE, SIG_IGN);
+#endif
 
     hev_task_mutex_init (&mutex);
 
