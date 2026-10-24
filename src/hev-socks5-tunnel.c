@@ -92,6 +92,9 @@ netif_output_handler (struct netif *netif, struct pbuf *p)
     if (s <= 0) {
         if (errno == EAGAIN)
             return ERR_WOULDBLOCK;
+        /* Large packets may not fit, lwIP sends smaller ones then. */
+        if ((errno == ENOBUFS) || (errno == ENOMEM))
+            return ERR_MEM;
         LOG_W ("socks5 tunnel write");
         return ERR_IF;
     }
