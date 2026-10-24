@@ -240,9 +240,11 @@ hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self, char *buf,
         hev_task_mutex_unlock (self->mutex);
 
         pbuf_free (b);
-        if ((err != ERR_OK) && (n > 1) &&
-            !(hev_tunnel_get_offload () & HEV_TUNNEL_OFFLOAD_UDP)) {
-            /* UDP GSO was rejected, send these datagrams one by one. */
+        if ((err != ERR_OK) && (n > 1)) {
+            /*
+             * UDP GSO was rejected, or the packet doesn't fit now (e.g.
+             * ENOBUFS), send these datagrams one by one.
+             */
             gso = 0;
             n = 0;
             continue;
