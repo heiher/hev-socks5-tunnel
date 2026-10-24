@@ -215,6 +215,37 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  windows-msvc:
+    name: Windows (MSVC, ${{ matrix.arch }})
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [x64, x86, arm64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Build
+        shell: pwsh
+        run: |
+          # Native MSVC build for the selected architecture (see
+          # Makefile.msvc / build-windows.ps1). The script locates Visual
+          # Studio via vswhere and imports the developer environment
+          # itself, no extra setup needed.
+          ./build-windows.ps1 -Arch ${{ matrix.arch }}
+          $dist = if ('${{ matrix.arch }}' -eq 'x64') { 'build-msvc/dist' } else { 'build-msvc/${{ matrix.arch }}/dist' }
+          $name = if ('${{ matrix.arch }}' -eq 'x64') { 'win64' } elseif ('${{ matrix.arch }}' -eq 'x86') { 'win32' } else { 'win-arm64' }
+          Compress-Archive -Path $dist/bin/*, $dist/lib/*, $dist/include/* -DestinationPath "hev-socks5-tunnel-$name-msvc.zip"
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.arch == 'x64' && 'hev-socks5-tunnel-win64-msvc.zip' || (matrix.arch == 'x86' && 'hev-socks5-tunnel-win32-msvc.zip' || 'hev-socks5-tunnel-win-arm64-msvc.zip') }}
+          path: hev-socks5-tunnel-*msvc.zip
+          if-no-files-found: error
+          retention-days: 1
+
   android:
     name: Android
     runs-on: ubuntu-latest
@@ -301,6 +332,7 @@ jobs:
       - macos
       - freebsd
       - windows
+      - windows-msvc
       - android
     if: github.event_name == 'release'
     steps:

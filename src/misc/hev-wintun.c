@@ -7,7 +7,13 @@
  ============================================================================
  */
 
-#if defined(__MSYS__)
+#if defined(_MSC_VER) || defined(__MSYS__)
+
+#if defined(_MSC_VER)
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windows.h>
+#endif
 
 #include <wintun.h>
 #include <netioapi.h>
@@ -252,4 +258,4 @@ hev_wintun_get_last_error (void)
     return GetLastError ();
 }
 
-#endif /* __MSYS__ */
+#endif /* _MSC_VER || __MSYS__ */

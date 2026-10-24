@@ -1,0 +1,600 @@
+# Makefile.msvc - Native Windows build for hev-socks5-tunnel
+#
+# Supported architectures: x64 (default), x86 and arm64. All compilation
+# (including the GAS hev-task-execute.S) goes through clang-cl; the MSVC
+# INCLUDE/LIB environment is reused unchanged.
+#
+# Usage (from a VS2022 Developer Command Prompt matching the target arch):
+#   nmake /F Makefile.msvc                  - x64 Release, dynamic CRT (/MD)
+#   nmake /F Makefile.msvc ARCH=x86         - x86 Release
+#   nmake /F Makefile.msvc ARCH=arm64       - ARM64 Release
+#   nmake /F Makefile.msvc DEBUG=1          - Debug, dynamic CRT (/MDd)
+#   nmake /F Makefile.msvc STATIC_CRT=1     - Release, static CRT (/MT)
+#   nmake /F Makefile.msvc clean            - remove build outputs for the
+#                                        selected arch
+#
+# Outputs:
+#   build-msvc[\x86|\arm64]\dist\bin\  - hev-socks5-tunnel.exe,
+#                                        hev-socks5-tunnel.dll, wintun.dll
+#   build-msvc[\x86|\arm64]\dist\lib\  - hev-socks5-tunnel-static.lib,
+#                                        hev-socks5-tunnel.lib (import)
+#   build-msvc[\x86|\arm64]\dist\include\ - public header (hev-main.h)
+
+PROJECT = hev-socks5-tunnel
+OUTDIR = build-msvc
+OBJDIR = $(OUTDIR)\obj
+DISTDIR = $(OUTDIR)\dist
+DISTBIN = $(DISTDIR)\bin
+DISTLIB = $(DISTDIR)\lib
+DISTINC = $(DISTDIR)\include
+
+# The bundled wintun redistributable ships one DLL per architecture; the
+# per-arch selection happens in the ARCH block below.
+WINTUN_DLL_AMD64 = third-part\wintun\bin\wintun.dll
+WINTUN_DLL_X86 = third-part\wintun\bin\wintun-x86.dll
+WINTUN_DLL_ARM64 = third-part\wintun\bin\wintun-arm64.dll
+PUBHEADER = src\hev-main.h
+COMPAT_HEADER = third-part\hev-task-system\win32-compat\hev-win-compat.h
+
+CC = clang-cl
+# Named AR (not LIB) so it cannot clobber the LIB environment variable,
+# which NMAKE exports to child processes and link.exe needs to find CRT/SDK libs.
+AR = lib
+LINK = link
+
+# ------------------------ architecture selection ------------------------
+!IF "$(ARCH)" == "x86"
+ARCH_DIR = x86
+CLANG_TARGET = i686-pc-windows-msvc
+WINTUN_DLL = $(WINTUN_DLL_X86)
+!ELSEIF "$(ARCH)" == "arm64"
+ARCH_DIR = arm64
+CLANG_TARGET = aarch64-pc-windows-msvc
+WINTUN_DLL = $(WINTUN_DLL_ARM64)
+!ELSEIF "$(ARCH)" == "x64" || !DEFINED(ARCH)
+ARCH_DIR = x64
+CLANG_TARGET = x86_64-pc-windows-msvc
+WINTUN_DLL = $(WINTUN_DLL_AMD64)
+!ELSE
+!ERROR Unknown ARCH "$(ARCH)". Use x64 (default), x86 or arm64.
+!ENDIF
+
+# Explicit /MACHINE for lib and link: their default target machine depends
+# on the developer environment and can disagree with ARCH in cross setups.
+!IF "$(ARCH_DIR)" == "x86"
+MACHINE_OPT = /MACHINE:X86
+!ELSEIF "$(ARCH_DIR)" == "arm64"
+MACHINE_OPT = /MACHINE:ARM64
+!ELSE
+MACHINE_OPT = /MACHINE:X64
+!ENDIF
+
+# Keep the established x64 output paths; x86 and arm64 build into
+# subfolders so no architecture overwrites another's artifacts.
+!IF "$(ARCH_DIR)" != "x64"
+OUTDIR = build-msvc\$(ARCH_DIR)
+!ENDIF
+
+!IF DEFINED(DEBUG)
+CFLAGS_EXTRA = /Od /Zi /MDd
+!ELSEIF DEFINED(STATIC_CRT)
+CFLAGS_EXTRA = /O2 /MT
+!ELSE
+CFLAGS_EXTRA = /O2 /MD
+!ENDIF
+
+CFLAGS = /nologo /c /W4 /utf-8 /std:c11 -Xclang -std=gnu11 $(CFLAGS_EXTRA) \
+	--target=$(CLANG_TARGET) -Wno-unused-command-line-argument \
+	/DENABLE_LIBRARY \
+	/D_CRT_SECURE_NO_WARNINGS \
+	/D_CRT_NONSTDC_NO_WARNINGS \
+	/DHAVE_CONFIG_H=0 \
+	/DYAML_DECLARE_STATIC \
+	/DYAML_VERSION_MAJOR=0 \
+	/DYAML_VERSION_MINOR=2 \
+	/DYAML_VERSION_PATCH=5 \
+	/DYAML_VERSION_STRING=\"0.2.5\" \
+	/DSSIZE_MAX=INT_MAX \
+	/DENABLE_MEMALLOC_SLICE \
+	/DENABLE_STACK_OVERFLOW_DETECTION \
+	/DCOMMIT_ID=\"unknown\" \
+	/DCONFIG_STACK_BACKEND=STACK_HEAP \
+	/DCONFIG_STACK_OVERFLOW_DETECTION=1 \
+	/DCONFIG_MEMALLOC_SLICE_ALIGN=16 \
+	/DCONFIG_MEMALLOC_SLICE_MAX_SIZE=4096 \
+	/DCONFIG_MEMALLOC_SLICE_MAX_COUNT=1000 \
+	/DCONFIG_SCHED_CLOCK=CLOCK_NONE \
+	/Isrc \
+	/Isrc\misc \
+	/Isrc\core\include \
+	/Ithird-part\yaml\include \
+	/Ithird-part\lwip\src\include \
+	/Ithird-part\lwip\src\ports\include \
+	/Ithird-part\hev-task-system\include \
+	/Ithird-part\hev-task-system\src \
+	/Ithird-part\hev-task-system\win32-compat \
+	/Ithird-part\hev-task-system\win32-compat\include \
+	/Ithird-part\wintun\include \
+	/FIhev-win-compat.h
+
+# Same as CFLAGS but without /DENABLE_LIBRARY, so hev-main.c gets main().
+CFLAGS_EXE = /nologo /c /W4 /utf-8 /std:c11 -Xclang -std=gnu11 $(CFLAGS_EXTRA) \
+	--target=$(CLANG_TARGET) -Wno-unused-command-line-argument \
+	/D_CRT_SECURE_NO_WARNINGS \
+	/D_CRT_NONSTDC_NO_WARNINGS \
+	/DHAVE_CONFIG_H=0 \
+	/DYAML_DECLARE_STATIC \
+	/DYAML_VERSION_MAJOR=0 \
+	/DYAML_VERSION_MINOR=2 \
+	/DYAML_VERSION_PATCH=5 \
+	/DYAML_VERSION_STRING=\"0.2.5\" \
+	/DSSIZE_MAX=INT_MAX \
+	/DENABLE_MEMALLOC_SLICE \
+	/DENABLE_STACK_OVERFLOW_DETECTION \
+	/DCOMMIT_ID=\"unknown\" \
+	/DCONFIG_STACK_BACKEND=STACK_HEAP \
+	/DCONFIG_STACK_OVERFLOW_DETECTION=1 \
+	/DCONFIG_MEMALLOC_SLICE_ALIGN=16 \
+	/DCONFIG_MEMALLOC_SLICE_MAX_SIZE=4096 \
+	/DCONFIG_MEMALLOC_SLICE_MAX_COUNT=1000 \
+	/DCONFIG_SCHED_CLOCK=CLOCK_NONE \
+	/Isrc \
+	/Isrc\misc \
+	/Isrc\core\include \
+	/Ithird-part\yaml\include \
+	/Ithird-part\lwip\src\include \
+	/Ithird-part\lwip\src\ports\include \
+	/Ithird-part\hev-task-system\include \
+	/Ithird-part\hev-task-system\src \
+	/Ithird-part\hev-task-system\win32-compat \
+	/Ithird-part\hev-task-system\win32-compat\include \
+	/Ithird-part\wintun\include \
+	/FIhev-win-compat.h
+
+WINLIBS = Ws2_32.lib Iphlpapi.lib Advapi32.lib
+SDK_LIBPATH = $(WindowsSdkDir)Lib\$(WindowsSDKVersion)um\$(ARCH_DIR)
+# /CETCOMPAT is x64/x86 only; ARM64 has no CET shadow stack.
+!IF "$(ARCH_DIR)" == "arm64"
+CET_OPT =
+!ELSE
+CET_OPT = /CETCOMPAT:NO
+!ENDIF
+LINKOPTS = /NOLOGO $(CET_OPT) $(MACHINE_OPT) /LIBPATH:"$(SDK_LIBPATH)" /LIBPATH:"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.26100.0\um\$(ARCH_DIR)" /LIBPATH:"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\$(ARCH_DIR)"
+
+# ------------------------------- sources --------------------------------
+
+YAML_SRCS = \
+	third-part\yaml\src\api.c \
+	third-part\yaml\src\dumper.c \
+	third-part\yaml\src\emitter.c \
+	third-part\yaml\src\loader.c \
+	third-part\yaml\src\parser.c \
+	third-part\yaml\src\reader.c \
+	third-part\yaml\src\scanner.c \
+	third-part\yaml\src\writer.c
+
+LWIP_SRCS = \
+	third-part\lwip\src\core\altcp.c \
+	third-part\lwip\src\core\altcp_alloc.c \
+	third-part\lwip\src\core\altcp_tcp.c \
+	third-part\lwip\src\core\def.c \
+	third-part\lwip\src\core\dns.c \
+	third-part\lwip\src\core\inet_chksum.c \
+	third-part\lwip\src\core\init.c \
+	third-part\lwip\src\core\ip.c \
+	third-part\lwip\src\core\mem.c \
+	third-part\lwip\src\core\memp.c \
+	third-part\lwip\src\core\netif.c \
+	third-part\lwip\src\core\pbuf.c \
+	third-part\lwip\src\core\raw.c \
+	third-part\lwip\src\core\stats.c \
+	third-part\lwip\src\core\sys.c \
+	third-part\lwip\src\core\tcp.c \
+	third-part\lwip\src\core\tcp_in.c \
+	third-part\lwip\src\core\tcp_out.c \
+	third-part\lwip\src\core\timeouts.c \
+	third-part\lwip\src\core\udp.c \
+	third-part\lwip\src\core\ipv4\acd.c \
+	third-part\lwip\src\core\ipv4\autoip.c \
+	third-part\lwip\src\core\ipv4\dhcp.c \
+	third-part\lwip\src\core\ipv4\etharp.c \
+	third-part\lwip\src\core\ipv4\icmp.c \
+	third-part\lwip\src\core\ipv4\igmp.c \
+	third-part\lwip\src\core\ipv4\ip4.c \
+	third-part\lwip\src\core\ipv4\ip4_addr.c \
+	third-part\lwip\src\core\ipv4\ip4_frag.c \
+	third-part\lwip\src\core\ipv6\dhcp6.c \
+	third-part\lwip\src\core\ipv6\ethip6.c \
+	third-part\lwip\src\core\ipv6\icmp6.c \
+	third-part\lwip\src\core\ipv6\inet6.c \
+	third-part\lwip\src\core\ipv6\ip6.c \
+	third-part\lwip\src\core\ipv6\ip6_addr.c \
+	third-part\lwip\src\core\ipv6\ip6_frag.c \
+	third-part\lwip\src\core\ipv6\mld6.c \
+	third-part\lwip\src\core\ipv6\nd6.c
+
+TASK_SRCS = \
+	third-part\hev-task-system\src\kern\core\hev-task-system.c \
+	third-part\hev-task-system\src\kern\core\hev-task-system-schedule.c \
+	third-part\hev-task-system\src\kern\task\hev-task.c \
+	third-part\hev-task-system\src\kern\task\hev-task-call.c \
+	third-part\hev-task-system\src\kern\task\hev-task-executer.c \
+	third-part\hev-task-system\src\kern\task\hev-task-stack.c \
+	third-part\hev-task-system\src\kern\task\hev-task-stack-heap.c \
+	third-part\hev-task-system\src\kern\io\hev-task-io-reactor-iocp.c \
+	third-part\hev-task-system\src\kern\itc\hev-task-channel.c \
+	third-part\hev-task-system\src\kern\itc\hev-task-channel-select.c \
+	third-part\hev-task-system\src\kern\sync\hev-task-cond.c \
+	third-part\hev-task-system\src\kern\sync\hev-task-mutex.c \
+	third-part\hev-task-system\src\kern\time\hev-task-timer.c \
+	third-part\hev-task-system\src\kern\aide\hev-task-aide.c \
+	third-part\hev-task-system\src\lib\dns\hev-task-dns.c \
+	third-part\hev-task-system\src\lib\dns\hev-task-dns-proxy.c \
+	third-part\hev-task-system\src\lib\io\basic\hev-task-io.c \
+	third-part\hev-task-system\src\lib\io\buffer\hev-circular-buffer.c \
+	third-part\hev-task-system\src\lib\io\pipe\hev-task-io-pipe.c \
+	third-part\hev-task-system\src\lib\io\poll\hev-task-io-poll.c \
+	third-part\hev-task-system\src\lib\io\socket\hev-task-io-socket.c \
+	third-part\hev-task-system\src\lib\list\hev-list.c \
+	third-part\hev-task-system\src\lib\misc\hev-debugger.c \
+	third-part\hev-task-system\src\lib\object\hev-object.c \
+	third-part\hev-task-system\src\lib\object\hev-object-atomic.c \
+	third-part\hev-task-system\src\lib\rbtree\hev-rbtree.c \
+	third-part\hev-task-system\src\lib\rbtree\hev-rbtree-cached.c \
+	third-part\hev-task-system\src\mem\api\hev-memory-allocator-api.c \
+	third-part\hev-task-system\src\mem\base\hev-memory-allocator.c \
+	third-part\hev-task-system\src\mem\simple\hev-memory-allocator-simple.c \
+	third-part\hev-task-system\src\mem\slice\hev-memory-allocator-slice.c
+
+CORE_SRCS = \
+	src\core\src\hev-socks5-authenticator.c \
+	src\core\src\hev-socks5-client-tcp.c \
+	src\core\src\hev-socks5-client-udp.c \
+	src\core\src\hev-socks5-client.c \
+	src\core\src\hev-socks5-logger.c \
+	src\core\src\hev-socks5-misc.c \
+	src\core\src\hev-socks5-server.c \
+	src\core\src\hev-socks5-tcp.c \
+	src\core\src\hev-socks5-udp.c \
+	src\core\src\hev-socks5-user.c \
+	src\core\src\hev-socks5.c
+
+TUNNEL_SRCS = \
+	src\hev-config.c \
+	src\hev-main.c \
+	src\hev-mapped-dns.c \
+	src\hev-socks5-session.c \
+	src\hev-socks5-session-tcp.c \
+	src\hev-socks5-session-udp.c \
+	src\hev-socks5-tunnel.c \
+	src\hev-tunnel-windows.c \
+	src\misc\hev-exec.c \
+	src\misc\hev-logger.c \
+	src\misc\hev-ring-buffer.c \
+	src\misc\hev-utils.c \
+	src\misc\hev-wintun.c \
+	third-part\hev-task-system\win32-compat\hev-win-compat.c \
+	third-part\lwip\src\ports\win32\lib\sys_arch.c
+
+YAML_OBJS = $(OBJDIR)\yaml\api.obj \
+	$(OBJDIR)\yaml\dumper.obj \
+	$(OBJDIR)\yaml\emitter.obj \
+	$(OBJDIR)\yaml\loader.obj \
+	$(OBJDIR)\yaml\parser.obj \
+	$(OBJDIR)\yaml\reader.obj \
+	$(OBJDIR)\yaml\scanner.obj \
+	$(OBJDIR)\yaml\writer.obj
+
+LWIP_OBJS = $(OBJDIR)\lwip\altcp.obj \
+	$(OBJDIR)\lwip\altcp_alloc.obj \
+	$(OBJDIR)\lwip\altcp_tcp.obj \
+	$(OBJDIR)\lwip\def.obj \
+	$(OBJDIR)\lwip\dns.obj \
+	$(OBJDIR)\lwip\inet_chksum.obj \
+	$(OBJDIR)\lwip\init.obj \
+	$(OBJDIR)\lwip\ip.obj \
+	$(OBJDIR)\lwip\mem.obj \
+	$(OBJDIR)\lwip\memp.obj \
+	$(OBJDIR)\lwip\netif.obj \
+	$(OBJDIR)\lwip\pbuf.obj \
+	$(OBJDIR)\lwip\raw.obj \
+	$(OBJDIR)\lwip\stats.obj \
+	$(OBJDIR)\lwip\sys.obj \
+	$(OBJDIR)\lwip\tcp.obj \
+	$(OBJDIR)\lwip\tcp_in.obj \
+	$(OBJDIR)\lwip\tcp_out.obj \
+	$(OBJDIR)\lwip\timeouts.obj \
+	$(OBJDIR)\lwip\udp.obj \
+	$(OBJDIR)\lwip\acd.obj \
+	$(OBJDIR)\lwip\autoip.obj \
+	$(OBJDIR)\lwip\dhcp.obj \
+	$(OBJDIR)\lwip\etharp.obj \
+	$(OBJDIR)\lwip\icmp.obj \
+	$(OBJDIR)\lwip\igmp.obj \
+	$(OBJDIR)\lwip\ip4.obj \
+	$(OBJDIR)\lwip\ip4_addr.obj \
+	$(OBJDIR)\lwip\ip4_frag.obj \
+	$(OBJDIR)\lwip\dhcp6.obj \
+	$(OBJDIR)\lwip\ethip6.obj \
+	$(OBJDIR)\lwip\icmp6.obj \
+	$(OBJDIR)\lwip\inet6.obj \
+	$(OBJDIR)\lwip\ip6.obj \
+	$(OBJDIR)\lwip\ip6_addr.obj \
+	$(OBJDIR)\lwip\ip6_frag.obj \
+	$(OBJDIR)\lwip\mld6.obj \
+	$(OBJDIR)\lwip\nd6.obj
+
+TASK_OBJS = $(OBJDIR)\task\hev-task-system.obj \
+	$(OBJDIR)\task\hev-task-system-schedule.obj \
+	$(OBJDIR)\task\hev-task.obj \
+	$(OBJDIR)\task\hev-task-call.obj \
+	$(OBJDIR)\task\hev-task-executer.obj \
+	$(OBJDIR)\task\hev-task-stack.obj \
+	$(OBJDIR)\task\hev-task-stack-heap.obj \
+	$(OBJDIR)\task\hev-task-io-reactor-iocp.obj \
+	$(OBJDIR)\task\hev-task-channel.obj \
+	$(OBJDIR)\task\hev-task-channel-select.obj \
+	$(OBJDIR)\task\hev-task-cond.obj \
+	$(OBJDIR)\task\hev-task-mutex.obj \
+	$(OBJDIR)\task\hev-task-timer.obj \
+	$(OBJDIR)\task\hev-task-aide.obj \
+	$(OBJDIR)\task\hev-task-dns.obj \
+	$(OBJDIR)\task\hev-task-dns-proxy.obj \
+	$(OBJDIR)\task\hev-task-io.obj \
+	$(OBJDIR)\task\hev-circular-buffer.obj \
+	$(OBJDIR)\task\hev-task-io-pipe.obj \
+	$(OBJDIR)\task\hev-task-io-poll.obj \
+	$(OBJDIR)\task\hev-task-io-socket.obj \
+	$(OBJDIR)\task\hev-list.obj \
+	$(OBJDIR)\task\hev-debugger.obj \
+	$(OBJDIR)\task\hev-object.obj \
+	$(OBJDIR)\task\hev-object-atomic.obj \
+	$(OBJDIR)\task\hev-rbtree.obj \
+	$(OBJDIR)\task\hev-rbtree-cached.obj \
+	$(OBJDIR)\task\hev-memory-allocator-api.obj \
+	$(OBJDIR)\task\hev-memory-allocator.obj \
+	$(OBJDIR)\task\hev-memory-allocator-simple.obj \
+	$(OBJDIR)\task\hev-memory-allocator-slice.obj \
+	$(OBJDIR)\task\hev-task-execute-S.obj
+
+CORE_OBJS = $(OBJDIR)\core\hev-socks5-authenticator.obj \
+	$(OBJDIR)\core\hev-socks5-client-tcp.obj \
+	$(OBJDIR)\core\hev-socks5-client-udp.obj \
+	$(OBJDIR)\core\hev-socks5-client.obj \
+	$(OBJDIR)\core\hev-socks5-logger.obj \
+	$(OBJDIR)\core\hev-socks5-misc.obj \
+	$(OBJDIR)\core\hev-socks5-server.obj \
+	$(OBJDIR)\core\hev-socks5-tcp.obj \
+	$(OBJDIR)\core\hev-socks5-udp.obj \
+	$(OBJDIR)\core\hev-socks5-user.obj \
+	$(OBJDIR)\core\hev-socks5.obj
+
+TUNNEL_OBJS = $(OBJDIR)\tunnel\hev-config.obj \
+	$(OBJDIR)\tunnel\hev-main.obj \
+	$(OBJDIR)\tunnel\hev-mapped-dns.obj \
+	$(OBJDIR)\tunnel\hev-socks5-session.obj \
+	$(OBJDIR)\tunnel\hev-socks5-session-tcp.obj \
+	$(OBJDIR)\tunnel\hev-socks5-session-udp.obj \
+	$(OBJDIR)\tunnel\hev-socks5-tunnel.obj \
+	$(OBJDIR)\tunnel\hev-tunnel-windows.obj \
+	$(OBJDIR)\tunnel\hev-exec.obj \
+	$(OBJDIR)\tunnel\hev-logger.obj \
+	$(OBJDIR)\tunnel\hev-ring-buffer.obj \
+	$(OBJDIR)\tunnel\hev-utils.obj \
+	$(OBJDIR)\tunnel\hev-wintun.obj \
+	$(OBJDIR)\tunnel\hev-win-compat.obj \
+	$(OBJDIR)\tunnel\sys_arch.obj
+
+TUNNEL_EXE_OBJS = $(OBJDIR)\tunnel-exe\hev-config.obj \
+	$(OBJDIR)\tunnel-exe\hev-main.obj \
+	$(OBJDIR)\tunnel-exe\hev-mapped-dns.obj \
+	$(OBJDIR)\tunnel-exe\hev-socks5-session.obj \
+	$(OBJDIR)\tunnel-exe\hev-socks5-session-tcp.obj \
+	$(OBJDIR)\tunnel-exe\hev-socks5-session-udp.obj \
+	$(OBJDIR)\tunnel-exe\hev-socks5-tunnel.obj \
+	$(OBJDIR)\tunnel-exe\hev-tunnel-windows.obj \
+	$(OBJDIR)\tunnel-exe\hev-exec.obj \
+	$(OBJDIR)\tunnel-exe\hev-logger.obj \
+	$(OBJDIR)\tunnel-exe\hev-ring-buffer.obj \
+	$(OBJDIR)\tunnel-exe\hev-utils.obj \
+	$(OBJDIR)\tunnel-exe\hev-wintun.obj \
+	$(OBJDIR)\tunnel-exe\hev-win-compat.obj \
+	$(OBJDIR)\tunnel-exe\sys_arch.obj
+
+LIB_OBJS = $(YAML_OBJS) $(LWIP_OBJS) $(TASK_OBJS) $(CORE_OBJS) $(TUNNEL_OBJS)
+EXE_OBJS = $(YAML_OBJS) $(LWIP_OBJS) $(TASK_OBJS) $(CORE_OBJS) $(TUNNEL_EXE_OBJS)
+
+STATIC_LIB = $(DISTLIB)\hev-socks5-tunnel-static.lib
+SHARED_DLL = $(DISTBIN)\hev-socks5-tunnel.dll
+SHARED_LIB = $(DISTLIB)\hev-socks5-tunnel.lib
+EXE = $(DISTBIN)\hev-socks5-tunnel.exe
+
+# Public exports (no .def file in this tree, pass directly to link).
+EXPORTS = /EXPORT:hev_socks5_tunnel_main \
+	/EXPORT:hev_socks5_tunnel_main_from_file \
+	/EXPORT:hev_socks5_tunnel_main_from_str \
+	/EXPORT:hev_socks5_tunnel_quit \
+	/EXPORT:hev_socks5_tunnel_stats
+
+all : static shared exe dist
+
+static : $(STATIC_LIB)
+
+shared : $(SHARED_DLL)
+
+exe : $(EXE)
+
+dist : $(STATIC_LIB) $(SHARED_DLL) $(EXE)
+	if not exist $(DISTBIN) mkdir $(DISTBIN)
+	if not exist $(DISTLIB) mkdir $(DISTLIB)
+	if not exist $(DISTINC) mkdir $(DISTINC)
+	copy /Y $(PUBHEADER) $(DISTINC)
+	if exist $(WINTUN_DLL) copy /Y $(WINTUN_DLL) $(DISTBIN)\wintun.dll
+	if not exist $(DISTBIN)\wintun.dll copy /Y $(WINTUN_DLL_AMD64) $(DISTBIN)\wintun.dll
+
+$(STATIC_LIB) : $(LIB_OBJS)
+	if not exist $(DISTLIB) mkdir $(DISTLIB)
+	$(AR) /NOLOGO $(MACHINE_OPT) /OUT:$@ $(LIB_OBJS)
+
+$(SHARED_DLL) : $(LIB_OBJS)
+	if not exist $(DISTBIN) mkdir $(DISTBIN)
+	if not exist $(DISTLIB) mkdir $(DISTLIB)
+	$(LINK) $(LINKOPTS) /DLL /OUT:$@ /IMPLIB:$(SHARED_LIB) $(LIB_OBJS) $(WINLIBS) $(EXPORTS)
+
+$(EXE) : $(EXE_OBJS)
+	if not exist $(DISTBIN) mkdir $(DISTBIN)
+	$(LINK) $(LINKOPTS) /SUBSYSTEM:CONSOLE /OUT:$@ $(EXE_OBJS) $(WINLIBS)
+
+clean :
+!IF "$(ARCH_DIR)" == "x64"
+	if exist $(OUTDIR)\obj rmdir /S /Q $(OUTDIR)\obj
+	if exist $(OUTDIR)\dist rmdir /S /Q $(OUTDIR)\dist
+!ELSE
+	if exist $(OUTDIR) rmdir /S /Q $(OUTDIR)
+!ENDIF
+
+# --------------------------- inference rules ----------------------------
+
+{third-part\yaml\src}.c{$(OBJDIR)\yaml}.obj :
+	if not exist $(OBJDIR)\yaml mkdir $(OBJDIR)\yaml
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\lwip\src\core}.c{$(OBJDIR)\lwip}.obj :
+	if not exist $(OBJDIR)\lwip mkdir $(OBJDIR)\lwip
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\lwip\src\core\ipv4}.c{$(OBJDIR)\lwip}.obj :
+	if not exist $(OBJDIR)\lwip mkdir $(OBJDIR)\lwip
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\lwip\src\core\ipv6}.c{$(OBJDIR)\lwip}.obj :
+	if not exist $(OBJDIR)\lwip mkdir $(OBJDIR)\lwip
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\lwip\src\ports\win32\lib}.c{$(OBJDIR)\tunnel}.obj :
+	if not exist $(OBJDIR)\tunnel mkdir $(OBJDIR)\tunnel
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\lwip\src\ports\win32\lib}.c{$(OBJDIR)\tunnel-exe}.obj :
+	if not exist $(OBJDIR)\tunnel-exe mkdir $(OBJDIR)\tunnel-exe
+	$(CC) $(CFLAGS_EXE) /Fo$@ $<
+
+{third-part\hev-task-system\src\kern\core}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\kern\task}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\kern\io}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\kern\io}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\kern\itc}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\kern\sync}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\kern\time}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\kern\aide}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\lib\dns}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\lib\io\basic}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\lib\io\buffer}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\lib\io\pipe}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\lib\io\poll}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\lib\io\socket}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\lib\list}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\lib\misc}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\lib\object}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\lib\rbtree}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\mem\api}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\mem\base}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\mem\simple}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\src\mem\slice}.c{$(OBJDIR)\task}.obj :
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+$(OBJDIR)\task\hev-task-execute-S.obj : third-part\hev-task-system\src\kern\task\hev-task-execute.S
+	if not exist $(OBJDIR)\task mkdir $(OBJDIR)\task
+	$(CC) /nologo /c --target=$(CLANG_TARGET) -Ithird-part\hev-task-system\src /Fo$@ third-part\hev-task-system\src\kern\task\hev-task-execute.S
+
+{third-part\hev-task-system\win32-compat}.c{$(OBJDIR)\tunnel}.obj :
+	if not exist $(OBJDIR)\tunnel mkdir $(OBJDIR)\tunnel
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{third-part\hev-task-system\win32-compat}.c{$(OBJDIR)\tunnel-exe}.obj :
+	if not exist $(OBJDIR)\tunnel-exe mkdir $(OBJDIR)\tunnel-exe
+	$(CC) $(CFLAGS_EXE) /Fo$@ $<
+
+{src\core\src}.c{$(OBJDIR)\core}.obj :
+	if not exist $(OBJDIR)\core mkdir $(OBJDIR)\core
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{src}.c{$(OBJDIR)\tunnel}.obj :
+	if not exist $(OBJDIR)\tunnel mkdir $(OBJDIR)\tunnel
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{src}.c{$(OBJDIR)\tunnel-exe}.obj :
+	if not exist $(OBJDIR)\tunnel-exe mkdir $(OBJDIR)\tunnel-exe
+	$(CC) $(CFLAGS_EXE) /Fo$@ $<
+
+{src\misc}.c{$(OBJDIR)\tunnel}.obj :
+	if not exist $(OBJDIR)\tunnel mkdir $(OBJDIR)\tunnel
+	$(CC) $(CFLAGS) /Fo$@ $<
+
+{src\misc}.c{$(OBJDIR)\tunnel-exe}.obj :
+	if not exist $(OBJDIR)\tunnel-exe mkdir $(OBJDIR)\tunnel-exe
+	$(CC) $(CFLAGS_EXE) /Fo$@ $<
