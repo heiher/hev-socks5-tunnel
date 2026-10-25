@@ -12,7 +12,7 @@
 
 #define MAJOR_VERSION (2)
 #define MINOR_VERSION (19)
-#define MICRO_VERSION (2)
+#define MICRO_VERSION (3)
 
 #define UDP_BUF_SIZE 1500
 #define UDP_POOL_SIZE 512
