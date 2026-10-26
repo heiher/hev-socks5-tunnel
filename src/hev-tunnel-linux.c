@@ -55,7 +55,7 @@ hev_tunnel_open (const char *name, int multi_queue, const char *guid)
     int res = -1;
     int fd;
 
-    fd = hev_task_io_open ("/dev/net/tun", O_RDWR);
+    fd = hev_task_io_open ("/dev/net/tun", O_RDWR | O_CLOEXEC);
     if (fd < 0)
         goto exit;
 

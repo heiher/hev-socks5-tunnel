@@ -8,6 +8,7 @@
  */
 
 #include <errno.h>
+#include <fcntl.h>
 #include <assert.h>
 #include <signal.h>
 #include <string.h>
@@ -643,6 +644,12 @@ event_task_init (void)
     res = ioctl (event_fds[0], FIONBIO, (char *)&nonblock);
     if (res < 0) {
         LOG_E ("socks5 tunnel event nonblock");
+        return -1;
+    }
+
+    if ((fcntl (event_fds[0], F_SETFD, FD_CLOEXEC) < 0) ||
+        (fcntl (event_fds[1], F_SETFD, FD_CLOEXEC) < 0)) {
+        LOG_E ("socks5 tunnel event cloexec");
         return -1;
     }
 
