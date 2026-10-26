@@ -45,8 +45,10 @@ hev_logger_init (HevLoggerLevel level, const char *path)
 void
 hev_logger_fini (void)
 {
-    if (fd >= 0)
+    if (fd >= 0) {
         close (fd);
+        fd = -1;
+    }
 }
 
 int
