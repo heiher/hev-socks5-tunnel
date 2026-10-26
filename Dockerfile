@@ -16,7 +16,8 @@ FROM alpine:latest
 LABEL org.opencontainers.image.source="https://github.com/heiher/hev-socks5-tunnel"
 
 RUN apk add --update --no-cache \
-    iproute2
+    iproute2 \
+    dnsmasq
 
 ENV TUN=tun0 \
     MTU=8500 \
@@ -34,6 +35,9 @@ ENV TUN=tun0 \
     CONFIG_ROUTES=1 \
     IPV4_INCLUDED_ROUTES=0.0.0.0/0 \
     IPV4_EXCLUDED_ROUTES='' \
+    DNS_CACHE=0 \
+    DNS_CACHE_SERVERS=8.8.8.8,1.1.1.1 \
+    DNS_CACHE_SIZE=10000 \
     LOG_LEVEL=warn
 
 HEALTHCHECK --start-period=5s --interval=5s --timeout=2s --retries=3 CMD ["test", "-f", "/success"]
