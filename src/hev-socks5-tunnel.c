@@ -538,8 +538,12 @@ tunnel_fini (void)
 {
     const char *script_path;
 
-    if (!tun_fd_local)
+    if (!tun_fd_local) {
+        /* The fd belongs to the caller, only release what we hold for it. */
+        hev_tunnel_set_offload (-1, 0);
+        tun_fd = -1;
         return;
+    }
 
     script_path = hev_config_get_tunnel_pre_down_script ();
     if (script_path)
