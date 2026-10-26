@@ -208,14 +208,18 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
     if (!READ_ONCE (run))
         return ERR_RST;
 
-    tcp = hev_socks5_session_tcp_new (pcb, &mutex);
-    if (!tcp)
-        return ERR_MEM;
-
+    /*
+     * The task goes first: the session can't be destroyed here, its destructor
+     * takes the mutex that is held while lwIP calls us.
+     */
     stack_size = hev_config_get_misc_task_stack_size ();
     task = hev_task_new (stack_size);
-    if (!task) {
-        hev_object_unref (HEV_OBJECT (tcp));
+    if (!task)
+        return ERR_MEM;
+
+    tcp = hev_socks5_session_tcp_new (pcb, &mutex);
+    if (!tcp) {
+        hev_task_unref (task);
         return ERR_MEM;
     }
 
@@ -262,6 +266,19 @@ exit:
     udp_remove (pcb);
 }
 
+/*
+ * The datagram that created the pcb is delivered to it after we return. The
+ * pcb must not be removed before, lwIP would create a new one for it again.
+ */
+static void
+udp_drop_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
+                  const ip_addr_t *addr, u16_t port)
+{
+    pbuf_free (p);
+    udp_recv (pcb, NULL, NULL);
+    udp_remove (pcb);
+}
+
 static void
 udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
                   const ip_addr_t *addr, u16_t port)
@@ -273,7 +290,7 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
     HevTask *task;
 
     if (!READ_ONCE (run)) {
-        udp_remove (pcb);
+        udp_recv (pcb, udp_drop_handler, NULL);
         return;
     }
 
@@ -287,16 +304,18 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
         }
     }
 
-    udp = hev_socks5_session_udp_new (pcb, &mutex);
-    if (!udp) {
-        udp_remove (pcb);
-        return;
-    }
-
+    /* As for TCP, the session can't be destroyed here. */
     stack_size = hev_config_get_misc_task_stack_size ();
     task = hev_task_new (stack_size);
     if (!task) {
-        hev_object_unref (HEV_OBJECT (udp));
+        udp_recv (pcb, udp_drop_handler, NULL);
+        return;
+    }
+
+    udp = hev_socks5_session_udp_new (pcb, &mutex);
+    if (!udp) {
+        hev_task_unref (task);
+        udp_recv (pcb, udp_drop_handler, NULL);
         return;
     }
 
