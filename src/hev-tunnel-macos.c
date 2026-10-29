@@ -9,6 +9,7 @@
 
 #if defined(__APPLE__) || defined(__MACH__)
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -73,6 +74,10 @@ hev_tunnel_open (const char *name, int multi_queue, const char *guid)
         goto exit_close;
 
     res = ioctl (fd, FIONBIO, (char *)&nonblock);
+    if (res < 0)
+        goto exit_close;
+
+    res = fcntl (fd, F_SETFD, FD_CLOEXEC);
     if (res < 0)
         goto exit_close;
 

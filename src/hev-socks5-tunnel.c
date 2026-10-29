@@ -8,6 +8,7 @@
  */
 
 #include <errno.h>
+#include <fcntl.h>
 #include <assert.h>
 #if !defined(_WIN32)
 #include <signal.h>
@@ -94,6 +95,9 @@ netif_output_handler (struct netif *netif, struct pbuf *p)
     if (s <= 0) {
         if (errno == EAGAIN)
             return ERR_WOULDBLOCK;
+        /* Large packets may not fit, lwIP sends smaller ones then. */
+        if ((errno == ENOBUFS) || (errno == ENOMEM))
+            return ERR_MEM;
         LOG_W ("socks5 tunnel write");
         return ERR_IF;
     }
@@ -207,14 +211,18 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
     if (!READ_ONCE (run))
         return ERR_RST;
 
-    tcp = hev_socks5_session_tcp_new (pcb, &mutex);
-    if (!tcp)
-        return ERR_MEM;
-
+    /*
+     * The task goes first: the session can't be destroyed here, its destructor
+     * takes the mutex that is held while lwIP calls us.
+     */
     stack_size = hev_config_get_misc_task_stack_size ();
     task = hev_task_new (stack_size);
-    if (!task) {
-        hev_object_unref (HEV_OBJECT (tcp));
+    if (!task)
+        return ERR_MEM;
+
+    tcp = hev_socks5_session_tcp_new (pcb, &mutex);
+    if (!tcp) {
+        hev_task_unref (task);
         return ERR_MEM;
     }
 
@@ -261,6 +269,19 @@ exit:
     udp_remove (pcb);
 }
 
+/*
+ * The datagram that created the pcb is delivered to it after we return. The
+ * pcb must not be removed before, lwIP would create a new one for it again.
+ */
+static void
+udp_drop_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
+                  const ip_addr_t *addr, u16_t port)
+{
+    pbuf_free (p);
+    udp_recv (pcb, NULL, NULL);
+    udp_remove (pcb);
+}
+
 static void
 udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
                   const ip_addr_t *addr, u16_t port)
@@ -272,7 +293,7 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
     HevTask *task;
 
     if (!READ_ONCE (run)) {
-        udp_remove (pcb);
+        udp_recv (pcb, udp_drop_handler, NULL);
         return;
     }
 
@@ -286,16 +307,18 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
         }
     }
 
-    udp = hev_socks5_session_udp_new (pcb, &mutex);
-    if (!udp) {
-        udp_remove (pcb);
-        return;
-    }
-
+    /* As for TCP, the session can't be destroyed here. */
     stack_size = hev_config_get_misc_task_stack_size ();
     task = hev_task_new (stack_size);
     if (!task) {
-        hev_object_unref (HEV_OBJECT (udp));
+        udp_recv (pcb, udp_drop_handler, NULL);
+        return;
+    }
+
+    udp = hev_socks5_session_udp_new (pcb, &mutex);
+    if (!udp) {
+        hev_task_unref (task);
+        udp_recv (pcb, udp_drop_handler, NULL);
         return;
     }
 
@@ -334,6 +357,29 @@ event_task_entry (void *data)
     hev_task_del_fd (task_event, event_fds[0]);
 }
 
+/*
+ * Packets are read into MTU-sized pbufs. The ones that are queued by a
+ * session would pin the whole buffer, so small packets are moved into a
+ * pbuf that fits them.
+ */
+static struct pbuf *
+tunnel_compact_pbuf (struct pbuf *buf)
+{
+    struct pbuf *p;
+
+    if (buf->next || (buf->tot_len > COMPACT_PBUF_SIZE))
+        return buf;
+
+    p = pbuf_alloc (PBUF_RAW, buf->tot_len, PBUF_RAM);
+    if (!p)
+        return buf;
+
+    memcpy (p->payload, buf->payload, buf->tot_len);
+    pbuf_free (buf);
+
+    return p;
+}
+
 static void
 lwip_io_task_entry (void *data)
 {
@@ -354,6 +400,8 @@ lwip_io_task_entry (void *data)
 
         stat_tx_packets++;
         stat_tx_bytes += buf->tot_len;
+
+        buf = tunnel_compact_pbuf (buf);
 
         data = buf->payload;
         if ((data[0] >> 4) == 4 ? (data[9] == IP_PROTO_UDP) :
@@ -492,8 +540,12 @@ tunnel_fini (void)
 {
     const char *script_path;
 
-    if (!tun_fd_local)
+    if (!tun_fd_local) {
+        /* The fd belongs to the caller, only release what we hold for it. */
+        hev_tunnel_set_offload (-1, 0);
+        tun_fd = -1;
         return;
+    }
 
     script_path = hev_config_get_tunnel_pre_down_script ();
     if (script_path)
@@ -598,6 +650,12 @@ event_task_init (void)
     res = ioctl (event_fds[0], FIONBIO, (char *)&nonblock);
     if (res < 0) {
         LOG_E ("socks5 tunnel event nonblock");
+        return -1;
+    }
+
+    if ((fcntl (event_fds[0], F_SETFD, FD_CLOEXEC) < 0) ||
+        (fcntl (event_fds[1], F_SETFD, FD_CLOEXEC) < 0)) {
+        LOG_E ("socks5 tunnel event cloexec");
         return -1;
     }
 

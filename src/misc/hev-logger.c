@@ -30,11 +30,11 @@ hev_logger_init (HevLoggerLevel level, const char *path)
     req_level = level;
 
     if (0 == strcmp (path, "stdout"))
-        fd = dup (1);
+        fd = fcntl (1, F_DUPFD_CLOEXEC, 0);
     else if (0 == strcmp (path, "stderr"))
-        fd = dup (2);
+        fd = fcntl (2, F_DUPFD_CLOEXEC, 0);
     else
-        fd = open (path, O_WRONLY | O_APPEND | O_CREAT, 0640);
+        fd = open (path, O_WRONLY | O_APPEND | O_CREAT | O_CLOEXEC, 0640);
 
     if (fd < 0)
         return -1;
@@ -45,8 +45,10 @@ hev_logger_init (HevLoggerLevel level, const char *path)
 void
 hev_logger_fini (void)
 {
-    if (fd >= 0)
+    if (fd >= 0) {
         close (fd);
+        fd = -1;
+    }
 }
 
 int

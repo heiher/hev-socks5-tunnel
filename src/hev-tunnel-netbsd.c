@@ -38,7 +38,7 @@ hev_tunnel_open (const char *name, int multi_queue, const char *guid)
     int fd;
 
     snprintf (buf, sizeof (buf), "/dev/%s", name);
-    fd = hev_task_io_open (buf, O_RDWR);
+    fd = hev_task_io_open (buf, O_RDWR | O_CLOEXEC);
     if (fd < 0)
         goto fail;
 

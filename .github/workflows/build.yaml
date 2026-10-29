@@ -127,7 +127,7 @@ jobs:
           - name: arm64
             flags: -arch arm64 -mmacosx-version-min=11.0
           - name: x86_64
-            flags: -arch x86_64 -mmacosx-version-min=10.6
+            flags: -arch x86_64 -mmacosx-version-min=10.7
     steps:
       - name: Checkout
         uses: actions/checkout@v6

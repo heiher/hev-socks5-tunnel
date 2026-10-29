@@ -304,10 +304,24 @@ services:
       CONFIG_ROUTES: 1 # optional, set 0 to ignore TABLE, IPV4_INCLUDED_ROUTES and IPV4_EXCLUDED_ROUTES, with MARK defaults to 0
       IPV4_INCLUDED_ROUTES: 0.0.0.0/0 # optional, demo means proxy all traffic. for multiple network segments, join with `,` or `\n`
       IPV4_EXCLUDED_ROUTES: a.b.c.d # optional, demo means exclude traffic from the proxy itself. for multiple network segments, join with `,` or `\n`
+      DNS_CACHE: 1 # optional, enable the lightweight caching resolver (dnsmasq) for use with mapdns disabled, default `0`
+      DNS_CACHE_SERVERS: 8.8.8.8,1.1.1.1 # optional, upstream resolvers of the cache, they are queried via the tun device, default `8.8.8.8,1.1.1.1`
+      DNS_CACHE_SIZE: 10000 # optional, number of cached DNS records, default `10000`
       LOG_LEVEL: warn # optional, default `warn`, other option `debug`/`info`/`error`
     dns:
-      - 8.8.8.8
+      - 127.0.0.1 # point clients at the caching resolver when DNS_CACHE=1, or a remote resolver like 8.8.8.8 otherwise
 ```
+
+#### DNS caching
+
+The tunnel has no built-in DNS cache when mapdns is disabled, but the Docker
+image ships an optional lightweight caching resolver (dnsmasq). Enable it with
+`DNS_CACHE=1`, no entrypoint override needed. It listens on `127.0.0.1` and the
+tun interface addresses, so clients sharing the network namespace
+(`network_mode: "service:tun"`) use it with `dns: 127.0.0.1` (or the tun IPv4,
+e.g. `dns: 198.18.0.1`). Upstream servers (`DNS_CACHE_SERVERS`) are queried
+through the tun device, i.e. resolved remotely via the Socks5 server, and
+successful answers are cached locally (`DNS_CACHE_SIZE` records).
 
 You can also set the route rules with multiple network segments like:
 

@@ -12,7 +12,9 @@
 #include "hev-utils.h"
 #include "hev-logger.h"
 #include "hev-config.h"
+#include "hev-config-const.h"
 #include "hev-socks5-client.h"
+#include "hev-socks5-tunnel.h"
 
 #include "hev-socks5-session.h"
 
@@ -60,6 +62,52 @@ hev_socks5_session_terminate (HevSocks5Session *self)
     iface = HEV_OBJECT_GET_IFACE (self, HEV_SOCKS5_SESSION_TYPE);
     hev_socks5_set_timeout (HEV_SOCKS5 (self), 0);
     hev_task_wakeup (iface->get_task (self));
+}
+
+/*
+ * Wait for I/O while the session has nothing in flight. The caller must have
+ * left the frame that holds its buffers, so that after an idle period the
+ * stack memory below can be released. A timeout not longer than the idle
+ * period is waited as is, without releasing.
+ *
+ * Returns 1 when the stack has been released. The caller must poll its I/O
+ * again, as a wakeup arriving with the idle timer is not seen here, and pass
+ * released as nonzero to the next wait if it still has nothing to do.
+ */
+int
+hev_socks5_session_idle_wait (HevSocks5Session *self, int released)
+{
+    HevSocks5 *s5 = HEV_SOCKS5 (self);
+    int timeout = s5->timeout;
+    int remain;
+
+    if (!released && (timeout < 0 || timeout > SESSION_IDLE_RELEASE_TIME)) {
+        remain = hev_task_sleep (SESSION_IDLE_RELEASE_TIME);
+        if (remain > 0)
+            goto woken;
+
+        hev_task_release_stack (hev_task_self ());
+        return 1;
+    }
+
+    if (timeout < 0) {
+        hev_task_yield (HEV_TASK_WAITIO);
+        goto woken;
+    }
+
+    /* The timeout may be changed (terminate) while sleeping. */
+    if (released && timeout > SESSION_IDLE_RELEASE_TIME)
+        timeout -= SESSION_IDLE_RELEASE_TIME;
+
+    remain = hev_task_sleep (timeout);
+    if (remain <= 0) {
+        LOG_I ("%p io timeout", self);
+        return -1;
+    }
+
+woken:
+    hev_socks5_tunnel_update_session (hev_socks5_session_get_node (self));
+    return 0;
 }
 
 void
