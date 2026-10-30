@@ -35,6 +35,14 @@ task_io_yielder (HevTaskYieldType type, void *data)
     int res;
 
     res = hev_socks5_task_io_yielder (type, data);
+    /*
+     * Terminated (timeout 0, see hev_socks5_session_terminate): a busy session
+     * only ever yields with HEV_TASK_YIELD, which ignores the timeout, so an
+     * evicted session that keeps moving data never ends and the session count
+     * runs past max-session-count (iOS NE jetsam, 30.10: 259 at a cap of 130).
+     */
+    if (hev_socks5_get_timeout (HEV_SOCKS5 (self)) == 0)
+        return -1;
     node = hev_socks5_session_get_node (self);
     hev_socks5_tunnel_update_session (node);
 
