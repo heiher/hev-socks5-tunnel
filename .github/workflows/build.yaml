@@ -172,7 +172,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  windows:
+  windows-msys2:
     name: Windows
     runs-on: windows-latest
     defaults:
