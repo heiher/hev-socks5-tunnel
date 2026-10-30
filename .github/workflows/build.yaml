@@ -331,7 +331,7 @@ jobs:
       - linux
       - macos
       - freebsd
-      - windows
+      - windows-msys2
       - windows-msvc
       - android
     if: github.event_name == 'release'
