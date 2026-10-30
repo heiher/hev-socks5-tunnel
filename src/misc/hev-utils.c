@@ -16,6 +16,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+#include <process.h>
 #else
 #include <sys/socket.h>
 #include <sys/resource.h>

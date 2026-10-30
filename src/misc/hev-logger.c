@@ -12,13 +12,43 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#if defined(_MSC_VER)
+#include <io.h>
+#include <hev-sys.h>
+#else
 #include <unistd.h>
 #include <sys/uio.h>
+#endif
 #include <sys/stat.h>
 
 #include "hev-logger.h"
 
 static int fd = -1;
+
+#if defined(_MSC_VER)
+#define hev_logger_dup(n) _dup (n)
+#define hev_logger_open(path)     _open (path, _O_WRONLY | _O_APPEND | _O_CREAT | _O_BINARY,            _S_IREAD | _S_IWRITE)
+#define hev_logger_close(fd) _close (fd)
+
+static int
+hev_logger_writev (int fd, const struct iovec *iov, int iovcnt)
+{
+    int i, res = 0;
+
+    for (i = 0; i < iovcnt; i++) {
+        res = _write (fd, iov[i].iov_base, (unsigned int)iov[i].iov_len);
+        if (res < 0)
+            break;
+    }
+
+    return res;
+}
+#else
+#define hev_logger_dup(n) fcntl (n, F_DUPFD_CLOEXEC, 0)
+#define hev_logger_open(path)     open (path, O_WRONLY | O_APPEND | O_CREAT | O_CLOEXEC, 0640)
+#define hev_logger_close(fd) close (fd)
+#define hev_logger_writev writev
+#endif
 static HevLoggerLevel req_level;
 
 int
@@ -30,11 +60,11 @@ hev_logger_init (HevLoggerLevel level, const char *path)
     req_level = level;
 
     if (0 == strcmp (path, "stdout"))
-        fd = fcntl (1, F_DUPFD_CLOEXEC, 0);
+        fd = hev_logger_dup (1);
     else if (0 == strcmp (path, "stderr"))
-        fd = fcntl (2, F_DUPFD_CLOEXEC, 0);
+        fd = hev_logger_dup (2);
     else
-        fd = open (path, O_WRONLY | O_APPEND | O_CREAT | O_CLOEXEC, 0640);
+        fd = hev_logger_open (path);
 
     if (fd < 0)
         return -1;
@@ -46,7 +76,7 @@ void
 hev_logger_fini (void)
 {
     if (fd >= 0) {
-        close (fd);
+        hev_logger_close (fd);
         fd = -1;
     }
 }
@@ -114,7 +144,7 @@ hev_logger_log (HevLoggerLevel level, const char *fmt, ...)
     iov[3].iov_base = "\n";
     iov[3].iov_len = 1;
 
-    if (writev (fd, iov, 4)) {
+    if (hev_logger_writev (fd, iov, 4)) {
         /* ignore return value */
     }
 }

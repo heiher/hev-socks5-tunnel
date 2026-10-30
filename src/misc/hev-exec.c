@@ -30,6 +30,28 @@
 
 #if defined(_MSC_VER)
 
+static wchar_t *
+hev_win_utf8_to_wide (const char *str)
+{
+    wchar_t *wstr;
+    int len;
+
+    len = MultiByteToWideChar (CP_UTF8, 0, str, -1, NULL, 0);
+    if (len <= 0)
+        return NULL;
+
+    wstr = malloc (len * sizeof (wchar_t));
+    if (!wstr)
+        return NULL;
+
+    if (!MultiByteToWideChar (CP_UTF8, 0, str, -1, wstr, len)) {
+        free (wstr);
+        return NULL;
+    }
+
+    return wstr;
+}
+
 /* Quote argv per CommandLineToArgvW rules; UTF-8 bytes are quoted safely. */
 static size_t
 hev_exec_arg_size (const char *arg)

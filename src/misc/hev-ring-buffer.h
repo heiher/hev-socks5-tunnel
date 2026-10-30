@@ -11,7 +11,11 @@
 #define __HEV_RING_BUFFER_H__
 
 #include <stdlib.h>
+#if defined(_MSC_VER)
+#include <hev-sys.h>
+#else
 #include <sys/uio.h>
+#endif
 #include <sys/types.h>
 
 typedef struct _HevRingBuffer HevRingBuffer;

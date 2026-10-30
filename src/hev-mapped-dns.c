@@ -10,7 +10,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(_MSC_VER)
+#include <hev-sys.h>
+#else
 #include <arpa/inet.h>
+#endif
 
 #include <hev-compiler.h>
 #include <hev-memory-allocator.h>

@@ -8,8 +8,12 @@
  */
 
 #include <stdio.h>
+#if defined(_MSC_VER)
+#include <hev-sys.h>
+#else
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#endif
 #include <lwip/tcp.h>
 #include <yaml.h>
 #include <hev-task.h>

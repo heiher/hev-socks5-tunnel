@@ -227,15 +227,17 @@ jobs:
         with:
           fetch-depth: 1
           submodules: true
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
       - name: Build
         shell: pwsh
         run: |
-          # Native MSVC build for the selected architecture (see
-          # Makefile.msvc / build-windows.ps1). The script locates Visual
-          # Studio via vswhere and imports the developer environment
-          # itself, no extra setup needed.
-          ./build-windows.ps1 -Arch ${{ matrix.arch }}
-          $dist = if ('${{ matrix.arch }}' -eq 'x64') { 'build-msvc/dist' } else { 'build-msvc/${{ matrix.arch }}/dist' }
+          # Native MSVC build for the selected architecture, driven by the
+          # Makefile (MSVC=1, clang-cl + lib/link).
+          make MSVC=1 ARCH=${{ matrix.arch }} dist
+          $dist = if ('${{ matrix.arch }}' -eq 'x64') { 'build/dist' } else { 'build/${{ matrix.arch }}/dist' }
           $name = if ('${{ matrix.arch }}' -eq 'x64') { 'win64' } elseif ('${{ matrix.arch }}' -eq 'x86') { 'win32' } else { 'win-arm64' }
           Compress-Archive -Path $dist/bin/*, $dist/lib/*, $dist/include/* -DestinationPath "hev-socks5-tunnel-$name-msvc.zip"
       - name: Upload

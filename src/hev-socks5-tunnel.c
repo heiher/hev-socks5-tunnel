@@ -15,7 +15,12 @@
 #endif
 #include <string.h>
 #include <stdatomic.h>
+#if defined(_MSC_VER)
+#include "sys/hev-sys-private.h"
+#define usleep(us) Sleep (((us) + 999) / 1000)
+#else
 #include <sys/ioctl.h>
+#endif
 
 #ifdef __GLIBC__
 #include <malloc.h>

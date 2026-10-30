@@ -10,6 +10,10 @@
 #include <errno.h>
 #include <string.h>
 
+#if defined(_MSC_VER)
+#include "sys/hev-sys-private.h"
+#endif
+
 #include <lwip/tcp.h>
 
 #include <hev-task.h>

@@ -1,5 +1,217 @@
 # Makefile for hev-socks5-tunnel
 
+# Native Windows build with clang-cl + MSVC lib/link:
+#   make [MSVC=1] [ARCH=x64|x86|arm64] [DEBUG=1] [STATIC_CRT=1] [all|exec|static|shared|dist|clean]
+# Run it from a Visual Studio developer environment, which provides
+# INCLUDE/LIB/PATH for the target ARCH. The bundled third-part libraries are
+# compiled directly here instead of via their own (GNU only) Makefiles.
+# MSVC is picked automatically on native Windows (a Visual Studio developer
+# prompt or plain cmd/PowerShell) and left off under MSYS2/MinGW, which set
+# MSYSTEM. Force it either way with MSVC=1 or MSVC=0.
+MSVC ?=
+ifeq ($(MSVC),)
+ifeq ($(OS),Windows_NT)
+ifeq ($(MSYSTEM),)
+MSVC=1
+endif
+endif
+endif
+ifeq ($(MSVC),1)
+
+PROJECT=hev-socks5-tunnel
+
+CC=clang-cl
+AR=lib.exe
+LINK=link.exe
+
+ARCH :=
+ifeq ($(ARCH),)
+	ARCH=x64
+endif
+
+ifeq ($(ARCH),x64)
+	CLANG_TARGET=x86_64-pc-windows-msvc
+	MACHINE=X64
+	WINTUN_DLL=wintun.dll
+	CET_OPT=-CETCOMPAT:NO
+	OUTDIR=build
+else ifeq ($(ARCH),x86)
+	CLANG_TARGET=i686-pc-windows-msvc
+	MACHINE=X86
+	WINTUN_DLL=wintun-x86.dll
+	CET_OPT=-CETCOMPAT:NO
+	OUTDIR=build/x86
+else ifeq ($(ARCH),arm64)
+	CLANG_TARGET=aarch64-pc-windows-msvc
+	MACHINE=ARM64
+	WINTUN_DLL=wintun-arm64.dll
+	CET_OPT=
+	OUTDIR=build/arm64
+else
+	$(error Unknown ARCH "$(ARCH)", use x64, x86 or arm64)
+endif
+
+SRCDIR=src
+THIRDPARTDIR=third-part
+TASKDIR=$(THIRDPARTDIR)/hev-task-system
+OBJDIR=$(OUTDIR)/obj
+DISTDIR=$(OUTDIR)/dist
+
+ENABLE_DEBUG :=
+DEBUG :=
+STATIC_CRT :=
+ifneq (,$(filter 1,$(ENABLE_DEBUG) $(DEBUG)))
+	CRT_FLAGS=-Od -Zi
+	CRT_SUFFIX=d
+else
+	CRT_FLAGS=-O2
+	CRT_SUFFIX=
+endif
+ifeq ($(STATIC_CRT),1)
+	CRT_FLAGS+=-MT$(CRT_SUFFIX)
+else
+	CRT_FLAGS+=-MD$(CRT_SUFFIX)
+endif
+
+-include build.mk
+
+# '-' option prefixes (instead of '/') keep MSYS from rewriting them as paths.
+CCFLAGS=-nologo -c -W4 -utf-8 -std:c11 -Xclang -std=gnu11 $(CRT_FLAGS) \
+	--target=$(CLANG_TARGET) -Wno-unused-command-line-argument \
+	-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS \
+	-DHAVE_CONFIG_H=0 -DYAML_DECLARE_STATIC \
+	-DYAML_VERSION_MAJOR=0 -DYAML_VERSION_MINOR=2 -DYAML_VERSION_PATCH=5 \
+	-DYAML_VERSION_STRING=\"0.2.5\" -DSSIZE_MAX=INT_MAX -DLWIP_NO_UNISTD_H=1 \
+	-DENABLE_MEMALLOC_SLICE -DENABLE_STACK_OVERFLOW_DETECTION \
+	-DCONFIG_STACK_BACKEND=STACK_HEAP -DCONFIG_STACK_OVERFLOW_DETECTION=1 \
+	-DCONFIG_MEMALLOC_SLICE_ALIGN=16 -DCONFIG_MEMALLOC_SLICE_MAX_SIZE=4096 \
+	-DCONFIG_MEMALLOC_SLICE_MAX_COUNT=1000 -DCONFIG_SCHED_CLOCK=CLOCK_NONE -DCONFIG_SCHED_IO_POLL_INTERVAL=50000 \
+	-DEXPORT_SYMBOL= -D_WINSOCK_DEPRECATED_NO_WARNINGS \
+	-Wno-microsoft-enum-forward-reference -Wno-pragma-pack \
+	-Dstrcasecmp=_stricmp -Dstrncasecmp=_strnicmp \
+	$(VERSION_CFLAGS) \
+	-I$(SRCDIR) -I$(SRCDIR)/misc -I$(SRCDIR)/core/include \
+	-I$(THIRDPARTDIR)/yaml/include \
+	-I$(THIRDPARTDIR)/lwip/src/include \
+	-I$(THIRDPARTDIR)/lwip/src/ports/include \
+	-I$(TASKDIR)/include -I$(TASKDIR)/src \
+	-I$(THIRDPARTDIR)/wintun/include \
+	$(CFLAGS)
+LIB_CCFLAGS=$(CCFLAGS) -DENABLE_LIBRARY
+EXE_CCFLAGS=$(CCFLAGS)
+
+WINLIBS=Ws2_32.lib Iphlpapi.lib Advapi32.lib
+LINKFLAGS=-NOLOGO $(CET_OPT) -MACHINE:$(MACHINE) $(LFLAGS)
+EXPORTS=-EXPORT:hev_socks5_tunnel_main \
+	-EXPORT:hev_socks5_tunnel_main_from_file \
+	-EXPORT:hev_socks5_tunnel_main_from_str \
+	-EXPORT:hev_socks5_tunnel_quit \
+	-EXPORT:hev_socks5_tunnel_stats
+
+# Sources shared by the library and the executable.
+rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) \
+	$(filter $(subst *,%,$2),$d))
+
+# hev-task-system sources are guarded per platform, so the whole tree is built.
+COMMON_SRCS=$(wildcard $(THIRDPARTDIR)/yaml/src/*.c) \
+	$(wildcard $(THIRDPARTDIR)/lwip/src/core/*.c) \
+	$(wildcard $(THIRDPARTDIR)/lwip/src/core/ipv4/*.c) \
+	$(wildcard $(THIRDPARTDIR)/lwip/src/core/ipv6/*.c) \
+	$(call rwildcard,$(TASKDIR)/src/,*.c *.S) \
+	$(filter-out $(SRCDIR)/core/src/hev-rbtree.c,$(wildcard $(SRCDIR)/core/src/*.c))
+
+# Sources that differ between the library (ENABLE_LIBRARY) and the executable.
+TUNNEL_SRCS=$(addprefix $(SRCDIR)/, \
+	hev-config.c hev-main.c hev-mapped-dns.c hev-socks5-session.c \
+	hev-socks5-session-tcp.c hev-socks5-session-udp.c hev-socks5-tunnel.c \
+	hev-tunnel-windows.c misc/hev-exec.c misc/hev-logger.c \
+	misc/hev-ring-buffer.c misc/hev-utils.c misc/hev-wintun.c) \
+	$(THIRDPARTDIR)/lwip/src/ports/win32/lib/sys_arch.c
+
+toobj=$(addsuffix .obj,$(basename $1))
+COMMON_OBJS=$(addprefix $(OBJDIR)/,$(call toobj,$(COMMON_SRCS)))
+LIB_OBJS=$(COMMON_OBJS) $(addprefix $(OBJDIR)/lib/,$(call toobj,$(TUNNEL_SRCS)))
+EXE_OBJS=$(COMMON_OBJS) $(addprefix $(OBJDIR)/exe/,$(call toobj,$(TUNNEL_SRCS)))
+DEPEND=$(LIB_OBJS:.obj=.d) $(EXE_OBJS:.obj=.d)
+
+EXEC_TARGET=$(DISTDIR)/bin/$(PROJECT).exe
+STATIC_TARGET=$(DISTDIR)/lib/$(PROJECT)-static.lib
+SHARED_TARGET=$(DISTDIR)/bin/$(PROJECT).dll
+IMPORT_TARGET=$(DISTDIR)/lib/$(PROJECT).lib
+
+BUILDMSG="\e[1;31mBUILD\e[0m %s\n"
+LINKMSG="\e[1;34mLINK\e[0m  \e[1;32m%s\e[0m\n"
+CLEANMSG="\e[1;34mCLEAN\e[0m %s\n"
+
+V :=
+ECHO_PREFIX := @
+ifeq ($(V),1)
+	undefine ECHO_PREFIX
+endif
+
+.DEFAULT_GOAL := all
+.PHONY: all exec static shared dist clean
+
+all : static shared exec dist
+
+exec : $(EXEC_TARGET)
+
+static : $(STATIC_TARGET)
+
+shared : $(SHARED_TARGET)
+
+dist : $(EXEC_TARGET) $(STATIC_TARGET) $(SHARED_TARGET)
+	$(ECHO_PREFIX) mkdir -p $(DISTDIR)/include
+	$(ECHO_PREFIX) cp $(SRCDIR)/hev-main.h $(DISTDIR)/include/
+	$(ECHO_PREFIX) cp $(THIRDPARTDIR)/wintun/bin/$(WINTUN_DLL) $(DISTDIR)/bin/wintun.dll
+
+clean :
+	$(ECHO_PREFIX) $(RM) -rf $(OUTDIR)
+	@printf $(CLEANMSG) $(PROJECT)
+
+$(EXEC_TARGET) : $(EXE_OBJS)
+	$(ECHO_PREFIX) mkdir -p $(dir $@)
+	$(ECHO_PREFIX) $(LINK) $(LINKFLAGS) -SUBSYSTEM:CONSOLE -OUT:$@ $^ $(WINLIBS)
+	@printf $(LINKMSG) $@
+
+$(STATIC_TARGET) : $(LIB_OBJS)
+	$(ECHO_PREFIX) mkdir -p $(dir $@)
+	$(ECHO_PREFIX) $(AR) -NOLOGO -MACHINE:$(MACHINE) -OUT:$@ $^
+	@printf $(LINKMSG) $@
+
+$(SHARED_TARGET) : $(LIB_OBJS)
+	$(ECHO_PREFIX) mkdir -p $(dir $@) $(dir $(IMPORT_TARGET))
+	$(ECHO_PREFIX) $(LINK) $(LINKFLAGS) -DLL -OUT:$@ -IMPLIB:$(IMPORT_TARGET) \
+		$^ $(WINLIBS) $(EXPORTS)
+	@printf $(LINKMSG) $@
+
+$(OBJDIR)/lib/%.obj : %.c
+	$(ECHO_PREFIX) mkdir -p $(dir $@)
+	$(ECHO_PREFIX) $(CC) $(LIB_CCFLAGS) -clang:-MMD -clang:-MF$(@:.obj=.d) -Fo$@ $<
+	@printf $(BUILDMSG) $<
+
+$(OBJDIR)/exe/%.obj : %.c
+	$(ECHO_PREFIX) mkdir -p $(dir $@)
+	$(ECHO_PREFIX) $(CC) $(EXE_CCFLAGS) -clang:-MMD -clang:-MF$(@:.obj=.d) -Fo$@ $<
+	@printf $(BUILDMSG) $<
+
+$(OBJDIR)/%.obj : %.c
+	$(ECHO_PREFIX) mkdir -p $(dir $@)
+	$(ECHO_PREFIX) $(CC) $(LIB_CCFLAGS) -clang:-MMD -clang:-MF$(@:.obj=.d) -Fo$@ $<
+	@printf $(BUILDMSG) $<
+
+# GAS assembly (hev-task-execute.S) is also built by clang-cl.
+$(OBJDIR)/%.obj : %.S
+	$(ECHO_PREFIX) mkdir -p $(dir $@)
+	$(ECHO_PREFIX) $(CC) -nologo -c --target=$(CLANG_TARGET) -I$(TASKDIR)/src -Fo$@ $<
+	@printf $(BUILDMSG) $<
+
+ifneq ($(MAKECMDGOALS),clean)
+-include $(DEPEND)
+endif
+
+else
+
 PROJECT=hev-socks5-tunnel
 
 CROSS_PREFIX :=
@@ -147,4 +359,6 @@ $(BUILDDIR)/%.o : $(SRCDIR)/%.c
 
 ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPEND)
+endif
+
 endif

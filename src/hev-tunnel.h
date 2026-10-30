@@ -18,8 +18,12 @@ enum
     HEV_TUNNEL_OFFLOAD_JUMBO = 1 << 3,
 };
 
+#if defined(_MSC_VER)
+#include <hev-sys.h>
+#else
 #include <netinet/in.h>
 #include <sys/socket.h>
+#endif
 #include <lwip/pbuf.h>
 
 #if defined(__linux__)
