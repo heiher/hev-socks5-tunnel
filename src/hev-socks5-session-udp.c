@@ -67,9 +67,6 @@ task_io_yielder (HevTaskYieldType type, void *data)
         return -1;
 
     res = hev_socks5_task_io_yielder (type, data);
-    /* Terminated, see task_io_yielder in hev-socks5-session-tcp.c. */
-    if (hev_socks5_get_timeout (self) == 0)
-        return -1;
     node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (self));
     hev_socks5_tunnel_update_session (node);
 
