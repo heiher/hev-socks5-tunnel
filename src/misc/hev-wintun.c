@@ -207,7 +207,7 @@ hev_wintun_adapter_set_ipv6 (HevWinTunAdapter *adapter, char addr[16],
 HevWinTunSession *
 hev_wintun_session_start (HevWinTunAdapter *adapter)
 {
-    return WintunStartSession (adapter, 0x400000);
+    return WintunStartSession (adapter, 0x800000);
 }
 
 void
