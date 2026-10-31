@@ -472,7 +472,7 @@ tunnel_init (int extern_tun_fd)
     offload = hev_config_get_tunnel_offload ();
 
     if (extern_tun_fd >= 0) {
-#ifndef HEV_WIN_NATIVE
+#ifndef _WIN32
         int nonblock = 1;
 
         res = ioctl (extern_tun_fd, FIONBIO, (char *)&nonblock);

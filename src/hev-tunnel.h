@@ -37,9 +37,9 @@ enum
 #include "hev-tunnel-macos.h"
 #endif /* __APPLE__ || __MACH__ */
 
-#if defined(_WIN32) || defined(__MSYS__)
+#ifdef _WIN32
 #include "hev-tunnel-windows.h"
-#endif /* _WIN32 || __MSYS__ */
+#endif /* _WIN32 */
 
 #if defined(HEV_TUNNEL_GENERIC_HEAD)
 static inline struct pbuf *

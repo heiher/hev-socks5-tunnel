@@ -39,13 +39,11 @@ THIRDPARTS=$(THIRDPARTDIR)/yaml \
 		   $(THIRDPARTDIR)/hev-task-system
 EXEEXT=
 
-# Native Windows: clang targeting MSVC, built with the very same rules.
+# Windows: clang targeting MSVC, built with the very same rules.
 # Run make from a Visual Studio developer prompt (x64, x86 or arm64) with
 # a POSIX sh.exe on PATH, e.g. Git for Windows:
 #   make ARCH=x64
 ifeq ($(OS),Windows_NT)
-ifeq ($(MSYSTEM),)
-WIN_NATIVE=1
 ARCH?=x64
 CROSS_TARGET_x64=x86_64
 CROSS_TARGET_x86=i686
@@ -70,11 +68,10 @@ ifneq ($(ARCH),arm64)
 LDFLAGS+=-Wl,/CETCOMPAT:NO
 endif
 endif
-endif
 
 $(STATIC_TARGET) : CCFLAGS+=-DENABLE_LIBRARY
 $(SHARED_TARGET) : CCFLAGS+=-DENABLE_LIBRARY
-ifneq ($(WIN_NATIVE),1)
+ifneq ($(OS),Windows_NT)
 $(SHARED_TARGET) : CCFLAGS+=-fPIC
 $(SHARED_TARGET) : LDFLAGS+=-shared -pthread
 TPSHARED=tp-shared
@@ -90,7 +87,7 @@ endif
 -include build.mk
 CCFLAGS+=$(VERSION_CFLAGS)
 TPFLAGS=ENABLE_MEMALLOC_SLICE=0
-ifneq ($(WIN_NATIVE),1)
+ifneq ($(OS),Windows_NT)
 TPFLAGS+=ENABLE_STACK_OVERFLOW_DETECTOR=1
 endif
 CCSRCS=$(filter %.c,$(SRCFILES))
@@ -117,11 +114,7 @@ ifeq ($(ENABLE_STATIC),1)
 	CCFLAGS+=-static
 endif
 
-ifeq ($(MSYSTEM),MSYS)
-	LDFLAGS+=-lmsys-2.0 -lws2_32 -lIphlpapi
-endif
-
-ifneq ($(WIN_NATIVE),1)
+ifneq ($(OS),Windows_NT)
 LDFLAGS+=-lpthread
 endif
 LDFLAGS+=$(LFLAGS)

@@ -61,7 +61,7 @@ cd hev-socks5-tunnel
 
 ### Windows (MSVC + Clang)
 
-The same `Makefile` builds natively with clang targeting MSVC. Open a Visual
+The same `Makefile` builds with clang targeting MSVC. Open a Visual
 Studio developer prompt (clang from the VS LLVM component or `PATH`), make
 sure GNU make and a POSIX `sh.exe` (for example the one of Git for Windows,
 `C:\Program Files\Git\usr\bin`) are on `PATH`, then:
@@ -83,16 +83,9 @@ when switching between the executable and the shared library.
 
 The [Wintun](https://www.wintun.net/) driver is loaded at runtime, put the
 `wintun.dll` of the same architecture next to the executable (the x64 one is
-in `third-part/wintun/bin`) and run it as Administrator. On native Windows
+in `third-part/wintun/bin`) and run it as Administrator. On Windows
 there is no daemon mode (`pid-file` only writes the process id), no
 `limit-nofile` and no `mark`. Stop the tunnel with Ctrl+C.
-
-### Windows (MSYS2)
-```bash
-git clone --recursive https://github.com/heiher/hev-socks5-tunnel
-cd hev-socks5-tunnel
-make
-```
 
 ### Library
 

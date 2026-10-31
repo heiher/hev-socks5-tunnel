@@ -7,7 +7,7 @@
  ============================================================================
  */
 
-#if defined(_WIN32) || defined(__MSYS__)
+#ifdef _WIN32
 
 #include <errno.h>
 #include <stdio.h>
@@ -232,4 +232,4 @@ hev_tunnel_write (int fd, struct pbuf *buf)
     return size;
 }
 
-#endif /* _WIN32 || __MSYS__ */
+#endif /* _WIN32 */

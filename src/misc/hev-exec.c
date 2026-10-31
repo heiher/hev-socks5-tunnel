@@ -11,7 +11,7 @@
 
 #include "hev-compat.h"
 
-#ifdef HEV_WIN_NATIVE
+#ifdef _WIN32
 #include <stdio.h>
 #else
 #include <signal.h>
@@ -29,7 +29,7 @@
 
 #include "hev-exec.h"
 
-#ifdef HEV_WIN_NATIVE
+#ifdef _WIN32
 void
 hev_exec_run (const char *script_path, const char *tun_name,
               const char *tun_index, int wait)
