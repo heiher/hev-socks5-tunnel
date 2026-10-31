@@ -130,6 +130,18 @@ netif_init_handler (struct netif *netif)
     return ERR_OK;
 }
 
+static inline void
+hev_socks5_tunnel_mark_evicted (HevListNode *node)
+{
+    node->next = node->prev = node;
+}
+
+static inline int
+hev_socks5_tunnel_is_evicted (HevListNode *node)
+{
+    return node->next == node;
+}
+
 /*
  * Over max-session-count the least recently active session is evicted. It is
  * taken off the set right away: a terminated session lingers until its task
@@ -143,8 +155,8 @@ hev_socks5_tunnel_evict_session (HevListNode *node)
     HevSocks5SessionData *sd;
 
     sd = container_of (node, HevSocks5SessionData, node);
-    sd->evicted = 1;
     hev_list_del (&session_set, node);
+    hev_socks5_tunnel_mark_evicted (node);
     session_count--;
     evicted_count++;
     hev_socks5_session_terminate (sd->self);
@@ -169,10 +181,7 @@ hev_socks5_tunnel_insert_session (HevListNode *node)
 static void
 hev_socks5_tunnel_delete_session (HevListNode *node)
 {
-    HevSocks5SessionData *sd;
-
-    sd = container_of (node, HevSocks5SessionData, node);
-    if (sd->evicted) {
+    if (hev_socks5_tunnel_is_evicted (node)) {
         evicted_count--;
         return;
     }
@@ -184,15 +193,13 @@ hev_socks5_tunnel_delete_session (HevListNode *node)
 void
 hev_socks5_tunnel_update_session (HevListNode *node)
 {
-    HevSocks5SessionData *sd;
     int max_session_count;
 
     max_session_count = hev_config_get_misc_max_session_count ();
     if (!max_session_count)
         return;
 
-    sd = container_of (node, HevSocks5SessionData, node);
-    if (sd->evicted)
+    if (hev_socks5_tunnel_is_evicted (node))
         return;
 
     hev_list_del (&session_set, node);
