@@ -82,10 +82,9 @@ library is `bin/hev-socks5-tunnel.dll` with the import library
 when switching between the executable and the shared library.
 
 The [Wintun](https://www.wintun.net/) driver is loaded at runtime, put the
-`wintun.dll` of the same architecture next to the executable (the x64 one is
-in `third-part/wintun/bin`) and run it as Administrator. On Windows
-there is no daemon mode (`pid-file` only writes the process id), no
-`limit-nofile` and no `mark`. Stop the tunnel with Ctrl+C.
+`wintun.dll` of the same architecture next to the executable and run it as
+Administrator. On Windows there is no daemon mode (`pid-file` only writes
+the process id), no `limit-nofile` and no `mark`. Stop the tunnel with Ctrl+C.
 
 ### Library
 
