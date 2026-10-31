@@ -1,6 +1,6 @@
 # HevSocks5Tunnel
 
-[![status](https://github.com/heiher/hev-socks5-tunnel/actions/workflows/build.yaml/badge.svg?branch=main&event=push)](https://github.com/heiher/hev-socks5-tunnel)
+[![status](https://github.com/heiher/hev-socks5-tunnel/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/heiher/hev-socks5-tunnel)
 
 A simple, lightweight tunnel over Socks5 proxy (tun2socks).
 
