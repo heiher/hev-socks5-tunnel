@@ -18,8 +18,7 @@ enum
     HEV_TUNNEL_OFFLOAD_JUMBO = 1 << 3,
 };
 
-#include <netinet/in.h>
-#include <sys/socket.h>
+#include <hev-sys.h>
 #include <lwip/pbuf.h>
 
 #if defined(__linux__)
@@ -38,9 +37,9 @@ enum
 #include "hev-tunnel-macos.h"
 #endif /* __APPLE__ || __MACH__ */
 
-#if defined(__MSYS__)
+#if defined(_WIN32) || defined(__MSYS__)
 #include "hev-tunnel-windows.h"
-#endif /* __MSYS__ */
+#endif /* _WIN32 || __MSYS__ */
 
 #if defined(HEV_TUNNEL_GENERIC_HEAD)
 static inline struct pbuf *

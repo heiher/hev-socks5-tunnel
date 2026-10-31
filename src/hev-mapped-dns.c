@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <arpa/inet.h>
+#include <hev-sys.h>
 
 #include <hev-compiler.h>
 #include <hev-memory-allocator.h>

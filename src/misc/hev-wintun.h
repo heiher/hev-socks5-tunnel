@@ -11,6 +11,7 @@
 #define __HEV_WINTUN_H__
 
 #define HEV_WINTUN_EAGAIN (259)
+#define HEV_WINTUN_ENOBUFS (111)
 
 typedef void HevWinTun;
 typedef void HevWinTunAdapter;

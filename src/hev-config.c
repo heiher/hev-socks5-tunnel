@@ -8,14 +8,14 @@
  */
 
 #include <stdio.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
+#include <hev-sys.h>
 #include <lwip/tcp.h>
 #include <yaml.h>
 #include <hev-task.h>
 #include <hev-task-io.h>
 
 #include "hev-logger.h"
+#include "hev-compat.h"
 #include "hev-tunnel.h"
 #include "hev-config.h"
 #include "hev-config-const.h"

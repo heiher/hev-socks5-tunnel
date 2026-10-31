@@ -7,7 +7,7 @@
  ============================================================================
  */
 
-#if defined(__MSYS__)
+#if defined(_WIN32) || defined(__MSYS__)
 
 #include <wintun.h>
 #include <netioapi.h>
@@ -252,4 +252,4 @@ hev_wintun_get_last_error (void)
     return GetLastError ();
 }
 
-#endif /* __MSYS__ */
+#endif /* _WIN32 || __MSYS__ */

@@ -172,8 +172,110 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  windows:
-    name: Windows
+  windows-msvc-x64:
+    name: Windows (MSVC, x64)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Setup GNU make for Win32
+        shell: pwsh
+        run: |
+          choco install make --no-progress -y
+          Add-Content $env:GITHUB_PATH "C:\Program Files\Git\usr\bin"
+      - name: Build
+        shell: cmd
+        run: |
+          make -j4
+          mkdir hev-socks5-tunnel
+          copy bin\hev-socks5-tunnel.exe hev-socks5-tunnel
+          copy third-part\wintun\bin\amd64\wintun.dll hev-socks5-tunnel
+          powershell -Command "Compress-Archive -Path hev-socks5-tunnel -DestinationPath hev-socks5-tunnel-win-x64.zip"
+      - name: Upload x64
+        uses: actions/upload-artifact@v7
+        with:
+          name: hev-socks5-tunnel-win-x64.zip
+          path: hev-socks5-tunnel-win-x64.zip
+          if-no-files-found: error
+          retention-days: 1
+
+  windows-msvc-x86:
+    name: Windows (MSVC, x86)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+      - name: Setup GNU make for Win32
+        shell: pwsh
+        run: |
+          choco install make --no-progress -y
+          Add-Content $env:GITHUB_PATH "C:\Program Files\Git\usr\bin"
+      - name: Build
+        shell: cmd
+        run: |
+          make -j4 ARCH=x86
+          mkdir hev-socks5-tunnel
+          copy bin\hev-socks5-tunnel.exe hev-socks5-tunnel
+          copy third-part\wintun\bin\x86\wintun.dll hev-socks5-tunnel
+          powershell -Command "Compress-Archive -Path hev-socks5-tunnel -DestinationPath hev-socks5-tunnel-win-x86.zip"
+      - name: Upload x86
+        uses: actions/upload-artifact@v7
+        with:
+          name: hev-socks5-tunnel-win-x86.zip
+          path: hev-socks5-tunnel-win-x86.zip
+          if-no-files-found: error
+          retention-days: 1
+
+  windows-msvc-arm64:
+    name: Windows (MSVC, arm64)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64_arm64
+      - name: Setup GNU make for Win32
+        shell: pwsh
+        run: |
+          choco install make --no-progress -y
+          Add-Content $env:GITHUB_PATH "C:\Program Files\Git\usr\bin"
+      - name: Build
+        shell: cmd
+        run: |
+          make -j4 ARCH=arm64
+          mkdir hev-socks5-tunnel
+          copy bin\hev-socks5-tunnel.exe hev-socks5-tunnel
+          copy third-part\wintun\bin\arm64\wintun.dll hev-socks5-tunnel
+          powershell -Command "Compress-Archive -Path hev-socks5-tunnel -DestinationPath hev-socks5-tunnel-win-arm64.zip"
+      - name: Upload arm64
+        uses: actions/upload-artifact@v7
+        with:
+          name: hev-socks5-tunnel-win-arm64.zip
+          path: hev-socks5-tunnel-win-arm64.zip
+          if-no-files-found: error
+          retention-days: 1
+
+  windows-msys2:
+    name: Windows (MSYS2)
     runs-on: windows-latest
     defaults:
       run:
@@ -199,7 +301,6 @@ jobs:
       - name: Build
         shell: msys2 {0}
         run: |
-          export MSYS=winsymlinks:native
           git clone --depth=1 --recursive file://`pwd` work; cd work
           make -j`nproc`
           mkdir hev-socks5-tunnel
@@ -300,7 +401,10 @@ jobs:
       - linux
       - macos
       - freebsd
-      - windows
+      - windows-msvc-x64
+      - windows-msvc-x86
+      - windows-msvc-arm64
+      - windows-msys2
       - android
     if: github.event_name == 'release'
     steps:

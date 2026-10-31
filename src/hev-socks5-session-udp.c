@@ -46,7 +46,8 @@ udp_check_ctrl (HevSocks5 *self)
         ssize_t res;
         char buf;
 
-        res = recv (self->fd, &buf, sizeof (buf), 0);
+        res = hev_task_io_socket_recv (self->fd, &buf, sizeof (buf), 0,
+                                       hev_task_io_nowait, NULL);
         if ((res == 0) || ((res < 0) && (errno != EAGAIN))) {
             hev_socks5_set_timeout (self, 0);
             return -1;

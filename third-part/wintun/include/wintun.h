@@ -30,6 +30,9 @@ extern "C" {
 #    define _Post_maybenull_
 #endif
 
+#pragma warning(push)
+#pragma warning(disable : 4324) /* structure was padded due to alignment specifier */
+
 /**
  * A handle representing Wintun adapter
  */
@@ -259,6 +262,8 @@ BYTE *(WINAPI WINTUN_ALLOCATE_SEND_PACKET_FUNC)(_In_ WINTUN_SESSION_HANDLE Sessi
  * @param Packet        Packet obtained with WintunAllocateSendPacket
  */
 typedef VOID(WINAPI WINTUN_SEND_PACKET_FUNC)(_In_ WINTUN_SESSION_HANDLE Session, _In_ const BYTE *Packet);
+
+#pragma warning(pop)
 
 #ifdef __cplusplus
 }

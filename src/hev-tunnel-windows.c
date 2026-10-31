@@ -7,12 +7,13 @@
  ============================================================================
  */
 
-#if defined(__MSYS__)
+#if defined(_WIN32) || defined(__MSYS__)
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <arpa/inet.h>
 
+#include <hev-sys.h>
 #include <hev-task.h>
 #include <hev-task-io.h>
 #include <hev-memory-allocator.h>
@@ -179,7 +180,12 @@ retry:
         if (hev_wintun_get_last_error () == HEV_WINTUN_EAGAIN) {
             if (spin++ < 1000) {
                 hev_task_yield (HEV_TASK_YIELD);
-            } else if (yielder) {
+                goto retry;
+            }
+
+            /* The wait of a handle is one-shot, arm it before each sleep. */
+            hev_tunnel_add_task (fd, hev_task_self ());
+            if (yielder) {
                 if (yielder (HEV_TASK_WAITIO, yielder_data))
                     return NULL;
             } else {
@@ -210,8 +216,12 @@ hev_tunnel_write (int fd, struct pbuf *buf)
     size_t size;
 
     packet = hev_wintun_session_allocate (session, p->tot_len);
-    if (!packet)
+    if (!packet) {
+        /* The send ring is full, the packet is dropped. */
+        if (hev_wintun_get_last_error () == HEV_WINTUN_ENOBUFS)
+            errno = ENOBUFS;
         return -1;
+    }
 
     for (size = 0; p; p = p->next) {
         memcpy (packet + size, p->payload, p->len);
@@ -222,4 +232,4 @@ hev_tunnel_write (int fd, struct pbuf *buf)
     return size;
 }
 
-#endif /* __MSYS__ */
+#endif /* _WIN32 || __MSYS__ */

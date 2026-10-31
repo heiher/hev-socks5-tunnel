@@ -8,12 +8,11 @@
  */
 
 #include <errno.h>
-#include <fcntl.h>
 #include <assert.h>
 #include <signal.h>
 #include <string.h>
 #include <stdatomic.h>
-#include <sys/ioctl.h>
+#include <hev-sys.h>
 
 #ifdef __GLIBC__
 #include <malloc.h>
@@ -29,13 +28,16 @@
 
 #include <hev-task.h>
 #include <hev-task-io.h>
+#include <hev-task-io-socket.h>
 #include <hev-task-mutex.h>
 #include <hev-task-system.h>
 #include <hev-memory-allocator.h>
 
 #include "hev-exec.h"
 #include "hev-config.h"
+#include "hev-utils.h"
 #include "hev-logger.h"
+#include "hev-compat.h"
 #include "hev-tunnel.h"
 #include "hev-compiler.h"
 #include "hev-mapped-dns.h"
@@ -470,6 +472,7 @@ tunnel_init (int extern_tun_fd)
     offload = hev_config_get_tunnel_offload ();
 
     if (extern_tun_fd >= 0) {
+#ifndef HEV_WIN_NATIVE
         int nonblock = 1;
 
         res = ioctl (extern_tun_fd, FIONBIO, (char *)&nonblock);
@@ -477,6 +480,7 @@ tunnel_init (int extern_tun_fd)
             LOG_E ("socks5 tunnel non-blocking");
             return -1;
         }
+#endif
 
         tun_fd = extern_tun_fd;
         hev_tunnel_set_offload (tun_fd, offload);
@@ -636,23 +640,16 @@ gateway_fini (void)
 static int
 event_task_init (void)
 {
-    int nonblock = 1;
     int res;
 
-    res = socketpair (PF_LOCAL, SOCK_STREAM, 0, event_fds);
+    res = hev_task_io_socket_socketpair (PF_LOCAL, SOCK_STREAM, 0, event_fds);
     if (res < 0) {
         LOG_E ("socks5 tunnel event");
         return -1;
     }
 
-    res = ioctl (event_fds[0], FIONBIO, (char *)&nonblock);
-    if (res < 0) {
-        LOG_E ("socks5 tunnel event nonblock");
-        return -1;
-    }
-
-    if ((fcntl (event_fds[0], F_SETFD, FD_CLOEXEC) < 0) ||
-        (fcntl (event_fds[1], F_SETFD, FD_CLOEXEC) < 0)) {
+    if ((hev_task_io_fcntl (event_fds[0], F_SETFD, FD_CLOEXEC) < 0) ||
+        (hev_task_io_fcntl (event_fds[1], F_SETFD, FD_CLOEXEC) < 0)) {
         LOG_E ("socks5 tunnel event cloexec");
         return -1;
     }
@@ -675,11 +672,11 @@ event_task_fini (void)
     }
 
     if (event_fds[0] >= 0) {
-        close (event_fds[0]);
+        hev_task_io_close (event_fds[0]);
         event_fds[0] = -1;
     }
     if (event_fds[1] >= 0) {
-        close (event_fds[1]);
+        hev_task_io_close (event_fds[1]);
         event_fds[1] = -1;
     }
 }
@@ -795,7 +792,9 @@ hev_socks5_tunnel_init (int tun_fd)
     if (res < 0)
         goto exit;
 
+#ifdef SIGPIPE
     signal (SIGPIPE, SIG_IGN);
+#endif
 
     hev_task_mutex_init (&mutex);
 
@@ -872,7 +871,8 @@ retry:
     if (res & SYNC_SEND) {
         res = atomic_fetch_or (&tsync, SYNC_SENT);
         if (!(res & SYNC_SENT)) {
-            res = write (event_fds[1], &res, 1);
+            res = hev_task_io_write (event_fds[1], &res, 1, hev_task_io_nowait,
+                                     NULL);
             assert (res > 0 && "socks5 tunnel write event");
         }
     } else {
@@ -882,7 +882,7 @@ retry:
     atomic_fetch_and (&tsync, ~SYNC_WAIT);
 }
 
-void
+EXPORT_SYMBOL void
 hev_socks5_tunnel_stats (size_t *tx_packets, size_t *tx_bytes,
                          size_t *rx_packets, size_t *rx_bytes)
 {

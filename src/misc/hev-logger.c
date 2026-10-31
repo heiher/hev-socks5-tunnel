@@ -12,14 +12,31 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/uio.h>
+#include <hev-sys.h>
 #include <sys/stat.h>
+
+#ifdef _WIN32
+#include <io.h>
+#endif
 
 #include "hev-logger.h"
 
+#ifndef O_CLOEXEC
+#define O_CLOEXEC 0
+#endif
+
 static int fd = -1;
 static HevLoggerLevel req_level;
+
+static int
+dup_cloexec (int oldfd)
+{
+#ifdef F_DUPFD_CLOEXEC
+    return fcntl (oldfd, F_DUPFD_CLOEXEC, 0);
+#else
+    return dup (oldfd);
+#endif
+}
 
 int
 hev_logger_init (HevLoggerLevel level, const char *path)
@@ -30,9 +47,9 @@ hev_logger_init (HevLoggerLevel level, const char *path)
     req_level = level;
 
     if (0 == strcmp (path, "stdout"))
-        fd = fcntl (1, F_DUPFD_CLOEXEC, 0);
+        fd = dup_cloexec (1);
     else if (0 == strcmp (path, "stderr"))
-        fd = fcntl (2, F_DUPFD_CLOEXEC, 0);
+        fd = dup_cloexec (2);
     else
         fd = open (path, O_WRONLY | O_APPEND | O_CREAT | O_CLOEXEC, 0640);
 
@@ -63,58 +80,58 @@ hev_logger_enabled (HevLoggerLevel level)
 void
 hev_logger_log (HevLoggerLevel level, const char *fmt, ...)
 {
-    struct iovec iov[4];
-    const char *ts_fmt;
-    char msg[1024];
+    char buf[1024];
     struct tm *ti;
-    char ts[32];
+    size_t size;
     time_t now;
     va_list ap;
+    char lc;
     int len;
+    int n;
 
     if (level < req_level || fd < 0)
         return;
 
+    switch (level) {
+    case HEV_LOGGER_DEBUG:
+        lc = 'D';
+        break;
+    case HEV_LOGGER_INFO:
+        lc = 'I';
+        break;
+    case HEV_LOGGER_WARN:
+        lc = 'W';
+        break;
+    case HEV_LOGGER_ERROR:
+        lc = 'E';
+        break;
+    default:
+        lc = '?';
+        break;
+    }
+
     time (&now);
     ti = localtime (&now);
 
-    ts_fmt = "[%04u-%02u-%02u %02u:%02u:%02u] ";
-    len = snprintf (ts, sizeof (ts), ts_fmt, 1900 + ti->tm_year, 1 + ti->tm_mon,
-                    ti->tm_mday, ti->tm_hour, ti->tm_min, ti->tm_sec);
+    /* Gather the whole line in one buffer, so that it is written atomically. */
+    len = snprintf (buf, 64, "[%04u-%02u-%02u %02u:%02u:%02u] [%c] ",
+                    1900 + ti->tm_year, 1 + ti->tm_mon, ti->tm_mday,
+                    ti->tm_hour, ti->tm_min, ti->tm_sec, lc);
 
-    iov[0].iov_base = ts;
-    iov[0].iov_len = len;
-
-    switch (level) {
-    case HEV_LOGGER_DEBUG:
-        iov[1].iov_base = "[D] ";
-        break;
-    case HEV_LOGGER_INFO:
-        iov[1].iov_base = "[I] ";
-        break;
-    case HEV_LOGGER_WARN:
-        iov[1].iov_base = "[W] ";
-        break;
-    case HEV_LOGGER_ERROR:
-        iov[1].iov_base = "[E] ";
-        break;
-    case HEV_LOGGER_UNSET:
-        iov[1].iov_base = "[?] ";
-        break;
-    }
-    iov[1].iov_len = 4;
-
+    /* Reserve one byte for the trailing newline. */
+    size = sizeof (buf) - len - 1;
     va_start (ap, fmt);
-    iov[2].iov_base = msg;
-    iov[2].iov_len = vsnprintf (msg, sizeof (msg), fmt, ap);
-    if (iov[2].iov_len >= sizeof (msg))
-        iov[2].iov_len = sizeof (msg) - 1;
+    n = vsnprintf (buf + len, size, fmt, ap);
     va_end (ap);
 
-    iov[3].iov_base = "\n";
-    iov[3].iov_len = 1;
+    if (n < 0)
+        n = 0;
+    else if ((size_t)n >= size)
+        n = size - 1;
+    len += n;
+    buf[len++] = '\n';
 
-    if (writev (fd, iov, 4)) {
+    if (write (fd, buf, len)) {
         /* ignore return value */
     }
 }

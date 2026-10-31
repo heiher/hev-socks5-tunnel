@@ -8,10 +8,14 @@
  */
 
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
-#include <sys/socket.h>
+#include <hev-sys.h>
+
+#include "hev-compat.h"
+
+#ifndef HEV_WIN_NATIVE
 #include <sys/resource.h>
+#endif
 
 #if defined(__APPLE__)
 #include <Availability.h>
@@ -41,6 +45,10 @@ run_as_daemon (const char *pid_file)
         return;
     }
 
+#ifdef HEV_WIN_NATIVE
+    /* No daemon on Windows, keep running in the foreground. */
+    fprintf (fp, "%lu\n", GetCurrentProcessId ());
+#else
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #if !(TARGET_OS_TV)
@@ -51,12 +59,17 @@ run_as_daemon (const char *pid_file)
 #pragma GCC diagnostic pop
 
     fprintf (fp, "%u\n", getpid ());
+#endif
     fclose (fp);
 }
 
 int
 set_limit_nofile (int limit_nofile)
 {
+#ifdef HEV_WIN_NATIVE
+    (void)limit_nofile;
+    return 0;
+#else
     struct rlimit limit;
     int res;
 
@@ -72,6 +85,7 @@ set_limit_nofile (int limit_nofile)
     limit.rlim_cur = limit_nofile;
     limit.rlim_max = limit_nofile;
     return setrlimit (RLIMIT_NOFILE, &limit);
+#endif
 }
 
 int
