@@ -61,6 +61,7 @@ static atomic_int tsync;
 static int tun_fd = -1;
 static int tun_fd_local;
 static int session_count;
+static int evicted_count;
 static int event_fds[2] = { -1, -1 };
 
 static size_t stat_tx_packets;
@@ -131,27 +132,62 @@ netif_init_handler (struct netif *netif)
     return ERR_OK;
 }
 
+static inline void
+hev_socks5_tunnel_mark_evicted (HevListNode *node)
+{
+    node->next = node->prev = node;
+}
+
+static inline int
+hev_socks5_tunnel_is_evicted (HevListNode *node)
+{
+    return node->next == node;
+}
+
+/*
+ * Over max-session-count the least recently active session is evicted. It is
+ * taken off the set right away: a terminated session lingers until its task
+ * runs again, and a burst of accepts handled in one go would otherwise
+ * terminate that same head over and over while the set keeps growing (iOS NE
+ * jetsam, 30.10: 190 sessions at a cap of 130).
+ */
+static void
+hev_socks5_tunnel_evict_session (HevListNode *node)
+{
+    HevSocks5SessionData *sd;
+
+    sd = container_of (node, HevSocks5SessionData, node);
+    hev_list_del (&session_set, node);
+    hev_socks5_tunnel_mark_evicted (node);
+    session_count--;
+    evicted_count++;
+    hev_socks5_session_terminate (sd->self);
+}
+
 static void
 hev_socks5_tunnel_insert_session (HevListNode *node)
 {
-    HevSocks5SessionData *sd;
     int max_session_count;
 
     hev_list_add_tail (&session_set, node);
     session_count++;
 
     max_session_count = hev_config_get_misc_max_session_count ();
-    if (!max_session_count || session_count < max_session_count)
+    if (!max_session_count)
         return;
 
-    node = hev_list_first (&session_set);
-    sd = container_of (node, HevSocks5SessionData, node);
-    hev_socks5_session_terminate (sd->self);
+    while (session_count >= max_session_count)
+        hev_socks5_tunnel_evict_session (hev_list_first (&session_set));
 }
 
 static void
 hev_socks5_tunnel_delete_session (HevListNode *node)
 {
+    if (hev_socks5_tunnel_is_evicted (node)) {
+        evicted_count--;
+        return;
+    }
+
     hev_list_del (&session_set, node);
     session_count--;
 }
@@ -163,6 +199,9 @@ hev_socks5_tunnel_update_session (HevListNode *node)
 
     max_session_count = hev_config_get_misc_max_session_count ();
     if (!max_session_count)
+        return;
+
+    if (hev_socks5_tunnel_is_evicted (node))
         return;
 
     hev_list_del (&session_set, node);
@@ -450,7 +489,7 @@ lwip_timer_task_entry (void *data)
         }
         hev_task_mutex_unlock (&mutex);
 
-        if (hev_list_first (&session_set))
+        if (hev_list_first (&session_set) || evicted_count)
             hev_task_sleep (TCP_TMR_INTERVAL);
         else {
 #if defined(__GLIBC__) && !defined(ENABLE_LIBRARY)
