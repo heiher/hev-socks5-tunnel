@@ -488,25 +488,32 @@ still override `PKGNAME`/`CLSNAME` in `Application.mk` as shown above and build 
 
 ## Contributors
 
+* **acidroper** - https://github.com/acidroper
 * **arror** - https://github.com/arror
 * **bazuchan** - https://github.com/bazuchan
+* **bitmold** - https://github.com/bitmold
 * **codewithtamim** - https://github.com/codewithtamim
+* **daemooon** - https://github.com/daemooon
 * **dovecoteescapee** - https://github.com/dovecoteescapee
 * **ebrahimtahernejad** - https://github.com/ebrahimtahernejad
 * **egavr** - https://github.com/egavr
+* **fwx** - https://github.com/fwx
 * **heiby** - https://github.com/heiby
 * **hev** - https://hev.cc
 * **ihipop** - https://ihipop.com
 * **katana** - https://github.com/officialkatana
+* **mmjvox** - https://github.com/mmjvox
 * **nange** - https://github.com/nange
 * **plangto** - https://github.com/plangto
+* **popsiclelmlm** - https://github.com/popsiclelmlm
 * **pronebird** - https://github.com/pronebird
 * **saeeddev94** - https://github.com/saeeddev94
+* **simplerick-simplefun** - https://github.com/simplerick-simplefun
 * **sskaje** - https://github.com/sskaje
 * **wankkoree** - https://github.com/wankkoree
 * **xiguagua** - https://github.com/xiguagua
 * **xz-dev** - https://github.com/xz-dev
-* **yiguous** - https://github.com/yiguous
+* **yiguodev** - https://github.com/yiguodev
 * **yujinpan** - https://github.com/yujinpan
 * **zheshinicheng** - https://github.com/zheshinicheng
 
