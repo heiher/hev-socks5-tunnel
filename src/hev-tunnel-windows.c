@@ -17,6 +17,7 @@
 #include <hev-task.h>
 #include <hev-task-io.h>
 
+#include "hev-config.h"
 #include "hev-wintun.h"
 
 #include "hev-tunnel.h"
@@ -75,7 +76,8 @@ int
 hev_tunnel_set_state (int state)
 {
     if (state) {
-        session = hev_wintun_session_start (adapter);
+        session = hev_wintun_session_start (
+            adapter, hev_config_get_misc_wintun_ring_capacity ());
         if (!session)
             return -1;
     } else {

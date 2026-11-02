@@ -168,6 +168,9 @@ socks5:
 #misc:
   # task stack size (bytes)
 # task-stack-size: 86016
+  # wintun ring buffer capacity (bytes, windows only, power of two,
+  # range: 131072 - 67108864)
+# wintun-ring-capacity: 524288
   # tcp buffer size (bytes)
 # tcp-buffer-size: 65536
   # udp socket recv buffer (SO_RCVBUF) size (bytes)

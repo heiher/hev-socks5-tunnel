@@ -45,6 +45,7 @@ static char log_file[1024];
 static char pid_file[1024];
 static int max_session_count;
 static int task_stack_size;
+static int wintun_ring_capacity;
 static int tcp_buffer_size;
 static int udp_recv_buffer_size;
 static int udp_copy_buffer_nums;
@@ -410,6 +411,8 @@ hev_config_parse_misc (yaml_document_t *doc, yaml_node_t *base)
 
         if (0 == strcmp (key, "task-stack-size"))
             task_stack_size = strtoul (value, NULL, 10);
+        else if (0 == strcmp (key, "wintun-ring-capacity"))
+            wintun_ring_capacity = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "tcp-buffer-size"))
             tcp_buffer_size = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "udp-recv-buffer-size"))
@@ -505,6 +508,15 @@ hev_config_parse_doc (yaml_document_t *doc)
     else
         min_task_stack_size = TASK_STACK_SIZE + udp_buffer_size;
 
+    /* Wintun requires a power of two within [128KiB, 64MiB]. */
+    if (wintun_ring_capacity < 0x20000)
+        wintun_ring_capacity = 0x20000;
+    else if (wintun_ring_capacity > 0x4000000)
+        wintun_ring_capacity = 0x4000000;
+    else
+        while (wintun_ring_capacity & (wintun_ring_capacity - 1))
+            wintun_ring_capacity &= wintun_ring_capacity - 1;
+
     if (task_stack_size < min_task_stack_size)
         task_stack_size = min_task_stack_size;
 
@@ -538,6 +550,7 @@ hev_config_reset (void)
 
     max_session_count = 0;
     task_stack_size = 86016;
+    wintun_ring_capacity = 0x80000;
     tcp_buffer_size = 65536;
     udp_recv_buffer_size = 524288;
     udp_copy_buffer_nums = 10;
@@ -730,6 +743,12 @@ int
 hev_config_get_misc_task_stack_size (void)
 {
     return task_stack_size;
+}
+
+int
+hev_config_get_misc_wintun_ring_capacity (void)
+{
+    return wintun_ring_capacity;
 }
 
 int

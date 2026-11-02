@@ -31,7 +31,8 @@ int hev_wintun_adapter_set_ipv4 (HevWinTunAdapter *adapter, char addr[4],
 int hev_wintun_adapter_set_ipv6 (HevWinTunAdapter *adapter, char addr[16],
                                  unsigned int prefix);
 
-HevWinTunSession *hev_wintun_session_start (HevWinTunAdapter *adapter);
+HevWinTunSession *hev_wintun_session_start (HevWinTunAdapter *adapter,
+                                            unsigned int capacity);
 void hev_wintun_session_stop (HevWinTunSession *session);
 
 void *hev_wintun_session_get_read_wait_event (HevWinTunSession *session);
