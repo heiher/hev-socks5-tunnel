@@ -19,6 +19,8 @@
 
 #include "hev-mapped-dns.h"
 
+#define HEV_MAPPED_DNS_NAME_MAX 256
+
 static HevMappedDNS *singleton;
 
 typedef struct _DNSHdr DNSHdr;
@@ -175,61 +177,109 @@ write_u32 (uint8_t *p, uint32_t v)
     p[3] = v;
 }
 
+/*
+ * Parse an uncompressed QNAME at @off into @name as a dotted, NUL-terminated,
+ * lower-case string. Returns the offset just after the name, or -1 if the
+ * name is malformed (compression pointer, oversized label or name, empty
+ * name, or truncated packet).
+ */
+static int
+parse_qname (const uint8_t *rb, int qlen, int off, char *name)
+{
+    int nlen = 0;
+
+    for (;;) {
+        int llen, i;
+
+        if (off >= qlen)
+            return -1;
+
+        llen = rb[off++];
+        if (!llen)
+            break;
+
+        /* compression pointers (0xc0) and reserved label types (0x40,
+         * 0x80) are all > 63 */
+        if (llen > 63)
+            return -1;
+        if (llen > (qlen - off))
+            return -1;
+        /* labels, separators and the final NUL must fit in 255 bytes */
+        if ((nlen + llen + 1) >= HEV_MAPPED_DNS_NAME_MAX)
+            return -1;
+
+        if (nlen)
+            name[nlen++] = '.';
+        for (i = 0; i < llen; i++) {
+            uint8_t c = rb[off++];
+            if (!c)
+                return -1;
+            name[nlen++] = ((c >= 'A') && (c <= 'Z')) ? (c | 0x20) : c;
+        }
+    }
+
+    if (!nlen)
+        return -1;
+    name[nlen] = '\0';
+
+    return off;
+}
+
 int
 hev_mapped_dns_handle (HevMappedDNS *self, void *req, int qlen, void *res,
                        int slen)
 {
-    DNSHdr *qhdr = req;
     DNSHdr *shdr = res;
-    uint8_t *rb = req;
+    const uint8_t *rb = req;
     uint8_t *sb = res;
+    uint16_t qd, fl;
     int ips[32];
     int ipo[32];
     int ipn = 0;
     int off;
     int i;
 
-    if (slen < qlen)
+    if (qlen < (int)sizeof (DNSHdr))
         return -1;
-    if (qlen < sizeof (DNSHdr))
+    if (slen < qlen)
         return -1;
 
     memcpy (res, req, qlen);
-    qhdr->qd = ntohs (qhdr->qd);
-    shdr->fl = ntohs (shdr->fl);
+    qd = ntohs (shdr->qd);
+    fl = ntohs (shdr->fl);
+
+    /* only standard queries */
+    if ((fl & 0x8000) || (fl & 0x7800))
+        return -1;
+    if (qd > 32)
+        return -1;
+
     shdr->ns = 0;
     shdr->an = 0;
     shdr->ar = 0;
 
-    if (qhdr->qd > 32)
-        return -1;
-
     off = sizeof (DNSHdr);
-    for (i = 0; i < qhdr->qd; i++) {
-        ipo[ipn] = off;
+    for (i = 0; i < qd; i++) {
+        char name[HEV_MAPPED_DNS_NAME_MAX];
+        int noff = off;
 
-        if (off >= qlen)
+        off = parse_qname (rb, qlen, off, name);
+        if (off < 0)
             return -1;
 
-        while (rb[off]) {
-            int poff = off;
-
-            off += 1 + rb[off];
-            if (off >= qlen)
-                return -1;
-
-            rb[poff] = '.';
-        }
-
-        off++;
-        if ((off + 3) >= qlen)
+        /* QTYPE + QCLASS */
+        if ((qlen - off) < 4)
+            return -1;
+        /* answers point back to the name with a 14-bit offset */
+        if (noff > 0x3fff)
             return -1;
 
         if ((read_u16 (&rb[off + 0]) == 1) && (read_u16 (&rb[off + 2]) == 1)) {
             int idx;
 
-            idx = hev_mapped_dns_find (self, (char *)&rb[ipo[ipn] + 1]);
+            idx = hev_mapped_dns_find (self, name);
             if (idx >= 0) {
+                ipo[ipn] = noff;
                 ips[ipn] = self->net | idx;
                 ipn++;
             }
@@ -239,7 +289,7 @@ hev_mapped_dns_handle (HevMappedDNS *self, void *req, int qlen, void *res,
     }
 
     for (i = 0; i < ipn; i++) {
-        if ((off + 15) >= slen)
+        if ((off + 16) > slen)
             return -1;
 
         write_u16 (&sb[off + 0], 0xc000 | ipo[i]);
@@ -252,7 +302,7 @@ hev_mapped_dns_handle (HevMappedDNS *self, void *req, int qlen, void *res,
         off += 16;
     }
 
-    shdr->fl = htons (shdr->fl | 0x8000 | ((shdr->fl & 0x100) >> 1));
+    shdr->fl = htons (fl | 0x8000 | ((fl & 0x100) >> 1));
     shdr->an = htons (ipn);
 
     return off;
