@@ -62,6 +62,8 @@ int hev_config_get_misc_udp_evict_min_idle (void);
 int hev_config_get_misc_tcp_evict_min_idle (void);
 int hev_config_get_misc_udp_evict_protect_age (void);
 int hev_config_get_misc_udp_evict_protect_idle (void);
+int hev_config_get_misc_udp_queue_frames (void);
+int hev_config_get_misc_udp_queue_total_frames (void);
 int hev_config_get_misc_connect_timeout (void);
 int hev_config_get_misc_tcp_read_write_timeout (void);
 int hev_config_get_misc_udp_read_write_timeout (void);

@@ -39,6 +39,8 @@ struct _HevSocks5UDPFrame
     struct pbuf *data;
 };
 
+static int queued_frames;
+
 static int
 udp_check_ctrl (HevSocks5 *self)
 {
@@ -115,6 +117,7 @@ hev_socks5_session_udp_fwd_f (HevSocks5SessionUDP *self)
             hev_free (frame);
             pbuf_free (buf);
             self->frames--;
+            queued_frames--;
         }
     }
 
@@ -267,13 +270,17 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
 {
     HevSocks5SessionUDP *self = arg;
     HevSocks5UDPFrame *frame;
+    int max_frames, max_total;
 
     if (!p) {
         hev_socks5_session_terminate (HEV_SOCKS5_SESSION (self));
         return;
     }
 
-    if (self->frames > UDP_POOL_SIZE) {
+    max_frames = hev_config_get_misc_udp_queue_frames ();
+    max_total = hev_config_get_misc_udp_queue_total_frames ();
+    if ((self->frames >= max_frames) ||
+        (max_total && (queued_frames >= max_total))) {
         pbuf_free (p);
         return;
     }
@@ -303,6 +310,7 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
     }
 
     self->frames++;
+    queued_frames++;
     hev_list_add_tail (&self->frame_list, &frame->node);
     hev_task_wakeup (self->data.task);
 }
@@ -509,6 +517,7 @@ hev_socks5_session_udp_destruct (HevObject *base)
         pbuf_free (frame->data);
         hev_free (frame);
     }
+    queued_frames -= self->frames;
 
     hev_task_mutex_lock (self->mutex);
     if (self->pcb) {

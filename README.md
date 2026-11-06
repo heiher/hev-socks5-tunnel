@@ -190,6 +190,10 @@ socks5:
   # idle for protect-idle (ms, 0: off)
 # udp-evict-protect-age: 0
 # udp-evict-protect-idle: 0
+  # pending datagrams per UDP session
+# udp-queue-frames: 513
+  # pending datagrams in all UDP sessions (0: unlimited)
+# udp-queue-total-frames: 0
   # connect timeout (ms)
 # connect-timeout: 10000
   # TCP read-write timeout (ms)

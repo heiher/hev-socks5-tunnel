@@ -50,6 +50,8 @@ static int udp_evict_min_idle;
 static int tcp_evict_min_idle;
 static int udp_evict_protect_age;
 static int udp_evict_protect_idle;
+static int udp_queue_frames;
+static int udp_queue_total_frames;
 static int task_stack_size;
 static int wintun_ring_capacity;
 static int tcp_buffer_size;
@@ -439,6 +441,10 @@ hev_config_parse_misc (yaml_document_t *doc, yaml_node_t *base)
             udp_evict_protect_age = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "udp-evict-protect-idle"))
             udp_evict_protect_idle = strtoul (value, NULL, 10);
+        else if (0 == strcmp (key, "udp-queue-frames"))
+            udp_queue_frames = strtoul (value, NULL, 10);
+        else if (0 == strcmp (key, "udp-queue-total-frames"))
+            udp_queue_total_frames = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "connect-timeout"))
             connect_timeout = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "read-write-timeout"))
@@ -457,6 +463,8 @@ hev_config_parse_misc (yaml_document_t *doc, yaml_node_t *base)
             limit_nofile = strtol (value, NULL, 10);
     }
 
+    if (udp_queue_frames <= 0)
+        udp_queue_frames = UDP_POOL_SIZE + 1;
     if (tcp_rw_timeout <= 0)
         tcp_rw_timeout = rw_timeout;
     if (udp_rw_timeout <= 0)
@@ -573,6 +581,8 @@ hev_config_reset (void)
     tcp_evict_min_idle = 60000;
     udp_evict_protect_age = 0;
     udp_evict_protect_idle = 0;
+    udp_queue_frames = UDP_POOL_SIZE + 1;
+    udp_queue_total_frames = 0;
     task_stack_size = 86016;
     wintun_ring_capacity = 0x80000;
     tcp_buffer_size = 65536;
@@ -833,6 +843,18 @@ int
 hev_config_get_misc_udp_evict_protect_idle (void)
 {
     return udp_evict_protect_idle;
+}
+
+int
+hev_config_get_misc_udp_queue_frames (void)
+{
+    return udp_queue_frames;
+}
+
+int
+hev_config_get_misc_udp_queue_total_frames (void)
+{
+    return udp_queue_total_frames;
 }
 
 int
