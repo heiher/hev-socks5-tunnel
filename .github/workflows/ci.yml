@@ -481,6 +481,39 @@ jobs:
         run: |
           make CC=clang ENABLE_STATIC=1 -j`nproc`
 
+  tests:
+    name: Tests (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    if: github.event_name != 'release'
+    strategy:
+      fail-fast: false
+      matrix:
+        # add more platforms here once tests/hevtest/platform/<os>.py exists
+        include:
+          - name: Linux functional
+            os: ubuntu-latest
+            mode: func
+          - name: Linux benchmark
+            os: ubuntu-latest
+            mode: bench
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Prepare
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iproute2 iputils-ping
+      - name: Run
+        run: |
+          if [ "${{ matrix.mode }}" = bench ]; then
+            tests/run.sh bench -d 3
+          else
+            tests/run.sh func
+          fi
+
   docker:
     name: Build Docker Image
     runs-on: ubuntu-latest
