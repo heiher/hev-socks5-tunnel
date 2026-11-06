@@ -75,6 +75,17 @@ socks5:
 # udp-copy-buffer-nums: 10
   # maximum session count (0: unlimited)
 # max-session-count: 0
+  # maximum UDP / TCP session count (0: unlimited); a new session replaces
+  # one that has been idle for evict-min-idle, or is refused
+# udp-max-session-count: 0
+# tcp-max-session-count: 0
+  # idle time after which a session can be replaced (ms)
+# udp-evict-min-idle: 2000
+# tcp-evict-min-idle: 60000
+  # an answered UDP session older than protect-age is replaced only when
+  # idle for protect-idle (ms, 0: off)
+# udp-evict-protect-age: 0
+# udp-evict-protect-idle: 0
   # connect timeout (ms)
 # connect-timeout: 10000
   # TCP read-write timeout (ms)

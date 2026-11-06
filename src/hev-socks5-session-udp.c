@@ -254,6 +254,8 @@ hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self, char *buf,
             LOG_D ("%p socks5 session udp fwd b send", self);
             return -1;
         }
+
+        self->data.answered = 1;
     }
 
     return 1;
