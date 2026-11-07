@@ -128,6 +128,12 @@ hev_socks5_session_get_node (HevSocks5Session *self)
     return iface->get_node (self);
 }
 
+HevSocks5Type
+hev_socks5_session_get_type (HevSocks5Session *self)
+{
+    return HEV_SOCKS5 (self)->type;
+}
+
 int
 hev_socks5_session_bind (HevSocks5 *self, int fd, const struct sockaddr *dest)
 {
