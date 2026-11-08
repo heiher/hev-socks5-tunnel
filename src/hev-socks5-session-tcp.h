@@ -32,6 +32,7 @@ struct _HevSocks5SessionTCP
     struct tcp_pcb *pcb;
     HevTaskMutex *mutex;
     HevRingBuffer *buffer;
+    unsigned int window;
     int pcb_eof;
 };
 

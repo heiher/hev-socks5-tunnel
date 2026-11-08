@@ -65,6 +65,38 @@ hev_socks5_session_terminate (HevSocks5Session *self)
 }
 
 /*
+ * Drop what the session holds in lwIP right away, if it can, and abort it, it
+ * is ended by its task later. The caller holds the lwIP mutex.
+ */
+void
+hev_socks5_session_release (HevSocks5Session *self)
+{
+    HevSocks5SessionIface *iface;
+
+    LOG_D ("%p socks5 session release", self);
+
+    iface = HEV_OBJECT_GET_IFACE (self, HEV_SOCKS5_SESSION_TYPE);
+    if (iface->release)
+        iface->release (self);
+    hev_socks5_session_abort (self);
+}
+
+/*
+ * End the session, and reset the upstream connection: what is left in its
+ * buffers is dropped instead of being kept until it is sent.
+ */
+void
+hev_socks5_session_abort (HevSocks5Session *self)
+{
+    int fd = HEV_SOCKS5 (self)->fd;
+
+    if (fd >= 0)
+        set_sock_abort_on_close (fd);
+
+    hev_socks5_session_terminate (self);
+}
+
+/*
  * Wait for I/O while the session has nothing in flight. The caller must have
  * left the frame that holds its buffers, so that after an idle period the
  * stack memory below can be released. A timeout not longer than the idle
@@ -84,7 +116,7 @@ hev_socks5_session_idle_wait (HevSocks5Session *self, int released)
     if (!released && (timeout < 0 || timeout > SESSION_IDLE_RELEASE_TIME)) {
         remain = hev_task_sleep (SESSION_IDLE_RELEASE_TIME);
         if (remain > 0)
-            goto woken;
+            return 0;
 
         hev_task_release_stack (hev_task_self ());
         return 1;
@@ -92,7 +124,7 @@ hev_socks5_session_idle_wait (HevSocks5Session *self, int released)
 
     if (timeout < 0) {
         hev_task_yield (HEV_TASK_WAITIO);
-        goto woken;
+        return 0;
     }
 
     /* The timeout may be changed (terminate) while sleeping. */
@@ -105,8 +137,6 @@ hev_socks5_session_idle_wait (HevSocks5Session *self, int released)
         return -1;
     }
 
-woken:
-    hev_socks5_tunnel_update_session (hev_socks5_session_get_node (self));
     return 0;
 }
 
@@ -148,6 +178,7 @@ hev_socks5_session_bind (HevSocks5 *self, int fd, const struct sockaddr *dest)
     }
 
     set_sock_tcp_fastopen (fd, srv->fastopen);
+    set_sock_tcp_buffer (fd, hev_config_get_misc_tcp_socket_buffer_size ());
 
     return 0;
 }

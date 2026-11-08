@@ -68,10 +68,30 @@ task_io_yielder (HevTaskYieldType type, void *data)
         return -1;
 
     res = hev_socks5_task_io_yielder (type, data);
-    node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (self));
-    hev_socks5_tunnel_update_session (node);
+
+    /* Only data moved counts as activity, not being woken up. */
+    if (type == HEV_TASK_YIELD) {
+        node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (self));
+        hev_socks5_tunnel_update_session (node);
+    }
 
     return res;
+}
+
+static int
+udp_frame_charge (struct pbuf *p)
+{
+    return sizeof (HevSocks5UDPFrame) + p->tot_len + PBUF_CHARGE_OVERHEAD;
+}
+
+static void
+udp_frame_free (HevSocks5SessionUDP *self, HevSocks5UDPFrame *frame)
+{
+    if (hev_socks5_tunnel_buffer_limit)
+        hev_socks5_tunnel_buffer_charge (&self->data,
+                                         -udp_frame_charge (frame->data));
+    pbuf_free (frame->data);
+    hev_free (frame);
 }
 
 static int
@@ -109,11 +129,9 @@ hev_socks5_session_udp_fwd_f (HevSocks5SessionUDP *self)
         for (i = 0; i < res; i++) {
             node = hev_list_first (&self->frame_list);
             frame = container_of (node, HevSocks5UDPFrame, node);
-            buf = frame->data;
 
             hev_list_del (&self->frame_list, node);
-            hev_free (frame);
-            pbuf_free (buf);
+            udp_frame_free (self, frame);
             self->frames--;
         }
     }
@@ -271,7 +289,9 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
         return;
     }
 
-    if (self->frames > UDP_POOL_SIZE) {
+    if ((self->frames > UDP_POOL_SIZE) ||
+        (hev_socks5_tunnel_buffer_limit &&
+         !hev_socks5_tunnel_buffer_admit (udp_frame_charge (p)))) {
         pbuf_free (p);
         return;
     }
@@ -302,6 +322,8 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
 
     self->frames++;
     hev_list_add_tail (&self->frame_list, &frame->node);
+    if (hev_socks5_tunnel_buffer_limit)
+        hev_socks5_tunnel_buffer_charge (&self->data, udp_frame_charge (p));
     hev_task_wakeup (self->data.task);
 }
 
@@ -485,7 +507,6 @@ hev_socks5_session_udp_construct (HevSocks5SessionUDP *self,
 
     self->pcb = pcb;
     self->mutex = mutex;
-    self->data.self = self;
 
     return 0;
 }
@@ -504,8 +525,7 @@ hev_socks5_session_udp_destruct (HevObject *base)
 
         frame = container_of (node, HevSocks5UDPFrame, node);
         node = hev_list_node_next (node);
-        pbuf_free (frame->data);
-        hev_free (frame);
+        udp_frame_free (self, frame);
     }
 
     hev_task_mutex_lock (self->mutex);

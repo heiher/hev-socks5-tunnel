@@ -10,6 +10,8 @@
 #ifndef __HEV_CONFIG_H__
 #define __HEV_CONFIG_H__
 
+#include <stddef.h>
+
 typedef struct _HevConfigServer HevConfigServer;
 
 struct _HevConfigServer
@@ -53,9 +55,11 @@ int hev_config_get_mapdns_cache_size (void);
 int hev_config_get_misc_task_stack_size (void);
 int hev_config_get_misc_wintun_ring_capacity (void);
 int hev_config_get_misc_tcp_buffer_size (void);
+int hev_config_get_misc_tcp_socket_buffer_size (void);
 int hev_config_get_misc_udp_recv_buffer_size (void);
 int hev_config_get_misc_udp_copy_buffer_nums (void);
 int hev_config_get_misc_max_session_count (void);
+size_t hev_config_get_misc_max_buffer_size (void);
 int hev_config_get_misc_connect_timeout (void);
 int hev_config_get_misc_tcp_read_write_timeout (void);
 int hev_config_get_misc_udp_read_write_timeout (void);

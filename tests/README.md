@@ -51,6 +51,14 @@ addresses (`203.0.113.10`, `2001:db8::10`) exist only in the server
 namespace, so a connection can succeed only if it really went through the
 tunnel and the SOCKS5 server.
 
+## Memory limits
+
+`tests/functional/test_memory.py` runs the tunnel with a hard memory limit
+(cgroup v2 `memory.max`, no swap: the kernel kills it beyond, as iOS does with
+a Network Extension) and hits it with surges of thousands of connections from
+`hevtest/load.py`. The tests are skipped when the memory controller is not
+available to the root cgroup's children.
+
 ## Adding a platform
 
 Create `hevtest/platform/<name>.py` with a `Bed` class deriving from

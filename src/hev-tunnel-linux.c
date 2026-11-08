@@ -28,6 +28,7 @@
 #include <hev-task.h>
 #include <hev-task-io.h>
 
+#include "hev-config.h"
 #include "hev-logger.h"
 #include "hev-tunnel.h"
 
@@ -364,8 +365,23 @@ hev_tunnel_read_vnet (int fd, int mtu, HevTaskIOYielder yielder,
         return buf;
     }
 
-    tun_rbuf->tot_len = s - mtu;
-    tun_rbuf->len = s - mtu;
+    /*
+     * A spill that uses less than half of the spare pbuf is copied out, the
+     * spare is kept for the next read instead of being pinned by a few bytes.
+     */
+    s -= mtu;
+    if (hev_config_get_misc_max_buffer_size () && (s <= (tun_rbuf->len / 2))) {
+        struct pbuf *p = pbuf_alloc (PBUF_RAW, s, PBUF_RAM);
+
+        if (p) {
+            memcpy (p->payload, tun_rbuf->payload, s);
+            pbuf_cat (buf, p);
+            return buf;
+        }
+    }
+
+    tun_rbuf->tot_len = s;
+    tun_rbuf->len = s;
     pbuf_cat (buf, tun_rbuf);
     tun_rbuf = NULL;
 
