@@ -8,6 +8,7 @@ Runs inside the server environment (stdlib only).  Everything listens on
   TCP 7003 source         UDP 7003 source  ("SRC <size> <seconds>\\n")
   TCP 7004 digest  (read to EOF, answer "<bytes> <sha256>\\n")
   TCP 7005 count   (read to EOF, answer "<bytes>\\n")
+  TCP 7007 ping    (echo, one thread for all connections)
   TCP 7100 ctrl    ("udp-sink\\n" -> "<bytes> <packets>\\n", then resets)
 """
 import hashlib
@@ -18,6 +19,60 @@ import time
 BUF = 256 * 1024
 stats = {"bytes": 0, "pkts": 0}
 stats_lock = threading.Lock()
+
+
+def tcp_ping(port):
+    """Echo served by one thread for all connections, for many short ones:
+    a thread per connection costs more than the tunnel then, and where the
+    kernel places each new thread (e.g. on another L3 cache) is measured
+    instead.  What can't be sent right away waits until the peer reads."""
+    import selectors
+    s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+    s.bind(("::", port))
+    s.listen(4096)
+    s.setblocking(False)
+    sel = selectors.DefaultSelector()
+    sel.register(s, selectors.EVENT_READ)
+    out = {}
+
+    def close(c):
+        sel.unregister(c)
+        del out[c]
+        c.close()
+
+    def loop():
+        while True:
+            for key, _ in sel.select():
+                c = key.fileobj
+                if c is s:
+                    try:
+                        c, _ = s.accept()
+                    except OSError:
+                        continue
+                    c.setblocking(False)
+                    c.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                    out[c] = b""
+                    sel.register(c, selectors.EVENT_READ)
+                    continue
+                try:
+                    if not out[c]:
+                        out[c] = c.recv(BUF)
+                        if not out[c]:
+                            close(c)
+                            continue
+                    out[c] = out[c][c.send(out[c]):]
+                except BlockingIOError:
+                    pass
+                except OSError:
+                    close(c)
+                    continue
+                ev = selectors.EVENT_WRITE if out[c] else selectors.EVENT_READ
+                if ev != key.events:
+                    sel.modify(c, ev)
+
+    threading.Thread(target=loop, daemon=True).start()
 
 
 def tcp_listener(port, handler):
@@ -161,6 +216,7 @@ def main():
     tcp_listener(7003, h_source)
     tcp_listener(7004, h_digest)
     tcp_listener(7005, h_count)
+    tcp_ping(7007)
     tcp_listener(7100, h_ctrl)
     udp_listener(7001, u_echo)
     udp_listener(7002, u_sink)

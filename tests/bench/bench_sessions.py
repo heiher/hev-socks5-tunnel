@@ -20,7 +20,7 @@ def conn_rate(bed, host, secs, workers):
     def one(_):
         n = 0
         while n < quota and time.time() < end:
-            s = client.tcp_connect(host, bed.P_ECHO, 10)
+            s = client.tcp_connect(host, bed.P_PING, 10)
             s.sendall(b"x")
             s.recv(1)
             s.close()
@@ -41,7 +41,7 @@ def run(bed, rep, args):
         mode = "pipeline" if pipe else "default"
         with bl.running(bed, socks5={"pipeline": pipe}) as (proc, smp):
             t0 = time.perf_counter()
-            s = client.tcp_connect(bed.target4, bed.P_ECHO, 10)
+            s = client.tcp_connect(bed.target4, bed.P_PING, 10)
             s.sendall(b"x")
             s.recv(1)
             ttfb = (time.perf_counter() - t0) * 1e3
@@ -67,7 +67,7 @@ def run(bed, rep, args):
             while len(socks) < n:
                 new = []
                 for _ in range(batch):
-                    s = client.tcp_connect(bed.target4, bed.P_ECHO, 10)
+                    s = client.tcp_connect(bed.target4, bed.P_PING, 10)
                     s.settimeout(15)
                     s.sendall(b"x")
                     new.append(s)
