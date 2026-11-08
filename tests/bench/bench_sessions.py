@@ -4,13 +4,22 @@ import time
 from hevtest import benchlib as bl
 from hevtest import client
 
+# Each connection leaves an upstream socket of the tunnel in TIME_WAIT for
+# 60s, all to the same SOCKS5 server, which is not on loopback where they
+# could be reused: at most ip_local_port_range (28232 by default) can be made
+# per minute, then the tunnel's connects fail and the clients are reset. Past
+# about half of it, each connect gets slower searching for a free port. The
+# measurements share that budget, so each one is capped to stay below it.
+CONN_LIMIT = 2500
+
 
 def conn_rate(bed, host, secs, workers):
     end = time.time() + secs
+    quota = CONN_LIMIT // workers
 
     def one(_):
         n = 0
-        while time.time() < end:
+        while n < quota and time.time() < end:
             s = client.tcp_connect(host, bed.P_ECHO, 10)
             s.sendall(b"x")
             s.recv(1)
