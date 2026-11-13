@@ -26,7 +26,9 @@ struct _HevSocks5SessionData
 {
     HevListNode node;
     HevTask *task;
-    HevSocks5Session *self;
+    /* Charged to the tunnel buffer budget, see hev-socks5-tunnel.c. */
+    int buffered;
+    unsigned int active;
 };
 
 struct _HevSocks5SessionIface
@@ -35,12 +37,15 @@ struct _HevSocks5SessionIface
     HevTask *(*get_task) (HevSocks5Session *self);
     void (*set_task) (HevSocks5Session *self, HevTask *task);
     HevListNode *(*get_node) (HevSocks5Session *self);
+    void (*release) (HevSocks5Session *self);
 };
 
 void *hev_socks5_session_iface (void);
 
 void hev_socks5_session_run (HevSocks5Session *self);
 void hev_socks5_session_terminate (HevSocks5Session *self);
+void hev_socks5_session_release (HevSocks5Session *self);
+void hev_socks5_session_abort (HevSocks5Session *self);
 int hev_socks5_session_idle_wait (HevSocks5Session *self, int released);
 
 void hev_socks5_session_set_task (HevSocks5Session *self, HevTask *task);

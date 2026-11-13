@@ -37,7 +37,8 @@ class TunnelTestCase(unittest.TestCase):
             f.write(config.dump(cfg))
         return path
 
-    def tunnel(self, wait=True, extra_args=(), raw=None, **over):
+    def tunnel(self, wait=True, extra_args=(), raw=None, mem_limit=None,
+               **over):
         """Start a tunnel.  ``over`` overrides config sections, e.g.
         ``self.tunnel(tunnel={'mtu': 1400}, socks5={'udp': 'tcp'})``."""
         tun = None
@@ -49,7 +50,8 @@ class TunnelTestCase(unittest.TestCase):
                 f.write(raw)
         else:
             path = self.write_config(**over)
-        proc = self.bed.start_tunnel(path, extra_args, wait=wait, tun=tun)
+        proc = self.bed.start_tunnel(path, extra_args, wait=wait, tun=tun,
+                                     mem_limit=mem_limit)
         t = Tunnel(self.bed, proc, path)
         self.addCleanup(t.stop)
         return t
