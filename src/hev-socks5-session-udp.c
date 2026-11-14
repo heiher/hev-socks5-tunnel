@@ -274,6 +274,7 @@ hev_socks5_session_udp_fwd_b (HevSocks5SessionUDP *self, char *buf,
         }
     }
 
+    hev_socks5_tunnel_session_replied (&self->data);
     return 1;
 }
 

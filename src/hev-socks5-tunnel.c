@@ -189,23 +189,115 @@ hev_socks5_tunnel_evict_session (HevListNode *node)
     hev_socks5_session_release (hev_socks5_tunnel_session_of (sd));
 }
 
+/*
+ * A session is kept over max-session-count if upstream replied, it still
+ * talked half of evict-protect-idle after it was created, and it has been
+ * silent for less than evict-protect-idle: a flow with rare keep-alives
+ * outlives a surge of new ones, a one-shot exchange like a DNS query doesn't.
+ */
+static int
+hev_socks5_tunnel_is_protected (HevSocks5SessionData *sd, unsigned int idle)
+{
+    if (!idle || !(sd->created & 1))
+        return 0;
+
+    return ((sd->active - (sd->created & ~1u)) >= (idle / 2)) &&
+           ((clock_ms - sd->active) < idle);
+}
+
+/*
+ * A session upstream answered less than SESSION_EVICT_YOUNG_TIME ago since it
+ * was created, like a TLS handshake after the server hello.
+ */
+static int
+hev_socks5_tunnel_is_young (HevSocks5SessionData *sd, unsigned int idle)
+{
+    if (!idle || !(sd->created & 1))
+        return 0;
+
+    return (clock_ms - (sd->created & ~1u)) < SESSION_EVICT_YOUNG_TIME;
+}
+
+/*
+ * Makes room for a new session before it is created, so that it can't evict
+ * itself. Protected sessions are kept up to half of max-session-count, young
+ * ones in what is left of that half, past that the one silent for the longest
+ * goes first as with the others.
+ *
+ * Callers hold the lwIP mutex.
+ */
+static void
+hev_socks5_tunnel_admit_session (void)
+{
+    unsigned int protect_idle;
+    int max_session_count;
+    int protected_over = 0;
+    int young_over = 0;
+    HevListNode *node;
+
+    max_session_count = hev_config_get_misc_max_session_count ();
+    if (!max_session_count || (session_count < max_session_count))
+        return;
+
+    protect_idle = hev_config_get_misc_evict_protect_idle ();
+    if (protect_idle) {
+        int protected_count = 0;
+        int young_count = 0;
+        int half = max_session_count / 2;
+
+        node = hev_list_first (&session_set);
+        for (; node; node = hev_list_node_next (node)) {
+            HevSocks5SessionData *sd;
+
+            sd = container_of (node, HevSocks5SessionData, node);
+            if (hev_socks5_tunnel_is_protected (sd, protect_idle))
+                protected_count++;
+            else if (hev_socks5_tunnel_is_young (sd, protect_idle))
+                young_count++;
+        }
+
+        protected_over = protected_count - half;
+        if (protected_over < 0) {
+            young_over = young_count + protected_count - half;
+            protected_over = 0;
+        } else {
+            young_over = young_count;
+        }
+    }
+
+    node = hev_list_first (&session_set);
+    while (node && (session_count >= max_session_count)) {
+        HevListNode *next = hev_list_node_next (node);
+        HevSocks5SessionData *sd;
+
+        sd = container_of (node, HevSocks5SessionData, node);
+        if (hev_socks5_tunnel_is_protected (sd, protect_idle)) {
+            if (protected_over > 0) {
+                protected_over--;
+                hev_socks5_tunnel_evict_session (node);
+            }
+        } else if (hev_socks5_tunnel_is_young (sd, protect_idle)) {
+            if (young_over > 0) {
+                young_over--;
+                hev_socks5_tunnel_evict_session (node);
+            }
+        } else {
+            hev_socks5_tunnel_evict_session (node);
+        }
+        node = next;
+    }
+}
+
 static void
 hev_socks5_tunnel_insert_session (HevListNode *node)
 {
     HevSocks5SessionData *sd;
-    int max_session_count;
 
     sd = container_of (node, HevSocks5SessionData, node);
     sd->active = clock_ms;
+    sd->created = clock_ms & ~1u;
     hev_list_add_tail (&session_set, node);
     session_count++;
-
-    max_session_count = hev_config_get_misc_max_session_count ();
-    if (!max_session_count)
-        return;
-
-    while (session_count >= max_session_count)
-        hev_socks5_tunnel_evict_session (hev_list_first (&session_set));
 }
 
 static void
@@ -315,6 +407,12 @@ hev_socks5_tunnel_reclaim (void)
 }
 
 void
+hev_socks5_tunnel_session_replied (HevSocks5SessionData *sd)
+{
+    sd->created |= 1;
+}
+
+void
 hev_socks5_tunnel_update_session (HevListNode *node)
 {
     HevSocks5SessionData *sd;
@@ -374,6 +472,8 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
 
     if (!READ_ONCE (run))
         return ERR_RST;
+
+    hev_socks5_tunnel_admit_session ();
 
     /*
      * The task goes first: the session can't be destroyed here, its destructor
@@ -471,6 +571,8 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
             return;
         }
     }
+
+    hev_socks5_tunnel_admit_session ();
 
     /* As for TCP, the session can't be destroyed here. */
     stack_size = hev_config_get_misc_task_stack_size ();

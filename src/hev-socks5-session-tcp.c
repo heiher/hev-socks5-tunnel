@@ -241,6 +241,7 @@ tcp_splice_b (HevSocks5SessionTCP *self)
             }
             hev_ring_buffer_read_finish (self->buffer, s);
             err |= tcp_output (self->pcb);
+            hev_socks5_tunnel_session_replied (&self->data);
             res = 1;
         } else if (res < 0) {
             tcp_shutdown (self->pcb, 0, 1);

@@ -25,5 +25,7 @@
 #define PBUF_CHARGE_OVERHEAD 128
 /* Sessions that hold buffers without progress for so long are reclaimed. */
 #define BUFFER_RECLAIM_IDLE_TIME 2000
+/* A session upstream answered is kept for so long to finish its handshake. */
+#define SESSION_EVICT_YOUNG_TIME 2000
 
 #endif /* __HEV_CONFIG_CONST_H__ */
