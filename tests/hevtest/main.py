@@ -128,7 +128,9 @@ def run_func(args):
 
 def run_bench(args):
     from .report import Report
-    mods = bench_modules(args.pattern)
+    # long ones run only when asked for by name
+    mods = [m for m in bench_modules(args.pattern)
+            if args.pattern or not getattr(m, "ON_REQUEST", False)]
     if not mods:
         print("no benchmarks selected")
         return 1
