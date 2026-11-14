@@ -17,6 +17,7 @@ if [ "$(id -u)" != 0 ]; then
     exec sudo env "PATH=$PATH" ${PYTHON:+"PYTHON=$PYTHON"} \
         ${CC:+"CC=$CC"} ${BENCH_DURATION:+"BENCH_DURATION=$BENCH_DURATION"} \
         ${GITHUB_STEP_SUMMARY:+"GITHUB_STEP_SUMMARY=$GITHUB_STEP_SUMMARY"} \
+        ${HEVTEST_SURGE:+"HEVTEST_SURGE=$HEVTEST_SURGE"} \
         "$0" "$@"
 fi
 

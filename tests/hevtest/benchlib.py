@@ -16,13 +16,14 @@ def raise_nofile(n=65536):
 
 
 @contextlib.contextmanager
-def running(bed, **over):
+def running(bed, mem_limit=None, **over):
     """Start a tunnel for the duration of the block; yields (proc, sampler)."""
     cfg = config.build(bed, **over)
     path = bed.tmpfile("bench.yml")
     with open(path, "w") as f:
         f.write(config.dump(cfg))
-    proc = bed.start_tunnel(path, tun=cfg["tunnel"].get("name"))
+    proc = bed.start_tunnel(path, tun=cfg["tunnel"].get("name"),
+                            mem_limit=mem_limit)
     try:
         yield proc, Sampler(bed, proc.pid)
     finally:

@@ -45,6 +45,7 @@ static char log_file[1024];
 static char pid_file[1024];
 static int max_session_count;
 static size_t max_buffer_size;
+static int evict_protect_idle;
 static int task_stack_size;
 static int wintun_ring_capacity;
 static int tcp_buffer_size;
@@ -427,6 +428,8 @@ hev_config_parse_misc (yaml_document_t *doc, yaml_node_t *base)
             max_session_count = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "max-buffer-size"))
             max_buffer_size = strtoull (value, NULL, 10);
+        else if (0 == strcmp (key, "evict-protect-idle"))
+            evict_protect_idle = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "connect-timeout"))
             connect_timeout = strtoul (value, NULL, 10);
         else if (0 == strcmp (key, "read-write-timeout"))
@@ -556,6 +559,7 @@ hev_config_reset (void)
 
     max_session_count = 0;
     max_buffer_size = 0;
+    evict_protect_idle = 0;
     task_stack_size = 86016;
     wintun_ring_capacity = 0x80000;
     tcp_buffer_size = 65536;
@@ -793,6 +797,12 @@ size_t
 hev_config_get_misc_max_buffer_size (void)
 {
     return max_buffer_size;
+}
+
+int
+hev_config_get_misc_evict_protect_idle (void)
+{
+    return evict_protect_idle;
 }
 
 int

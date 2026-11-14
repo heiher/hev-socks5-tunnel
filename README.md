@@ -184,6 +184,9 @@ socks5:
 # max-session-count: 0
   # maximum size of the packets buffered for all sessions (bytes, 0: unlimited)
 # max-buffer-size: 0
+  # keep a session that got a reply and talked for half of this after it
+  # started, until it has been silent this long (ms, 0: off)
+# evict-protect-idle: 0
   # connect timeout (ms)
 # connect-timeout: 10000
   # TCP read-write timeout (ms)
@@ -272,6 +275,16 @@ tunnel keeps running.
 
 * `max-session-count`: over it, the session that has not moved any data for
   the longest time is closed, even if it keeps receiving data it can't forward.
+* `evict-protect-idle`: a connection that only talks now and then, like one
+  with keep-alives every few seconds, would still be the one closed while new
+  connections keep coming. With it set, a session that got a reply from
+  upstream and still talked half of `evict-protect-idle` after it started is
+  not closed until it has been silent for `evict-protect-idle`. Set it above
+  the keep-alive interval. A session upstream answered in its first 2 seconds
+  is also kept for those 2 seconds, so that a handshake can finish. When a
+  new session needs room, the first kind keeps at most half of
+  `max-session-count` (rounded down) and the young ones what the first kind
+  leaves of it, past that the one silent for the longest is closed as usual.
 * `max-buffer-size`: the packets buffered for all sessions. As it fills up, the
   TCP receive windows get smaller and UDP datagrams are dropped. Each session
   receiving at the same time may go over it by one minimum window (~72 KiB);

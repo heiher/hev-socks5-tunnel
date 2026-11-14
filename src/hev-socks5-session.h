@@ -29,6 +29,8 @@ struct _HevSocks5SessionData
     /* Charged to the tunnel buffer budget, see hev-socks5-tunnel.c. */
     int buffered;
     unsigned int active;
+    /* Creation time, the low bit is set once upstream replied. */
+    unsigned int created;
 };
 
 struct _HevSocks5SessionIface

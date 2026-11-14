@@ -80,6 +80,9 @@ socks5:
 # max-session-count: 0
   # maximum size of the packets buffered for all sessions (bytes, 0: unlimited)
 # max-buffer-size: 0
+  # keep a session that got a reply and talked for half of this after it
+  # started, until it has been silent this long (ms, 0: off)
+# evict-protect-idle: 0
   # connect timeout (ms)
 # connect-timeout: 10000
   # TCP read-write timeout (ms)

@@ -6,21 +6,12 @@ import socket
 import threading
 import time
 
-from hevtest import benchlib, client, load
+from hevtest import benchlib, client, config, load
 from hevtest.case import TunnelTestCase
 
 MiB = 1 << 20
 
-# What a 50 MiB budget (iOS NE) is configured with, see README.
 LIMIT = 50 * MiB
-LIMITED = {
-    "max-session-count": 200,
-    "max-buffer-size": 4 * MiB,
-    "tcp-buffer-size": 16384,
-    "task-stack-size": 36864,
-    "tcp-socket-buffer-size": 32768,
-    "udp-recv-buffer-size": 65536,
-}
 
 
 class MemoryLimitTest(TunnelTestCase):
@@ -32,7 +23,7 @@ class MemoryLimitTest(TunnelTestCase):
     def limited(self, **misc):
         self.require(self.bed.memcg_supported(),
                      "memory limits are not available (cgroup v2 memory)")
-        m = dict(LIMITED)
+        m = dict(config.LOW_MEMORY)
         m.update(misc)
         return self.tunnel(mem_limit=LIMIT, misc=m)
 

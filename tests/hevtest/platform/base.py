@@ -81,6 +81,8 @@ class Bed:
     P_COUNT = 7005
     P_HOLD = 7006
     P_PING = 7007
+    P_PEER = 7008
+    P_SLOW = 7009
     P_CTRL = 7100
 
     def __init__(self, tunnel_bin, tools_dir, workdir=None, verbose=False):

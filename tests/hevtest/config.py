@@ -1,6 +1,18 @@
 """Tunnel configuration builder (no YAML dependency)."""
 import copy
 
+MiB = 1 << 20
+
+# What a 50 MiB budget (iOS NE) is configured with, see README.
+LOW_MEMORY = {
+    "max-session-count": 200,
+    "max-buffer-size": 4 * MiB,
+    "tcp-buffer-size": 16384,
+    "task-stack-size": 36864,
+    "tcp-socket-buffer-size": 32768,
+    "udp-recv-buffer-size": 65536,
+}
+
 
 def _scalar(v):
     if isinstance(v, bool):

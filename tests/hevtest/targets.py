@@ -10,9 +10,14 @@ Runs inside the server environment (stdlib only).  Everything listens on
   TCP 7005 count   (read to EOF, answer "<bytes>\\n")
   TCP 7006 hold    (accept, never read nor write, close on peer hangup)
   TCP 7007 ping    (echo, one thread for all connections)
+                          UDP 7008 peer    (answers "<address> <port>" it saw)
+  TCP 7009 slow    (echo, the first answer after 0.3-0.8 s like a handshake,
+                    or after <ms> if the first request is "d<ms>"; for
+                    "t<a>,<b>" "a" after <a> ms, then "b" after <b> more)
   TCP 7100 ctrl    ("udp-sink\\n" -> "<bytes> <packets>\\n", then resets)
 """
 import hashlib
+import random
 import socket
 import threading
 import time
@@ -151,6 +156,25 @@ def h_echo(c):
         c.sendall(d)
 
 
+def h_slow(c):
+    d = c.recv(BUF)
+    if not d:
+        return
+    if d.startswith(b"t"):
+        first, rest = (int(x) / 1000.0 for x in d[1:].split(b","))
+        time.sleep(first)
+        c.sendall(b"a")
+        time.sleep(rest)
+        c.sendall(b"b")
+        return
+    if d.startswith(b"d") and d[1:].isdigit():
+        time.sleep(int(d[1:]) / 1000.0)
+    else:
+        time.sleep(random.uniform(0.3, 0.8))
+    c.sendall(d)
+    h_echo(c)
+
+
 def h_sink(c):
     buf = bytearray(BUF)
     while c.recv_into(buf):
@@ -217,6 +241,12 @@ def u_sink(s):
             stats["pkts"] += 1
 
 
+def u_peer(s):
+    while True:
+        _, a = s.recvfrom(65535)
+        s.sendto(("%s %d" % a[:2]).encode(), a)
+
+
 def u_source(s):
     while True:
         d, a = s.recvfrom(65535)
@@ -251,10 +281,12 @@ def main():
     tcp_listener(7005, h_count)
     tcp_hold(7006)
     tcp_ping(7007)
+    tcp_listener(7009, h_slow)
     tcp_listener(7100, h_ctrl)
     udp_listener(7001, u_echo)
     udp_listener(7002, u_sink)
     udp_listener(7003, u_source)
+    udp_listener(7008, u_peer)
     print("READY", flush=True)
     threading.Event().wait()
 

@@ -157,6 +157,32 @@ def tcp_storm(host, port, count, secs, mode, rate=0, payload=CHUNK,
     return st
 
 
+def udp_flows(host, port, rate, secs):
+    """Open ``rate`` new UDP flows per second, one datagram each, like
+    retries to a dead server or DNS queries; counts the ones answered."""
+    socks = []
+    st = {"opened": 0, "answered": 0}
+    end = time.time() + secs
+    while time.time() < end:
+        s = socket.socket(_family(host), socket.SOCK_DGRAM)
+        s.setblocking(False)
+        socks.append(s)
+        try:
+            s.sendto(b"s", (host, port))
+            st["opened"] += 1
+        except OSError:
+            pass
+        time.sleep(1.0 / rate)
+    for s in socks:
+        try:
+            s.recv(16)
+            st["answered"] += 1
+        except OSError:
+            pass
+        s.close()
+    return st
+
+
 def udp_flood(host, port, flows, secs, size=1400, pps=0):
     """Send datagrams of ``size`` from ``flows`` sockets (one tunnel session
     each) for ``secs``, as fast as possible or ``pps`` in total."""
