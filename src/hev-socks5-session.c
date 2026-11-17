@@ -12,15 +12,25 @@
 #include "hev-utils.h"
 #include "hev-logger.h"
 #include "hev-config.h"
+#include "hev-compiler.h"
 #include "hev-config-const.h"
 #include "hev-socks5-client.h"
 #include "hev-socks5-tunnel.h"
 
 #include "hev-socks5-session.h"
 
+static HevSocks5SessionData *
+hev_socks5_session_get_data (HevSocks5Session *self)
+{
+    HevListNode *node = hev_socks5_session_get_node (self);
+
+    return container_of (node, HevSocks5SessionData, node);
+}
+
 void
 hev_socks5_session_run (HevSocks5Session *self)
 {
+    HevSocks5SessionData *sd = hev_socks5_session_get_data (self);
     HevSocks5SessionIface *iface;
     HevConfigServer *srv;
     int res;
@@ -29,12 +39,24 @@ hev_socks5_session_run (HevSocks5Session *self)
 
     srv = hev_config_get_socks5_server ();
 
+    /*
+     * Terminate sets the timeout to 0, but connect and handshake set it
+     * again. A session terminated before it ran, or between these steps,
+     * would go on to splice until its idle timeout, and the tunnel's stop
+     * would wait for it. So the terminated state is checked at each step.
+     */
+    if (sd->terminated)
+        return;
+
     res = hev_socks5_client_connect (HEV_SOCKS5_CLIENT (self), srv->addr,
                                      srv->port);
     if (res < 0) {
         LOG_I ("%p socks5 session connect", self);
         return;
     }
+
+    if (sd->terminated)
+        return;
 
     if (srv->user && srv->pass) {
         hev_socks5_client_set_auth (HEV_SOCKS5_CLIENT (self), srv->user,
@@ -48,6 +70,9 @@ hev_socks5_session_run (HevSocks5Session *self)
         return;
     }
 
+    if (sd->terminated)
+        return;
+
     iface = HEV_OBJECT_GET_IFACE (self, HEV_SOCKS5_SESSION_TYPE);
     iface->splicer (self);
 }
@@ -55,9 +80,12 @@ hev_socks5_session_run (HevSocks5Session *self)
 void
 hev_socks5_session_terminate (HevSocks5Session *self)
 {
+    HevSocks5SessionData *sd = hev_socks5_session_get_data (self);
     HevSocks5SessionIface *iface;
 
     LOG_D ("%p socks5 session terminate", self);
+
+    sd->terminated = 1;
 
     iface = HEV_OBJECT_GET_IFACE (self, HEV_SOCKS5_SESSION_TYPE);
     hev_socks5_set_timeout (HEV_SOCKS5 (self), 0);
