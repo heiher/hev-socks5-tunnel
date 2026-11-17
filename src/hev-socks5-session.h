@@ -27,7 +27,6 @@ struct _HevSocks5SessionData
     HevListNode node;
     HevTask *task;
     HevSocks5Session *self;
-    int terminated;
 };
 
 struct _HevSocks5SessionIface
