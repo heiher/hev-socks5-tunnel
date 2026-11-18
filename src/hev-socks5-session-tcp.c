@@ -149,7 +149,8 @@ tcp_recv_handler (void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
 
     if (p) {
         /* Don't delay the ACK, it stalls small writes with Nagle on. */
-        tcp_set_flags (pcb, TF_ACK_NOW);
+        if (p->flags & PBUF_FLAG_PUSH)
+            tcp_set_flags (pcb, TF_ACK_NOW);
 
         if (self->queue)
             pbuf_cat (self->queue, p);
