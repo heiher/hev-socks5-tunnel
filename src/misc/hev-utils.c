@@ -112,6 +112,41 @@ set_sock_tcp_fastopen (int fd, int enable)
 #endif
 }
 
+/*
+ * Fix the kernel buffers of a TCP socket, which turns off their autotuning: a
+ * send buffer otherwise grows up to tcp_wmem (4M) for each socket whose peer
+ * is slower than us.
+ */
+void
+set_sock_tcp_buffer (int fd, int size)
+{
+    socklen_t len = sizeof (int);
+    int type;
+
+    if (size <= 0)
+        return;
+    if (getsockopt (fd, SOL_SOCKET, SO_TYPE, (void *)&type, &len) < 0)
+        return;
+    if (type != SOCK_STREAM)
+        return;
+
+    setsockopt (fd, SOL_SOCKET, SO_RCVBUF, (void *)&size, sizeof (size));
+    setsockopt (fd, SOL_SOCKET, SO_SNDBUF, (void *)&size, sizeof (size));
+}
+
+/*
+ * Close with a reset, what is left in the buffers is dropped. An orphaned
+ * socket otherwise keeps it in the kernel until it is sent, which takes as
+ * long as the peer does not read.
+ */
+void
+set_sock_abort_on_close (int fd)
+{
+    struct linger linger = { 1, 0 };
+
+    setsockopt (fd, SOL_SOCKET, SO_LINGER, (void *)&linger, sizeof (linger));
+}
+
 int
 hev_socks5_addr_from_lwip (HevSocks5Addr *addr, const ip_addr_t *ip, u16_t port)
 {

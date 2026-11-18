@@ -91,11 +91,90 @@ class Bed(base.Bed):
         return self._spawn(["ip", "netns", "exec", self.ns_s] + list(argv),
                            name, **kw)
 
+    # --- memory limit (cgroup v2) --------------------------------------
+    CGROOT = "/sys/fs/cgroup"
+
+    def memcg_supported(self):
+        try:
+            with open(os.path.join(self.CGROOT, "cgroup.subtree_control")) as f:
+                if "memory" not in f.read().split():
+                    return False
+            path = self._memcg_create()
+        except OSError:
+            return False
+        os.rmdir(path)
+        return True
+
+    def _memcg_create(self):
+        self._cgseq = getattr(self, "_cgseq", 0) + 1
+        path = os.path.join(self.CGROOT, "hevt%d-%d" % (os.getpid(),
+                                                         self._cgseq))
+        os.mkdir(path)
+        return path
+
+    def _memcg_remove(self, path):
+        try:
+            with open(os.path.join(path, "cgroup.kill"), "w") as f:
+                f.write("1")
+        except OSError:
+            pass
+        end = time.time() + 5
+        while time.time() < end:
+            try:
+                os.rmdir(path)
+                return
+            except OSError:
+                time.sleep(0.05)
+
+    def memcg_stats(self, proc):
+        path = getattr(proc, "memcg", None)
+        if not path:
+            return {}
+        out = {}
+
+        def rd(name):
+            try:
+                with open(os.path.join(path, name)) as f:
+                    return f.read()
+            except OSError:
+                return ""
+
+        for name in ("memory.current", "memory.peak", "memory.max"):
+            v = rd(name).strip()
+            if v.isdigit():
+                out[name.split(".", 1)[1]] = int(v)
+        for line in rd("memory.events").splitlines():
+            k, v = line.split()
+            out["events_" + k] = int(v)
+        for line in rd("memory.stat").splitlines():
+            k, v = line.split()
+            if k in ("anon", "sock", "kernel", "file"):
+                out["stat_" + k] = int(v)
+        return out
+
     # --- tunnel --------------------------------------------------------
-    def start_tunnel(self, config_path, extra_args=(), wait=True, tun=None):
+    def start_tunnel(self, config_path, extra_args=(), wait=True, tun=None,
+                     mem_limit=None):
         tun = tun or self.tun_name
+        kw = {}
+        cg = None
+        if mem_limit:
+            # Exceeding the limit kills the tunnel (no swap to fall back on).
+            cg = self._memcg_create()
+            for name, val in (("memory.max", mem_limit),
+                              ("memory.swap.max", 0),
+                              ("memory.oom.group", 1)):
+                with open(os.path.join(cg, name), "w") as f:
+                    f.write(str(val))
+            procs = os.path.join(cg, "cgroup.procs")
+
+            def enter():
+                with open(procs, "w") as f:
+                    f.write("0")
+            kw["preexec_fn"] = enter
         proc = self.spawn_client([self.tunnel_bin, config_path] +
-                                 list(extra_args), "tunnel")
+                                 list(extra_args), "tunnel", **kw)
+        proc.memcg = cg
         if wait:
             self.wait_tun(proc, tun)
         return proc
@@ -115,6 +194,14 @@ class Bed(base.Bed):
             raise RuntimeError("tunnel interface did not come up:\n" +
                                proc.log())
         self.route_via(tun)
+
+    def stop_tunnel(self, proc, sig=None):
+        import signal
+        rc = proc.stop(sig or signal.SIGTERM)
+        cg = getattr(proc, "memcg", None)
+        if cg:
+            self._memcg_remove(cg)
+        return rc
 
     def route_via(self, tun):
         sh("ip", "-4", "route", "replace", "default", "dev", tun, "table", "20")

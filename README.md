@@ -173,12 +173,17 @@ socks5:
 # wintun-ring-capacity: 524288
   # tcp buffer size (bytes)
 # tcp-buffer-size: 65536
+  # tcp upstream socket buffer (SO_RCVBUF and SO_SNDBUF) size (bytes, 0: system
+  # default, autotuned)
+# tcp-socket-buffer-size: 0
   # udp socket recv buffer (SO_RCVBUF) size (bytes)
 # udp-recv-buffer-size: 524288
   # number of udp buffers in splice, 1500 bytes per buffer.
 # udp-copy-buffer-nums: 10
   # maximum session count (0: unlimited)
 # max-session-count: 0
+  # maximum size of the packets buffered for all sessions (bytes, 0: unlimited)
+# max-buffer-size: 0
   # connect timeout (ms)
 # connect-timeout: 10000
   # TCP read-write timeout (ms)
@@ -260,18 +265,47 @@ opkg install hev-socks5-tunnel
 
 #### Low memory usage
 
-On low-memory systems like iOS, reducing the size of the TCP buffer and
-task stack, as well as limiting the maximum session count, can help prevent
-out-of-memory issues.
+Systems like iOS terminate a Network Extension that goes over its memory limit
+(e.g. 50 MiB). The tunnel stays within a limit when it is configured for it,
+also when many connections show up at once; sessions are dropped then, the
+tunnel keeps running.
+
+* `max-session-count`: over it, the session that has not moved any data for
+  the longest time is closed, even if it keeps receiving data it can't forward.
+* `max-buffer-size`: the packets buffered for all sessions. As it fills up, the
+  TCP receive windows get smaller and UDP datagrams are dropped. Each session
+  receiving at the same time may go over it by one minimum window (~72 KiB);
+  if it is still over, the sessions that hold packets without progress for 2
+  seconds are closed.
+* `task-stack-size` and `tcp-buffer-size`: the per-session buffers.
+* `tcp-socket-buffer-size`: the kernel buffers of the upstream sockets, where
+  they count against the limit (e.g. Linux memory cgroups). It turns off their
+  autotuning, which costs throughput to a distant server.
+
+The memory used is roughly at most:
+
+```
+3 MiB + 2 * max-buffer-size
+      + max-session-count * (task-stack-size + 4 * tcp-socket-buffer-size)
+```
+
+The kernel doubles the socket buffer size set, for receive and send; a UDP
+session has `2 * udp-recv-buffer-size` instead. For a 50 MiB limit:
 
 ```yaml
 misc:
   # task stack size (bytes)
-  task-stack-size: 24576 # 20480 + tcp-buffer-size
+  task-stack-size: 36864 # 20480 + tcp-buffer-size
   # tcp buffer size (bytes)
-  tcp-buffer-size: 4096
+  tcp-buffer-size: 16384
+  # tcp upstream socket buffer size (bytes)
+  tcp-socket-buffer-size: 32768
+  # udp socket recv buffer size (bytes)
+  udp-recv-buffer-size: 65536
   # maximum session count
-  max-session-count: 1200
+  max-session-count: 200
+  # maximum size of the packets buffered for all sessions (bytes)
+  max-buffer-size: 4194304
 ```
 
 #### Docker Compose

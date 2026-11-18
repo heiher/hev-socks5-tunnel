@@ -21,5 +21,9 @@
 #define COMPACT_PBUF_SIZE 2048
 #define TASK_STACK_SIZE 20480
 #define SESSION_IDLE_RELEASE_TIME 1000
+/* Charged per queued pbuf: its struct, headers and malloc overhead. */
+#define PBUF_CHARGE_OVERHEAD 128
+/* Sessions that hold buffers without progress for so long are reclaimed. */
+#define BUFFER_RECLAIM_IDLE_TIME 2000
 
 #endif /* __HEV_CONFIG_CONST_H__ */

@@ -35,10 +35,112 @@ task_io_yielder (HevTaskYieldType type, void *data)
     int res;
 
     res = hev_socks5_task_io_yielder (type, data);
-    node = hev_socks5_session_get_node (self);
-    hev_socks5_tunnel_update_session (node);
+
+    /* Only data moved counts as activity, not being woken up. */
+    if (type == HEV_TASK_YIELD) {
+        node = hev_socks5_session_get_node (self);
+        hev_socks5_tunnel_update_session (node);
+    }
 
     return res;
+}
+
+/*
+ * The receive window is what bounds the receive queue: the data queued plus
+ * the window left (rcv_wnd) stays at what was granted, unless the window is
+ * reopened here. Without a buffer budget that is a full window, as lwIP does
+ * by itself. Otherwise less may be reopened, a window is never shrunk as the
+ * peer would have to retransmit what it was allowed to send.
+ *
+ * The floor lets a closed window be announced again: lwIP announces it once
+ * it moves by min (TCP_WND / 2, mss), past the leftover of a peer that does
+ * not send less than a segment.
+ */
+static unsigned int
+tcp_window_target (HevSocks5SessionTCP *self)
+{
+    struct tcp_pcb *pcb = self->pcb;
+    unsigned int max, floor;
+
+    max = TCP_WND_MAX (pcb);
+    floor = LWIP_MIN (TCP_WND / 2, pcb->mss) + TCP_MSS;
+    if (floor > max)
+        floor = max;
+
+    return hev_socks5_tunnel_window_target (self->window, floor, max);
+}
+
+static void
+tcp_update_window (HevSocks5SessionTCP *self)
+{
+    struct tcp_pcb *pcb = self->pcb;
+    unsigned int queued, target, wnd;
+
+    if (!pcb)
+        return;
+
+    queued = self->queue ? self->queue->tot_len : 0;
+    target = tcp_window_target (self);
+
+    wnd = (target > queued) ? target - queued : 0;
+    if (wnd > pcb->rcv_wnd) {
+        unsigned int n = wnd - pcb->rcv_wnd;
+
+        while (n > 0) {
+            u16_t c = (n > 0xffff) ? 0xffff : n;
+
+            tcp_recved (pcb, c);
+            n -= c;
+        }
+    }
+
+    hev_socks5_tunnel_window_set (&self->window, pcb->rcv_wnd + queued);
+}
+
+/*
+ * Accepted, only the window of the SYN-ACK has been sent so far, which is not
+ * scaled. The window lwIP is about to announce can still be made smaller.
+ */
+static void
+tcp_init_window (HevSocks5SessionTCP *self)
+{
+    struct tcp_pcb *pcb = self->pcb;
+    unsigned int wnd;
+
+    wnd = tcp_window_target (self);
+    if (wnd < LWIP_MIN (pcb->rcv_ann_wnd, 0xffff))
+        wnd = LWIP_MIN (pcb->rcv_ann_wnd, 0xffff);
+
+    if (wnd < pcb->rcv_wnd) {
+        pcb->rcv_wnd = wnd;
+        pcb->rcv_ann_wnd = wnd;
+        pcb->rcv_ann_right_edge = pcb->rcv_nxt + wnd;
+    }
+
+    hev_socks5_tunnel_window_set (&self->window, pcb->rcv_wnd);
+}
+
+/* Under a buffer budget: free what has been sent, and reopen the window. */
+static void
+tcp_queue_free (HevSocks5SessionTCP *self, size_t s)
+{
+    struct pbuf *p;
+    size_t n;
+    int c = 0;
+
+    /* The pbufs that pbuf_free_header frees as a whole. */
+    for (p = self->queue, n = s; p && n && (n >= p->len); p = p->next) {
+        n -= p->len;
+        c += PBUF_CHARGE_OVERHEAD;
+    }
+    hev_socks5_tunnel_buffer_charge (&self->data, -(c + s));
+
+    for (; s > 0; s -= n) {
+        n = (s > 0xffff) ? 0xffff : s;
+        self->queue = pbuf_free_header (self->queue, n);
+    }
+
+    tcp_update_window (self);
 }
 
 static int
@@ -70,13 +172,22 @@ tcp_splice_f (HevSocks5SessionTCP *self)
                 res = -1;
         } else {
             hev_task_mutex_lock (self->mutex);
-            while (s > 0) {
-                u16_t n = (s > 0xffff) ? 0xffff : s;
+            /* Released (evicted) meanwhile, there is nothing left to free. */
+            if (!self->queue) {
+                hev_task_mutex_unlock (self->mutex);
+                return -1;
+            }
+            if (hev_socks5_tunnel_buffer_limit) {
+                tcp_queue_free (self, s);
+            } else {
+                while (s > 0) {
+                    u16_t n = (s > 0xffff) ? 0xffff : s;
 
-                self->queue = pbuf_free_header (self->queue, n);
-                if (self->pcb)
-                    tcp_recved (self->pcb, n);
-                s -= n;
+                    self->queue = pbuf_free_header (self->queue, n);
+                    if (self->pcb)
+                        tcp_recved (self->pcb, n);
+                    s -= n;
+                }
             }
             hev_task_mutex_unlock (self->mutex);
             res = 1;
@@ -148,6 +259,11 @@ tcp_recv_handler (void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
     HevSocks5SessionTCP *self = arg;
 
     if (p) {
+        if (hev_socks5_tunnel_buffer_limit) {
+            int c = p->tot_len + pbuf_clen (p) * PBUF_CHARGE_OVERHEAD;
+
+            hev_socks5_tunnel_buffer_charge (&self->data, c);
+        }
         if (self->queue)
             pbuf_cat (self->queue, p);
         else
@@ -178,7 +294,12 @@ tcp_err_handler (void *arg, err_t err)
     HevSocks5SessionTCP *self = arg;
 
     self->pcb = NULL;
-    hev_socks5_session_terminate (HEV_SOCKS5_SESSION (self));
+
+    /* Closed in both directions as usual, or reset/aborted. */
+    if (err == ERR_CLSD)
+        hev_socks5_session_terminate (HEV_SOCKS5_SESSION (self));
+    else
+        hev_socks5_session_abort (HEV_SOCKS5_SESSION (self));
 }
 
 HevSocks5SessionTCP *
@@ -288,6 +409,28 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
     }
 }
 
+static void
+hev_socks5_session_tcp_release (HevSocks5Session *base)
+{
+    HevSocks5SessionTCP *self = HEV_SOCKS5_SESSION_TCP (base);
+
+    if (self->pcb) {
+        tcp_recv (self->pcb, NULL);
+        tcp_sent (self->pcb, NULL);
+        tcp_err (self->pcb, NULL);
+        tcp_abort (self->pcb);
+        self->pcb = NULL;
+    }
+
+    if (self->queue) {
+        pbuf_free (self->queue);
+        self->queue = NULL;
+    }
+
+    hev_socks5_tunnel_buffer_charge (&self->data, -self->data.buffered);
+    hev_socks5_tunnel_window_set (&self->window, 0);
+}
+
 static HevTask *
 hev_socks5_session_tcp_get_task (HevSocks5Session *base)
 {
@@ -338,7 +481,10 @@ hev_socks5_session_tcp_construct (HevSocks5SessionTCP *self,
 
     self->pcb = pcb;
     self->mutex = mutex;
-    self->data.self = self;
+
+    /* Under a buffer budget the initial window may be less than lwIP's. */
+    if (hev_socks5_tunnel_buffer_limit)
+        tcp_init_window (self);
 
     return 0;
 }
@@ -351,15 +497,7 @@ hev_socks5_session_tcp_destruct (HevObject *base)
     LOG_D ("%p socks5 session tcp destruct", self);
 
     hev_task_mutex_lock (self->mutex);
-    if (self->pcb) {
-        tcp_recv (self->pcb, NULL);
-        tcp_sent (self->pcb, NULL);
-        tcp_err (self->pcb, NULL);
-        tcp_abort (self->pcb);
-    }
-
-    if (self->queue)
-        pbuf_free (self->queue);
+    hev_socks5_session_tcp_release (HEV_SOCKS5_SESSION (self));
     hev_task_mutex_unlock (self->mutex);
 
     HEV_SOCKS5_CLIENT_TCP_TYPE->destruct (base);
@@ -403,6 +541,7 @@ hev_socks5_session_tcp_class (void)
         siptr->get_task = hev_socks5_session_tcp_get_task;
         siptr->set_task = hev_socks5_session_tcp_set_task;
         siptr->get_node = hev_socks5_session_tcp_get_node;
+        siptr->release = hev_socks5_session_tcp_release;
     }
 
     return okptr;

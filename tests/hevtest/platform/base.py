@@ -79,6 +79,7 @@ class Bed:
     P_SOURCE = 7003
     P_DIGEST = 7004
     P_COUNT = 7005
+    P_HOLD = 7006
     P_PING = 7007
     P_CTRL = 7100
 
@@ -150,9 +151,20 @@ class Bed:
         raise RuntimeError("%s did not become ready" % proc.argv[0])
 
     # --- tunnel --------------------------------------------------------
-    def start_tunnel(self, config_path, extra_args=(), wait=True):
-        """Start the tunnel in the client env and wire up routing."""
+    def start_tunnel(self, config_path, extra_args=(), wait=True, tun=None,
+                     mem_limit=None):
+        """Start the tunnel in the client env and wire up routing.  With
+        ``mem_limit`` (bytes) the OS kills the tunnel when it uses more."""
         raise NotImplementedError
+
+    def memcg_supported(self):
+        """True if ``start_tunnel(mem_limit=...)`` is available."""
+        return False
+
+    def memcg_stats(self, proc):
+        """Memory accounting of a limited tunnel: current=, peak=, max=,
+        events_oom_kill=, ... (bytes / counts), {} if not limited."""
+        return {}
 
     def stop_tunnel(self, proc, sig=signal.SIGTERM):
         return proc.stop(sig)

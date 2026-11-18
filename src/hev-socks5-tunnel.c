@@ -8,6 +8,7 @@
  */
 
 #include <errno.h>
+#include <stddef.h>
 #include <assert.h>
 #include <signal.h>
 #include <string.h>
@@ -62,7 +63,13 @@ static int tun_fd = -1;
 static int tun_fd_local;
 static int session_count;
 static int evicted_count;
+/* Time the timer task has slept while there are sessions (ms). */
+static unsigned int clock_ms;
+static size_t buffer_used;
+static size_t window_used;
 static int event_fds[2] = { -1, -1 };
+
+size_t hev_socks5_tunnel_buffer_limit;
 
 static size_t stat_tx_packets;
 static size_t stat_rx_packets;
@@ -132,6 +139,20 @@ netif_init_handler (struct netif *netif)
     return ERR_OK;
 }
 
+/*
+ * The sessions embed their data at the same offset, so that the session can
+ * be found from it without storing a pointer back in each one.
+ */
+_Static_assert (offsetof (HevSocks5SessionTCP, data) ==
+                    offsetof (HevSocks5SessionUDP, data),
+                "session data offset");
+
+static inline HevSocks5Session *
+hev_socks5_tunnel_session_of (HevSocks5SessionData *sd)
+{
+    return (char *)sd - offsetof (HevSocks5SessionTCP, data);
+}
+
 static inline void
 hev_socks5_tunnel_mark_evicted (HevListNode *node)
 {
@@ -149,7 +170,11 @@ hev_socks5_tunnel_is_evicted (HevListNode *node)
  * taken off the set right away: a terminated session lingers until its task
  * runs again, and a burst of accepts handled in one go would otherwise
  * terminate that same head over and over while the set keeps growing (iOS NE
- * jetsam, 30.10: 190 sessions at a cap of 130).
+ * jetsam, 30.10: 190 sessions at a cap of 130). For the same reason what it
+ * holds in lwIP is released right away, in a burst each new connection brings
+ * a full window of data with it before the evicted ones get to run.
+ *
+ * Callers hold the lwIP mutex.
  */
 static void
 hev_socks5_tunnel_evict_session (HevListNode *node)
@@ -161,14 +186,17 @@ hev_socks5_tunnel_evict_session (HevListNode *node)
     hev_socks5_tunnel_mark_evicted (node);
     session_count--;
     evicted_count++;
-    hev_socks5_session_terminate (sd->self);
+    hev_socks5_session_release (hev_socks5_tunnel_session_of (sd));
 }
 
 static void
 hev_socks5_tunnel_insert_session (HevListNode *node)
 {
+    HevSocks5SessionData *sd;
     int max_session_count;
 
+    sd = container_of (node, HevSocks5SessionData, node);
+    sd->active = clock_ms;
     hev_list_add_tail (&session_set, node);
     session_count++;
 
@@ -192,18 +220,115 @@ hev_socks5_tunnel_delete_session (HevListNode *node)
     session_count--;
 }
 
+/*
+ * Buffer budget (misc.max-buffer-size), 0 means unlimited: then nothing is
+ * charged, the sessions check hev_socks5_tunnel_buffer_limit first.
+ *
+ * The packets the sessions hold in lwIP are charged to buffer_used: the TCP
+ * receive queues and the UDP datagram queues. Their size is bounded by:
+ *
+ *  - TCP: the receive window of each session, granted out of 3/4 of the
+ *    budget, at least a fair share of it, and never less than what lwIP needs
+ *    to announce a closed window again. A session that holds more than it is
+ *    granted does not get its window reopened as far, until it is under.
+ *  - UDP: datagrams are dropped while the budget is used up.
+ *
+ * Only the window floors can overcommit it, by up to a floor for each session
+ * that is receiving at once. Then the sessions that hold packets without any
+ * progress for BUFFER_RECLAIM_IDLE_TIME are evicted, the least recently
+ * active first, the ones that make progress keep going with smaller windows.
+ */
+void
+hev_socks5_tunnel_buffer_charge (HevSocks5SessionData *sd, int size)
+{
+    if (size < 0 && -size > sd->buffered)
+        size = -sd->buffered;
+
+    sd->buffered += size;
+    buffer_used += size;
+}
+
+int
+hev_socks5_tunnel_buffer_admit (int size)
+{
+    return (buffer_used + size) <= hev_socks5_tunnel_buffer_limit;
+}
+
+unsigned int
+hev_socks5_tunnel_window_target (unsigned int window, unsigned int floor,
+                                 unsigned int max)
+{
+    size_t limit, others, room, fair;
+
+    limit = hev_socks5_tunnel_buffer_limit / 4 * 3;
+    others = window_used - window;
+    room = (limit > others) ? limit - others : 0;
+
+    /* Sessions over their fair share give it back as they go. */
+    fair = limit / (session_count + 1);
+    if (room < fair)
+        room = fair;
+
+    if (room < floor)
+        return floor;
+    if (room > max)
+        return max;
+    return room;
+}
+
+void
+hev_socks5_tunnel_window_set (unsigned int *window, unsigned int size)
+{
+    window_used += size;
+    window_used -= *window;
+    *window = size;
+}
+
+static void
+hev_socks5_tunnel_reclaim (void)
+{
+    size_t limit = hev_socks5_tunnel_buffer_limit;
+    HevListNode *node;
+    size_t used;
+
+    if (!limit || buffer_used <= limit)
+        return;
+
+    used = buffer_used;
+    node = hev_list_first (&session_set);
+    while (node && used > limit / 4 * 3) {
+        HevListNode *next = hev_list_node_next (node);
+        HevSocks5SessionData *sd;
+
+        sd = container_of (node, HevSocks5SessionData, node);
+        /* In LRU order, the rest made progress more recently. */
+        if ((clock_ms - sd->active) < BUFFER_RECLAIM_IDLE_TIME)
+            break;
+        if (sd->buffered > 0) {
+            LOG_I ("%p socks5 tunnel buffer full, evict",
+                   hev_socks5_tunnel_session_of (sd));
+            used -= sd->buffered;
+            hev_socks5_tunnel_evict_session (node);
+        }
+        node = next;
+    }
+}
+
 void
 hev_socks5_tunnel_update_session (HevListNode *node)
 {
+    HevSocks5SessionData *sd;
     int max_session_count;
 
     max_session_count = hev_config_get_misc_max_session_count ();
-    if (!max_session_count)
+    if (!max_session_count && !hev_socks5_tunnel_buffer_limit)
         return;
 
     if (hev_socks5_tunnel_is_evicted (node))
         return;
 
+    sd = container_of (node, HevSocks5SessionData, node);
+    sd->active = clock_ms;
     hev_list_del (&session_set, node);
     hev_list_add_tail (&session_set, node);
 }
@@ -259,15 +384,16 @@ tcp_accept_handler (void *arg, struct tcp_pcb *pcb, err_t err)
     if (!task)
         return ERR_MEM;
 
+    /* Before the session sizes its receive window, it depends on the mss. */
+    if (hev_tunnel_get_offload () &
+        (HEV_TUNNEL_OFFLOAD_TCP | HEV_TUNNEL_OFFLOAD_JUMBO))
+        tcp_pcb_set_gso (pcb);
+
     tcp = hev_socks5_session_tcp_new (pcb, &mutex);
     if (!tcp) {
         hev_task_unref (task);
         return ERR_MEM;
     }
-
-    if (hev_tunnel_get_offload () &
-        (HEV_TUNNEL_OFFLOAD_TCP | HEV_TUNNEL_OFFLOAD_JUMBO))
-        tcp_pcb_set_gso (pcb);
 
     hev_socks5_session_set_task (HEV_SOCKS5_SESSION (tcp), task);
     node = hev_socks5_session_get_node (HEV_SOCKS5_SESSION (tcp));
@@ -388,7 +514,7 @@ event_task_entry (void *data)
         HevSocks5SessionData *sd;
 
         sd = container_of (node, HevSocks5SessionData, node);
-        hev_socks5_session_terminate (sd->self);
+        hev_socks5_session_terminate (hev_socks5_tunnel_session_of (sd));
     }
 
     hev_task_join (task_lwip_io);
@@ -475,6 +601,7 @@ lwip_timer_task_entry (void *data)
     for (i = 1; READ_ONCE (run); i++) {
         hev_task_mutex_lock (&mutex);
         tcp_tmr ();
+        hev_socks5_tunnel_reclaim ();
 
         if ((i & 3) == 0) {
 #if IP_REASSEMBLY
@@ -489,8 +616,9 @@ lwip_timer_task_entry (void *data)
         }
         hev_task_mutex_unlock (&mutex);
 
+        /* Woken up early by new sessions, only the time slept counts. */
         if (hev_list_first (&session_set) || evicted_count)
-            hev_task_sleep (TCP_TMR_INTERVAL);
+            clock_ms += TCP_TMR_INTERVAL - hev_task_sleep (TCP_TMR_INTERVAL);
         else {
 #if defined(__GLIBC__) && !defined(ENABLE_LIBRARY)
             /* Release free memory from the heap */
@@ -837,6 +965,8 @@ hev_socks5_tunnel_init (int tun_fd)
 
     hev_task_mutex_init (&mutex);
 
+    hev_socks5_tunnel_buffer_limit = hev_config_get_misc_max_buffer_size ();
+
     atomic_fetch_or (&tsync, SYNC_SEND);
 
     return 0;
@@ -868,6 +998,9 @@ retry:
     stat_rx_packets = 0;
     stat_tx_bytes = 0;
     stat_rx_bytes = 0;
+
+    buffer_used = 0;
+    window_used = 0;
 }
 
 int

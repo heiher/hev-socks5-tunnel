@@ -73,8 +73,13 @@ socks5:
 # udp-recv-buffer-size: 524288
   # number of udp buffers in splice, 1500 bytes per buffer.
 # udp-copy-buffer-nums: 10
+  # tcp upstream socket buffer (SO_RCVBUF and SO_SNDBUF) size (bytes, 0: system
+  # default, autotuned)
+# tcp-socket-buffer-size: 0
   # maximum session count (0: unlimited)
 # max-session-count: 0
+  # maximum size of the packets buffered for all sessions (bytes, 0: unlimited)
+# max-buffer-size: 0
   # connect timeout (ms)
 # connect-timeout: 10000
   # TCP read-write timeout (ms)
