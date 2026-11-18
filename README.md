@@ -503,6 +503,7 @@ still override `PKGNAME`/`CLSNAME` in `Application.mk` as shown above and build 
 * **fwx** - https://github.com/fwx
 * **heiby** - https://github.com/heiby
 * **hev** - https://hev.cc
+* **hossin asaadi** - https://github.com/hossinasaadi
 * **ihipop** - https://ihipop.com
 * **katana** - https://github.com/officialkatana
 * **mmjvox** - https://github.com/mmjvox
