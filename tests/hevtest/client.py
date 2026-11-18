@@ -10,7 +10,9 @@ def _family(host):
     return socket.AF_INET6 if ":" in host else socket.AF_INET
 
 
-def tcp_connect(host, port, timeout=5.0):
+def tcp_connect(host, port, timeout=5.0, nodelay=True):
+    """``nodelay=False`` keeps Nagle on, as an ordinary application that
+    only sets TCP_NODELAY when it knows it needs it."""
     s = socket.socket(_family(host), socket.SOCK_STREAM)
     s.settimeout(timeout)
     try:
@@ -18,7 +20,7 @@ def tcp_connect(host, port, timeout=5.0):
     except BaseException:
         s.close()
         raise
-    s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1 if nodelay else 0)
     return s
 
 
