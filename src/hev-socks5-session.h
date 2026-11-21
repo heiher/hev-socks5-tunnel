@@ -27,6 +27,9 @@ struct _HevSocks5SessionData
     HevListNode node;
     HevTask *task;
     HevSocks5Session *self;
+    unsigned int create_time;
+    unsigned int active_time;
+    unsigned int answered : 1;
 };
 
 struct _HevSocks5SessionIface
@@ -45,6 +48,7 @@ int hev_socks5_session_idle_wait (HevSocks5Session *self, int released);
 
 void hev_socks5_session_set_task (HevSocks5Session *self, HevTask *task);
 HevListNode *hev_socks5_session_get_node (HevSocks5Session *self);
+HevSocks5Type hev_socks5_session_get_type (HevSocks5Session *self);
 
 int hev_socks5_session_bind (HevSocks5 *self, int fd,
                              const struct sockaddr *dest);
