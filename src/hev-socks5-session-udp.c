@@ -35,8 +35,8 @@ typedef struct _HevSocks5UDPFrame HevSocks5UDPFrame;
 struct _HevSocks5UDPFrame
 {
     HevListNode node;
-    HevSocks5Addr addr;
     struct pbuf *data;
+    HevSocks5Addr addr;
 };
 
 static int
@@ -265,6 +265,8 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
 {
     HevSocks5SessionUDP *self = arg;
     HevSocks5UDPFrame *frame;
+    HevSocks5Addr saddr;
+    int alen, res;
 
     if (!p) {
         hev_socks5_session_terminate (HEV_SOCKS5_SESSION (self));
@@ -285,7 +287,14 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
         p = q;
     }
 
-    frame = hev_malloc (sizeof (HevSocks5UDPFrame));
+    res = hev_socks5_addr_from_lwip (&saddr, &pcb->local_ip, pcb->local_port);
+    if (res < 0) {
+        pbuf_free (p);
+        return;
+    }
+
+    alen = hev_socks5_addr_len (&saddr);
+    frame = hev_malloc (offsetof (HevSocks5UDPFrame, addr) + alen);
     if (!frame) {
         pbuf_free (p);
         return;
@@ -293,9 +302,9 @@ udp_recv_handler (void *arg, struct udp_pcb *pcb, struct pbuf *p,
 
     frame->data = p;
     memset (&frame->node, 0, sizeof (frame->node));
-    hev_socks5_addr_from_lwip (&frame->addr, &pcb->local_ip, pcb->local_port);
+    memcpy (&frame->addr, &saddr, alen);
 
-    if (frame->addr.atype == HEV_SOCKS5_ADDR_TYPE_NAME) {
+    if (saddr.atype == HEV_SOCKS5_ADDR_TYPE_NAME) {
         self->addr = ip_2_ip4 (&pcb->local_ip)->addr;
         self->port = pcb->local_port;
     }
