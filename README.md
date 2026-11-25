@@ -260,9 +260,10 @@ opkg install hev-socks5-tunnel
 
 #### Low memory usage
 
-On low-memory systems like iOS, reducing the size of the TCP buffer and
-task stack, as well as limiting the maximum session count, can help prevent
-out-of-memory issues.
+On low-memory systems, reducing the size of the TCP buffer and task stack can
+help reduce the memory used by each session. `max-session-count` limits the
+concurrent sessions, the least recently active session is closed when it is
+exceeded. These settings do not guarantee a memory limit.
 
 ```yaml
 misc:

@@ -133,7 +133,7 @@ class MiscLimitsTest(TunnelTestCase):
         self.assertTrue(client.tcp_echo(self.t4, self.bed.P_ECHO, 100000))
 
     def test_max_session_count(self):
-        # the oldest session is evicted when the cap is reached
+        # the oldest session is evicted when the cap is exceeded
         self.tunnel(misc={"max-session-count": 4})
         socks = []
         try:
@@ -142,6 +142,14 @@ class MiscLimitsTest(TunnelTestCase):
                 s.sendall(b"a")
                 self.assertEqual(client.recv_exact(s, 1), b"a")
                 socks.append(s)
+            # all of them fit
+            for s in socks:
+                s.sendall(b"b")
+                self.assertEqual(client.recv_exact(s, 1), b"b")
+            s = client.tcp_connect(self.t4, self.bed.P_ECHO)
+            s.sendall(b"a")
+            self.assertEqual(client.recv_exact(s, 1), b"a")
+            socks.append(s)
             oldest = socks[0]
             oldest.settimeout(5.0)
             try:
@@ -152,6 +160,20 @@ class MiscLimitsTest(TunnelTestCase):
             for s in socks[1:]:
                 s.sendall(b"b")
                 self.assertEqual(client.recv_exact(s, 1), b"b")
+        finally:
+            for s in socks:
+                s.close()
+
+    def test_max_session_count_one(self):
+        # the new session replaces the old one, it is not evicted itself
+        self.tunnel(misc={"max-session-count": 1})
+        socks = []
+        try:
+            for _ in range(3):
+                s = client.tcp_connect(self.t4, self.bed.P_ECHO)
+                socks.append(s)
+                s.sendall(b"a")
+                self.assertEqual(client.recv_exact(s, 1), b"a")
         finally:
             for s in socks:
                 s.close()

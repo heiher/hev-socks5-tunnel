@@ -173,10 +173,10 @@ hev_socks5_tunnel_insert_session (HevListNode *node)
     session_count++;
 
     max_session_count = hev_config_get_misc_max_session_count ();
-    if (!max_session_count)
+    if (max_session_count <= 0)
         return;
 
-    while (session_count >= max_session_count)
+    while (session_count > max_session_count)
         hev_socks5_tunnel_evict_session (hev_list_first (&session_set));
 }
 
