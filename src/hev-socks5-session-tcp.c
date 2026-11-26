@@ -274,6 +274,10 @@ hev_socks5_session_tcp_splice (HevSocks5Session *base)
     if (!self->pcb)
         return;
 
+    res = hev_socks5_socket_set_nodelay (HEV_SOCKS5 (self)->fd);
+    if (res < 0)
+        LOG_D ("%p socks5 session tcp nodelay", self);
+
     /* Hold whole (super) segments, a full buffer is sent in full packets. */
     tcp_buffer_size = hev_config_get_misc_tcp_buffer_size ();
     if (tcp_buffer_size > self->pcb->mss)
@@ -339,6 +343,8 @@ hev_socks5_session_tcp_construct (HevSocks5SessionTCP *self,
     tcp_recv (pcb, tcp_recv_handler);
     tcp_sent (pcb, tcp_sent_handler);
     tcp_err (pcb, tcp_err_handler);
+
+    tcp_nagle_disable (pcb);
 
     self->pcb = pcb;
     self->mutex = mutex;
